@@ -1,31 +1,46 @@
 <template>
-  <VApp>
-
-    <component :is="getCurrentLayout">
-      <RouterView v-slot="{ Component }">
-        <Transition name="slide" mode="out-in">
+  <v-app>
+    <p v-if="isLoading">Site Loading</p>
+    <component :is="getCurrentLayout" v-else>
+      <router-view v-slot="{ Component }">
+        <transition name="slide" mode="out-in">
           <component :is="Component"> </component>
-        </Transition>
-      </RouterView>
+        </transition>
+      </router-view>
     </component>
 
-  </VApp>
+
+  </v-app>
 </template>
 
 <script setup lang="ts">
 import { useLayouts } from "@/composables/useLayouts";
+import { onMounted, ref } from "vue";
+import { useUserAuthStore } from "./stores/userAuth";
 
+const isLoading = ref(true);
+
+const { verifyUserToken } = useUserAuthStore();
 
 const { getCurrentLayout } = useLayouts();
 
 
+onMounted(async () => {
+  await verifyUserToken();
 
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
+});
 
 
 
 
 
 </script>
+
+
+
 
 <style lang="scss">
 @import '@/assets/scss/nullstyle.scss';
@@ -37,6 +52,12 @@ body {
   min-width: 320px;
   font-family: 'Poppins', sans-serif;
 }
+#app{
+  overflow: hidden;
+}
+
+
+//route transition
 
 .slide-enter-active,
 .slide-leave-active {
@@ -48,7 +69,4 @@ body {
   opacity: 0;
   transform: translate(-20%, 0);
 }
-
-
-
 </style>

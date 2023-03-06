@@ -1,14 +1,15 @@
 <template>
-  <VLayout>
-    <TheSidebarMenu @close-drawer="isSidebarOpened = false" :is-opened="isSidebarOpened" />
+  <v-layout>
+    
+    <TheSidebarMenu @close-menu="isSidebarOpened = false" :is-opened="isSidebarOpened" />
 
-    <VMain class="main">
+    <v-main class="main">
       <div class="page pa-5">
-        <VAppBarNavIcon v-if="smAndDown" @click="isSidebarOpened = !isSidebarOpened" />
+        <v-app-bar-nav-icon v-if="smAndDown" @click="isSidebarOpened = !isSidebarOpened" />
         <slot></slot>
       </div>
-    </VMain>
-  </VLayout>
+    </v-main>
+  </v-layout>
 </template>
 
 <script setup lang="ts">
@@ -25,6 +26,6 @@ const isSidebarOpened = ref(true);
 <style lang="scss" scoped>
 .main {
   background-color: whitesmoke;
-  background-color: black;
+
 }
 </style>

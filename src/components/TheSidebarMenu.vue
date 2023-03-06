@@ -1,6 +1,6 @@
 <template>
-  <VNavigationDrawer
-    @update:model-value="$emit('closeDrawer')"
+  <v-navigation-drawer
+    @update:model-value="$emit('closeMenu')"
     :model-value="isOpened"
     class="py-5"
     width="268"
@@ -12,65 +12,91 @@
       <span class="text-uppercase text-indigo-darken-4">crm</span> System
     </h2>
 
-    <VList class="pa-0">
-      <VListItem class="text-center d-block">
-        <VListItemTitle class="text-white text-h6"> My username </VListItemTitle>
+    <v-list class="pa-0">
+      <v-list-item class="text-center d-block">
+        <v-list-item-title class="text-white text-h6"
+          >{{ userAuthStore.currentUser?.name }}
+        </v-list-item-title>
         <template #prepend>
-          <VAvatar class="mx-auto" size="60px">
-            <VImg src="https://avatars0.githubusercontent.com/u/9064066?v=4&s=460"></VImg>
-          </VAvatar>
+          <v-avatar class="mx-auto" size="60px">
+            <v-img src="https://avatars0.githubusercontent.com/u/9064066?v=4&s=460" />
+          </v-avatar>
         </template>
-      </VListItem>
+      </v-list-item>
 
-      <VDivider color="white" class="my-2" />
+      <v-divider color="white" thickness="2" class="my-2" />
 
-      <VListItem v-for="item in menuItems" :value="item" active-class="active">
-        <VListItemTitle>
-          <RouterLink
+      <v-list-item v-for="item in menuItems" :value="item" active-class="active">
+        <v-list-item-title>
+          <router-link
             :to="item.link"
             class="d-flex justify-space-between align-center text-h6 text-white"
           >
             {{ item.title }}
 
-            <VIcon :icon="item.icon" />
-          </RouterLink>
-        </VListItemTitle>
-      </VListItem>
-    </VList>
+            <v-icon :icon="item.icon" />
+          </router-link>
+        </v-list-item-title>
+      </v-list-item>
+    </v-list>
 
+ 
     <template #append>
       <div class="px-4">
-        <VBtn block variant="flat" :height="60" color="red-darken-4" :rounded="0">
+        <v-btn @click="logOut" block variant="flat" :height="60" color="red-darken-4" :rounded="0">
           <span class="font-weight-medium">Выйти с аккаунта</span>
-          <VIcon end icon="mdi-exit-to-app" size="x-large" />
-        </VBtn>
+          <v-icon end icon="mdi-exit-to-app" size="x-large" />
+        </v-btn>
       </div>
     </template>
-  </VNavigationDrawer>
+
+  </v-navigation-drawer>
+  
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useDisplay } from 'vuetify/lib/framework.mjs';
+import { ref } from "vue";
+import { useDisplay } from "vuetify/lib/framework.mjs";
+import { useUserAuthStore } from "@/stores/userAuth";
+import { useRouter } from "vue-router";
 
 const props = defineProps<{
   isOpened: boolean;
 }>();
 
+const userAuthStore = useUserAuthStore();
+
 const { smAndDown, mdAndUp } = useDisplay();
 
-const menuItems = ref<{ title: string; icon: string; link: string }[]>([
+const router = useRouter();
+
+
+type MenuItem = {
+  title: string;
+  icon: string;
+  link: string;
+};
+
+const menuItems = ref<MenuItem[]>([
   {
-    title: 'Рабочие',
-    icon: 'mdi-account',
-    link: '/workers'
+    title: "Рабочие",
+    icon: "mdi-account",
+    link: "/workers"
   },
   {
-    title: 'Личный кабинет',
-    icon: 'mdi-key',
-    link: '/account'
+    title: "Личный кабинет",
+    icon: "mdi-key",
+    link: "/account"
   }
 ]);
+
+function logOut(): void {
+  if (window.confirm("Вы уверены что хотите выйти с аккаунта ?")) {
+    userAuthStore.logOutUser();
+    router.push({ name: "login-page" });
+  }
+}
+
 </script>
 
 <style lang="scss" scoped>

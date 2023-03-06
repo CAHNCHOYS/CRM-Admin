@@ -32,6 +32,7 @@
 
 .form-title {
   background-color: #c6d9ee;
+  font-weight: 600;
   color: #0f1e54;
 }
 
@@ -40,8 +41,11 @@
   z-index: 1000;
   left: 10px;
   top: 15px;
-  width: 100%;
+  width: calc(100% - 20px) !important;
   height: auto;
+
+  
+ 
 }
 
 

@@ -1,7 +1,7 @@
 <template>
   <div class="fullscreen h-100 d-flex justify-center align-center">
-    <VDialogTransition mode="out-in">
-      <VAlert
+    <v-dialog-transition>
+      <v-alert
         class="alert"
         type="success"
         border="start"
@@ -10,48 +10,52 @@
         close-label="Закрыть уведомление"
         v-if="isRegisterSucess"
       >
-        <VAlertTitle class="text-h4 mb-2 text-weight-bold"> Успех </VAlertTitle>
+        <v-alert-title class="text-h4 mb-2 text-weight-bold"> Успех </v-alert-title>
 
         <div class="text-white text-h6">
           Вы успешно зарегистрировались, можете перейти на страницу входа
         </div>
-      </VAlert>
-    </VDialogTransition>
+      </v-alert>
+    </v-dialog-transition>
 
-    <VDialogTransition mode="out-in">
-      <VAlert class="alert" type="error" :max-width="480" border="start" v-if="isRegistrationError">
-        <VAlertTitle class="mb-2">Произошла ошибка </VAlertTitle>
-        <div class="text-white text-h6">
-          {{ errorMessage }}
-        </div>
-      </VAlert>
-    </VDialogTransition>
+    <v-dialog-transition>
+      <v-alert
+        class="alert"
+        type="error"
+        :max-width="320"
+        border="start"
+        v-if="isRegistrationError"
+      >
+        <v-alert-title class="mb-2">Произошла ошибка </v-alert-title>
+        <div class="text-white text-h6">Ошибка: {{ errorMessage }}</div>
+      </v-alert>
+    </v-dialog-transition>
 
-    <VDialogTransition mode="out-in">
-      <VAlert
+    <v-dialog-transition>
+      <v-alert
         class="alert"
         type="warning"
         :max-width="450"
         border="start"
         v-if="isAlreadyRegistered"
       >
-        <VAlertTitle class="text-h4 mb-2">Упс </VAlertTitle>
+        <v-alert-title class="text-h4 mb-2">Упс </v-alert-title>
         <div class="text-white text-h6">Пользователь с таким email уже зарегистрирован !</div>
-      </VAlert>
-    </VDialogTransition>
+      </v-alert>
+    </v-dialog-transition>
 
-    <VCard class="form-card flex-grow-1 pb-8 rounded-lg" :max-width="486" :elevation="0">
-      <div class="form-title font-weight-bold text-center text-h4 py-4">Регистрация</div>
+    <v-card class="form-card flex-grow-1 pb-8 rounded-lg" :max-width="486" :elevation="0">
+      <div class="form-title text-center text-h4 py-4">Регистрация</div>
 
-      <VCardActions class="pt-4 pb-1 px-lg-10 px-md-8 px-4">
-        <VForm @submit="registerSubmit" class="fullscreen__form w-100">
-          <VCardTitle class="text-indigo-darken-2 text-center mb-2 px-0">
-            Введите ваши данные</VCardTitle
+      <v-card-actions class="pt-4 pb-1 px-lg-10 px-md-8 px-4">
+        <v-form @submit="registerSubmit" class="w-100">
+          <v-card-title class="text-indigo-darken-2 text-center mb-2 px-0">
+            Введите ваши данные</v-card-title
           >
 
-          <VRow no-gutters>
-            <VCol class="mb-2" cols="12">
-              <VTextField
+          <v-row no-gutters>
+            <v-col class="mb-2" cols="12">
+              <v-text-field
                 v-model="name"
                 :error-messages="nameErrors"
                 placeholder="Ваше имя"
@@ -61,12 +65,12 @@
                 clearable
               >
                 <template #prepend-inner>
-                  <VIcon class="icon mr-lg-3 mr-1" icon="mdi-clipboard-account" size="large" />
+                  <v-icon class="icon mr-lg-3 mr-1" icon="mdi-clipboard-account" size="large" />
                 </template>
-              </VTextField>
-            </VCol>
-            <VCol class="mb-2" cols="12">
-              <VTextField
+              </v-text-field>
+            </v-col>
+            <v-col class="mb-2" cols="12">
+              <v-text-field
                 v-model="email"
                 :error-messages="emailErrors"
                 placeholder="Ваша почта"
@@ -76,13 +80,29 @@
                 clearable
               >
                 <template #prepend-inner>
-                  <VIcon class="icon mr-lg-3 mr-1" icon="mdi-email" size="large" />
+                  <v-icon class="icon mr-lg-3 mr-1" icon="mdi-email" size="large" />
                 </template>
-              </VTextField>
-            </VCol>
+              </v-text-field>
+            </v-col>
 
-            <VCol class="mb-2" cols="12">
-              <VTextField
+            <v-col class="mb-2" cols="12">
+              <v-select
+                v-model="city"
+                placeholder="Выберете ваш город"
+                hint="Страна проживания"
+                :items="['Россия', 'Беларусь', 'Латвия', 'Украина', 'Казахстан', 'Узбекистан']"
+                variant="outlined"
+                :bg-color="'rgba(229, 229, 229, 0.25)'"
+                :error-messages="cityErrors"
+              >
+                <template #prepend-inner>
+                  <v-icon icon="mdi-city" class="icon mr-lg-3 mr-1"  size="large" />
+                </template>
+              </v-select>
+            </v-col>
+
+            <v-col class="mb-2" cols="12">
+              <v-text-field
                 v-model="password"
                 :error-messages="passwordErrors"
                 type="password"
@@ -93,12 +113,13 @@
                 clearable
               >
                 <template #prepend-inner>
-                  <VIcon class="icon mr-lg-3 mr-1" icon="mdi-lock" size="large" />
+                  <v-icon  icon="mdi-lock" class="icon mr-lg-3 mr-1" size="large" />
                 </template>
-              </VTextField>
-            </VCol>
-            <VCol cols="12">
-              <VTextField
+              </v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+              <v-text-field
                 type="password"
                 v-model="passwordConfirm"
                 :error-messages="passwordConfirmErrors"
@@ -109,37 +130,37 @@
                 clearable
               >
                 <template #prepend-inner>
-                  <VIcon class="icon mr-lg-3 mr-1" icon="mdi-lock" size="large" />
+                  <v-icon icon="mdi-lock" class="icon mr-lg-3 mr-1"  size="large" />
                 </template>
-              </VTextField>
-            </VCol>
-            <VCol class="mb-2" cols="12">
-              <VCheckbox
+              </v-text-field>
+            </v-col>
+
+            <v-col class="mb-2" cols="12">
+              <v-checkbox
                 v-model="agreement"
                 :error-messages="agreementErrors"
                 density="compact"
                 label="Вы согласны на обработку данных?"
               />
-            </VCol>
+            </v-col>
 
-            <VCol cols="12">
-              <VBtn
+            <v-col cols="12">
+              <v-btn
                 type="submit"
                 :loading="isSubmitting"
                 :disabled="isSubmitting"
                 :height="50"
                 block
-                :rounded="50"
                 color="dark-blue"
                 variant="flat"
               >
                 <span class="text-white text-h6 font-weight-medium">Зарегистрироваться</span>
-              </VBtn>
-            </VCol>
+              </v-btn>
+            </v-col>
 
-            <VCol cols="12">
-              <VScaleTransition>
-                <VBtn
+            <v-col cols="12">
+              <v-scale-transition>
+                <v-btn
                   block
                   variant="flat"
                   color="success"
@@ -147,18 +168,18 @@
                   :height="50"
                   v-if="isRegisterSucess"
                 >
-                  <RouterLink to="/login" class="text-white text-h6 font-weight-medium"
-                    >Перейти к авторизации</RouterLink
+                  <router-link to="/login" class="text-white text-h6 font-weight-medium"
+                    >Перейти к авторизации</router-link
                   >
-                </VBtn>
-              </VScaleTransition>
-            </VCol>
-          </VRow>
-        </VForm>
-      </VCardActions>
-    </VCard>
+                </v-btn>
+              </v-scale-transition>
+            </v-col>
+          </v-row>>
+        </v-form>
+      </v-card-actions>
+    </v-card>
 
-    <VImg cover class="bg-image" :src="bg" alt="Оффис" />
+    <v-img cover class="bg-image" :src="bg" alt="Оффис" />
   </div>
 </template>
 
@@ -170,11 +191,6 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";
 import { registerUser } from "@/api/registerUser";
 
-const isRegistrationError = ref(false);
-const isAlreadyRegistered = ref(false);
-const isRegisterSucess = ref(false);
-const errorMessage = ref("");
-
 //Валидация формы----------------------------------------------
 const { registerSchema } = useFormSchemas();
 
@@ -184,10 +200,17 @@ const { handleSubmit, isSubmitting, resetForm } = useForm({
 
 const { value: name, errorMessage: nameErrors } = useField("name");
 const { value: email, errorMessage: emailErrors } = useField("email");
+const { value: city, errorMessage: cityErrors } = useField("city");
 const { value: password, errorMessage: passwordErrors } = useField("password");
 const { value: passwordConfirm, errorMessage: passwordConfirmErrors } = useField("passwordConfirm");
 const { value: agreement, errorMessage: agreementErrors } = useField("agreement");
+
 //--------------------------------------------------------------
+
+const isRegistrationError = ref(false);
+const isAlreadyRegistered = ref(false);
+const isRegisterSucess = ref(false);
+const errorMessage = ref("");
 
 const registerSubmit = handleSubmit(async (values) => {
   console.log(values);
@@ -195,10 +218,9 @@ const registerSubmit = handleSubmit(async (values) => {
   const { success, alreadyRegistered, error } = await registerUser({
     name: values.name,
     email: values.email,
-    password: values.password
+    password: values.password,
+    city: values.city
   });
-
-  console.log(alreadyRegistered, success, error);
 
   if (error) {
     isRegistrationError.value = true;

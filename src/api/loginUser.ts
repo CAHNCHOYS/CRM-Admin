@@ -5,24 +5,26 @@ type UserLoginData = {
   email: string;
 };
 
+
 type LoginResponse = {
   error?: string;
-  wrongPassword?: string;
-  wrongEmail?: string;
-  token?: string;
-  user?: IUser;
+  wrongPassword?: boolean;
+  noExistEmail?: boolean;
+  loginData?: {      //Если авторизация удалась получаем токен
+     token: string,
+     user: IUser,
+  }
 };
  
 
-
-export const loginUser = async (userInfo: UserLoginData):Promise<LoginResponse> => {
+export const loginUser = async (userData: UserLoginData): Promise<LoginResponse> => {
   try {
     let response = await fetch("http://localhost:3000/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(userInfo)
+      body: JSON.stringify(userData)
     });
 
     let json: LoginResponse = await response.json();

@@ -3,6 +3,7 @@ type UserRegisterInfo = {
   name: string;
   email: string;
   password: string;
+  city: string;
 };
 
 //объект получаемый с запроса 

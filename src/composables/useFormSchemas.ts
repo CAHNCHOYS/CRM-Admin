@@ -9,6 +9,7 @@ export const useFormSchemas = () => {
   const registerSchema = yup.object({
     name: yup.string().required("Поле обязательное для ввода").min(4, "Введите нормальное имя"),
     email: yup.string().required("Поле обязательное для ввода").email("Введите правильный email"),
+    city: yup.string().required("Выберете вашу страну"),
     password: yup.string().required("Поле обязательное для ввода").min(4, "Минимум 4 символа"),
     passwordConfirm: yup
       .string()
