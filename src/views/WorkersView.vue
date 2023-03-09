@@ -1,6 +1,6 @@
 <template>
     <div>
-         Workers
+         Workers Page
     </div>
 </template>
 

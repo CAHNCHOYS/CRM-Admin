@@ -15,9 +15,6 @@ declare module 'vue-router' {
 
 
 
-
-
-
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [

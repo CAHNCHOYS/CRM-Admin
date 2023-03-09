@@ -1,21 +1,14 @@
 //Данные передаваемые в функции с формы
-type UserRegisterInfo = {
-  name: string;
-  email: string;
-  password: string;
-  city: string;
-};
 
-//объект получаемый с запроса 
-type RegisterResponse = {
-  readonly success?: boolean;
-  readonly alreadyRegistered?: boolean; //Если введеный емаил уже есть в бд
-  readonly error?: string;
-};
+//объект получаемый с запроса
+import type { RegisterResponse } from "@/types/responses";
+import type { RegisterFields } from "@/types/FormFields";
 
-export const registerUser = async (userInfo: UserRegisterInfo): Promise<RegisterResponse> => {
+
+
+export const registerUser = async (userInfo: RegisterFields): Promise<RegisterResponse> => {
   try {
-    let response = await fetch("http://localhost:3000/api/registration", {
+    let response = await fetch("http://localhost:3000/api/Registration", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -24,11 +17,12 @@ export const registerUser = async (userInfo: UserRegisterInfo): Promise<Register
     });
 
     let json: RegisterResponse = await response.json();
+    
     return json;
   } catch (error) {
     console.log(error);
     return {
-      error: (error as Error).message
+      errorMessage: (error as Error).message
     };
   }
 };

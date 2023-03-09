@@ -2,24 +2,26 @@
   <v-navigation-drawer
     @update:model-value="$emit('closeMenu')"
     :model-value="isOpened"
-    class="py-5"
+    class="pb-5 py-10"
     width="268"
-    color="#2F76E6"
+    color="#363740"
     :permanent="mdAndUp"
     :temporary="smAndDown"
+    v-if="userAuthStore.currentUser"
+    
   >
-    <h2 class="text mb-10 px-4 text-white">
-      <span class="text-uppercase text-indigo-darken-4">crm</span> System
-    </h2>
-
     <v-list class="pa-0">
       <v-list-item class="text-center d-block">
         <v-list-item-title class="text-white text-h6"
           >{{ userAuthStore.currentUser?.name }}
         </v-list-item-title>
         <template #prepend>
-          <v-avatar class="mx-auto" size="60px">
-            <v-img src="https://avatars0.githubusercontent.com/u/9064066?v=4&s=460" />
+          <v-avatar class="mx-auto mb-2" size="60px">
+            <v-img
+              :src="`http://localhost:3000/UserAvatars/${userAuthStore.currentUser.avatar}`"
+              alt="No avatar"
+              cover
+            />
           </v-avatar>
         </template>
       </v-list-item>
@@ -28,30 +30,29 @@
 
       <v-list-item v-for="item in menuItems" :value="item" active-class="active">
         <v-list-item-title>
-          <router-link
-            :to="item.link"
-            class="d-flex justify-space-between align-center text-h6 text-white"
-          >
+          <router-link :to="item.link" class="text-subtitle-1 text-white">
+            <v-icon class="mr-2" :icon="item.icon" />
             {{ item.title }}
-
-            <v-icon :icon="item.icon" />
           </router-link>
         </v-list-item-title>
       </v-list-item>
     </v-list>
 
- 
     <template #append>
       <div class="px-4">
-        <v-btn @click="logOut" block variant="flat" :height="60" color="red-darken-4" :rounded="0">
+        <v-btn
+          @click="logOut"
+          block
+          variant="flat"
+          color="deep-orange-darken-2"
+          :rounded="0"
+        >
           <span class="font-weight-medium">Выйти с аккаунта</span>
           <v-icon end icon="mdi-exit-to-app" size="x-large" />
         </v-btn>
       </div>
     </template>
-
   </v-navigation-drawer>
-  
 </template>
 
 <script setup lang="ts">
@@ -70,7 +71,6 @@ const { smAndDown, mdAndUp } = useDisplay();
 
 const router = useRouter();
 
-
 type MenuItem = {
   title: string;
   icon: string;
@@ -87,6 +87,11 @@ const menuItems = ref<MenuItem[]>([
     title: "Личный кабинет",
     icon: "mdi-key",
     link: "/account"
+  },
+  {
+    title: "Документы",
+    icon: "mdi-eye",
+    link: "/account"
   }
 ]);
 
@@ -96,6 +101,8 @@ function logOut(): void {
     router.push({ name: "login-page" });
   }
 }
+
+
 
 </script>
 

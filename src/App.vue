@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <p v-if="isLoading">Site Loading</p>
+    <p v-if="isLoading">Site Loading... pls wait</p>
     <component :is="getCurrentLayout" v-else>
       <router-view v-slot="{ Component }">
         <transition name="slide" mode="out-in">
@@ -8,54 +8,53 @@
         </transition>
       </router-view>
     </component>
-
-
   </v-app>
 </template>
 
 <script setup lang="ts">
 import { useLayouts } from "@/composables/useLayouts";
 import { onMounted, ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useUserAuthStore } from "./stores/userAuth";
 
 const isLoading = ref(true);
+const router = useRouter();
+const route = useRoute();
 
 const { verifyUserToken } = useUserAuthStore();
 
-const { getCurrentLayout } = useLayouts();
-
+const { getCurrentLayout } = useLayouts(route);
 
 onMounted(async () => {
-  await verifyUserToken();
+  if (localStorage.getItem("token")) {
+    const token = localStorage.getItem("token")!;
+    let checkToken = await verifyUserToken(token);
+    if (checkToken.isInvalidToken) {
+      router.push({
+        name: "login-page",
+        query: {
+          redirectedFrom: route.name?.toString() || route.fullPath
+        }
+      });
+    }
+  }
 
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1000);
+  isLoading.value = false;
 });
-
-
-
-
-
 </script>
 
-
-
-
 <style lang="scss">
-@import '@/assets/scss/nullstyle.scss';
+@import "@/assets/scss/nullstyle.scss";
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 body {
   min-width: 320px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
-#app{
+#app {
   overflow: hidden;
 }
-
 
 //route transition
 

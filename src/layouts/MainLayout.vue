@@ -3,12 +3,21 @@
     
     <TheSidebarMenu @close-menu="isSidebarOpened = false" :is-opened="isSidebarOpened" />
 
+    <v-app-bar  :height="65" :elevation="0">
+      <v-app-bar-nav-icon  @click="isSidebarOpened = !isSidebarOpened" />
+      <v-spacer></v-spacer>
+      <v-btn>GitHub</v-btn>
+    </v-app-bar>
+  
+
     <v-main class="main">
       <div class="page pa-5">
-        <v-app-bar-nav-icon v-if="smAndDown" @click="isSidebarOpened = !isSidebarOpened" />
+        
         <slot></slot>
       </div>
     </v-main>
+
+    
   </v-layout>
 </template>
 
@@ -16,16 +25,12 @@
 import TheSidebarMenu from '@/components/TheSidebarMenu.vue';
 import { ref } from 'vue';
 
-import { useDisplay } from 'vuetify/lib/framework.mjs';
-
-const { smAndDown } = useDisplay();
-
 const isSidebarOpened = ref(true);
 </script>
 
-<style lang="scss" scoped>
+<style  scoped>
 .main {
-  background-color: whitesmoke;
+  background-color: #F7F8FC;
 
 }
 </style>
