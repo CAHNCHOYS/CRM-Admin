@@ -60,12 +60,19 @@ const router = createRouter({
       meta: {
         requireAuth: true,
       }
+    },
+    {
+      path:"/about",
+      name:"about-page",
+      component:()=> import('../views/AboutView.vue'),
+      meta: {
+        requireAuth: true,
+      }
     }
  
 
   ]
 })
-
 
 
 

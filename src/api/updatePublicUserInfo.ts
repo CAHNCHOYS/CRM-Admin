@@ -1,4 +1,4 @@
-import type { UpdateInfoResponse  } from "@/types/responses";
+import type { UpdateInfoResponse  } from "@/types/BackendResponses";
 
 export const updatePublicUserInfo = async (obj: FormData): Promise<UpdateInfoResponse > => {
 

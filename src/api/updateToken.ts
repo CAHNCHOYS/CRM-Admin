@@ -1,4 +1,4 @@
-import type { UpdateTokenResponse } from "@/types/responses";
+import type { UpdateTokenResponse } from "@/types/BackendResponses";
 
 
 export const updateToken = async (userId: number): Promise<UpdateTokenResponse> => {

@@ -1,6 +1,6 @@
 <template>
   <div class="fullscreen h-100 d-flex justify-center align-center">
-    <!-----Уведомление после авторизации ----------->
+    <!----- Уведомление после авторизации ----------->
     <v-dialog-transition>
       <v-alert class="alert" :type="authMessageType" :max-width="400" v-show="isAuthMessageShown">
         <v-alert-title class="text-h4 mb-2"> Уведомление </v-alert-title>
@@ -9,6 +9,8 @@
         </div>
       </v-alert>
     </v-dialog-transition>
+
+
 
     <v-card class="form-card flex-grow-1 pb-8 rounded-lg" :max-width="486" :elevation="0">
       <div class="form-title text-center text-h4 py-4">Авторизация</div>
@@ -80,7 +82,7 @@
       </v-card-actions>
     </v-card>
 
-    <v-img class="bg-image" cover :src="bg" alt="OfficePic" />
+    <v-img class="bg-image" cover :src="pageBackground" alt="OfficePic" />
   </div>
 </template>
 
@@ -88,22 +90,19 @@
 import { ref, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import  { storeToRefs } from "pinia";
+import { storeToRefs } from "pinia";
 import { useUserAuthStore } from "@/stores/userAuth";
 
-import bg from "@/assets/Images/LoginRegister/bg.png";
+import pageBackground from "@/assets/Images/LoginRegister/bg.png";
 
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 
-import { loginUser } from "@/api/loginUser";
-
-import type { LoginResponse } from "@/types/responses";
 import type { LoginFields } from "@/types/FormFields";
 
 const userAuthStore = useUserAuthStore();
 const { isAuthMessageShown, authMessageText, authMessageType } = storeToRefs(userAuthStore);
-const { addTokenToStorage } = userAuthStore;
+const { loginUser } = userAuthStore;
 
 const route = useRoute();
 const router = useRouter();
@@ -122,48 +121,33 @@ const { value: password, errorMessage: passwordErrors } = useField<string>("pass
 const isPasswordSeen = ref(false);
 
 
-const isRedirected = ref(false);
-watchEffect(() => {
-  if (route.query.redirectedFrom) {
-    isRedirected.value = true;
-    setTimeout(() => (isRedirected.value = false), 3500);
-  }
-});
 
 
 //Авторизация
 const loginSubmit = handleSubmit(async (values: LoginFields) => {
-  
-  const loginResult: LoginResponse = await loginUser(values);
 
-  isAuthMessageShown.value = true;
+  await loginUser(values, resetField, resetForm);
   
-  if (loginResult.errorMessage) {
-    authMessageType.value = "error";
-    authMessageText.value = loginResult.errorMessage;
-  } else if (loginResult.isNoExistEmail) {
-    resetField("password");
-    authMessageType.value = "info";
-    authMessageText.value = `Пользователь с эмейлом  ${email.value} не найден`;
-  } else if (loginResult.isWrongPassword) {
-    resetField("password");
-    authMessageType.value = "warning";
-    authMessageText.value = "Неверный пароль, пожалуйста, повторите попытку";
-  } else if (loginResult.userTokenData) {
-    resetForm();
-    authMessageType.value = "success";
-    authMessageText.value = "Вы успешно авторизировались, вскоре вы будете переведены на сайт!";
-    addTokenToStorage(loginResult.userTokenData);
-
+  //Если вошли в аккаунт
+  if (localStorage.getItem("token")) {
     setTimeout(() => {
       if (route.query.redirectedFrom) {
         router.push({ name: route.query.redirectedFrom as string });
-      } else  router.push({ name: "home" });
+      } else router.push("/");
     }, 2500);
   }
-
-  setTimeout(() => (isAuthMessageShown.value = false), 3500);
 });
+
+
+watchEffect(() => {
+  if (route.query.redirectedFrom) {
+    isAuthMessageShown.value = true;
+    authMessageType.value = "info";
+    authMessageText.value = `Для доступа к странице ${route.query.redirectedFrom} необходимо авторизироваться`;
+    setTimeout(()=> isAuthMessageShown.value = false, 3500);
+  }
+});
+
 </script>
 
 <style lang="scss" scoped>

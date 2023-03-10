@@ -1,4 +1,4 @@
-import type { VerifyTokenResponse } from "@/types/responses";
+import type { VerifyTokenResponse } from "@/types/BackendResponses";
 
 export const verifyToken = async (token: string): Promise<VerifyTokenResponse> => {
   console.log(token);

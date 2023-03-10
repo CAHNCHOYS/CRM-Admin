@@ -1,4 +1,4 @@
-import type { UpdatePasswordResponse } from "@/types/responses";
+import type { UpdatePasswordResponse } from "@/types/BackendResponses";
 import type { UpdatePasswordFields } from "@/types/FormFields";
 
 export const updatePassword = async (
@@ -13,12 +13,13 @@ export const updatePassword = async (
       },
       body: JSON.stringify({ ...userPasswords, id: userId })
     });
+    
     let json: UpdatePasswordResponse = await response.json();
     return json;
   } catch (error) {
     console.log(error);
     return {
-      errorMessage: (error as Error).message
+      errorMessage: (error as Error).message,
     };
   }
 };

@@ -6,9 +6,9 @@
     width="268"
     color="#363740"
     :permanent="mdAndUp"
+    style="position: fixed"
     :temporary="smAndDown"
     v-if="userAuthStore.currentUser"
-    
   >
     <v-list class="pa-0">
       <v-list-item class="text-center d-block">
@@ -28,7 +28,13 @@
 
       <v-divider color="white" thickness="2" class="my-2" />
 
-      <v-list-item v-for="item in menuItems" :value="item" active-class="active">
+      <v-list-item
+        v-for="item in menuItems"
+        :key="item.link"
+        :value="item.link"
+        @click="navigateTo(item.link)"
+        active-class="active"
+      >
         <v-list-item-title>
           <router-link :to="item.link" class="text-subtitle-1 text-white">
             <v-icon class="mr-2" :icon="item.icon" />
@@ -40,13 +46,7 @@
 
     <template #append>
       <div class="px-4">
-        <v-btn
-          @click="logOut"
-          block
-          variant="flat"
-          color="deep-orange-darken-2"
-          :rounded="0"
-        >
+        <v-btn @click="logOut" block variant="flat" color="deep-orange-darken-2" :rounded="0">
           <span class="font-weight-medium">Выйти с аккаунта</span>
           <v-icon end icon="mdi-exit-to-app" size="x-large" />
         </v-btn>
@@ -79,19 +79,25 @@ type MenuItem = {
 
 const menuItems = ref<MenuItem[]>([
   {
-    title: "Рабочие",
+    title: "Статиститка",
     icon: "mdi-account",
     link: "/workers"
   },
+
+  {
+    title: "Товары",
+    icon: "mdi-note",
+    link: "/goods"
+  },
   {
     title: "Личный кабинет",
-    icon: "mdi-key",
+    icon: "mdi-account-circle",
     link: "/account"
   },
   {
-    title: "Документы",
-    icon: "mdi-eye",
-    link: "/account"
+    title: "О приложении",
+    icon: "mdi-information",
+    link: "/about"
   }
 ]);
 
@@ -102,7 +108,9 @@ function logOut(): void {
   }
 }
 
-
+function navigateTo(link: string) {
+  router.push(`${link}`);
+}
 
 </script>
 

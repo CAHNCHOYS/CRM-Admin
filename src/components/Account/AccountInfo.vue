@@ -15,11 +15,11 @@
 
     <v-form @submit.prevent="updateInfoSubmit" enctype="multipart/form-data">
       <v-row align="center">
-        <v-col cols="6">
-          <div class="d-flex align-center">
+        <v-col md="6" cols="12">
+          <div class="d-flex flex-sm-row flex-column align-sm-center">
             <v-avatar
               size="80"
-              class="mr-4"
+              class="mr-sm-3 mb-sm-0 mb-4 border mx-auto"
               :image="
                 previewAvatarImage
                 || `http://localhost:3000/UserAvatars/${userAuthStore.currentUser!.avatar}`
@@ -28,25 +28,24 @@
             <v-file-input
               v-model="avatar"
               :error-messages="avatarErrorMessages"
+              show-size
+              prepend-icon="mdi-camera"
               hide-details="auto"
               label="Загрузите ваш аватар"
-              show-size
-              accept=".jpg, .png, .jpeg, .svg"
+              accept=".jpg, .png, .jpeg, .svg , .webp"
               @change="setImagePreview"
               @click:clear="clearPreviewImage"
             />
           </div>
         </v-col>
-        <v-col cols="6">
-          <v-text-field v-model="name" :error-messages="nameErrors" label="Ваше имя">
-          </v-text-field>
+        <v-col sm="6" cols="12">
+          <v-text-field v-model="name" :error-messages="nameErrors" label="Ваше имя"  />
         </v-col>
-        <v-col cols="6">
-          <v-text-field v-model="email" :error-messages="emailErrors" label="Ваша почта">
-          </v-text-field>
+        <v-col sm="6" cols="12">
+          <v-text-field v-model="email" :error-messages="emailErrors" label="Ваша почта" />
         </v-col>
 
-        <v-col cols="6">
+        <v-col sm="6" cols="12">
           <v-select
             v-model="country"
             :error-messages="countryErrors"
@@ -73,19 +72,19 @@ import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 import type { UpdateInfoFields } from "@/types/FormFields";
+import type { UpdateInfoResponse } from "@/types/BackendResponses";
 
+import { updatePublicUserInfo } from "@/api/updatePublicUserInfo";
 
 const userAuthStore = useUserAuthStore();
-
 const { updateInfoShchema } = useFormSchemas();
-
 
 //Начальные значения формы
 const initialFormValues = computed(() => ({
   name: userAuthStore.currentUser!.name,
   email: userAuthStore.currentUser!.email,
   country: userAuthStore.currentUser!.country,
-  avatar: [],
+  avatar: []
 }));
 
 //---------------- Валидация формы -------------------------------------------------------------
@@ -101,14 +100,12 @@ const { value: avatar, errorMessage: avatarErrorMessages } = useField<File[]>("a
 
 //--------------------------------------------------------------------------------------------
 
-
-
 const isInfoUpdated = ref(false);
 const isInfoUpdateError = ref(false);
 
 const errorMessage = ref("");
 
-const updateInfoSubmit = handleSubmit(async (values) => {
+const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   console.log(values);
   //  console.log(previewAvatarImage.value);
   let data = new FormData();
@@ -119,22 +116,27 @@ const updateInfoSubmit = handleSubmit(async (values) => {
   data.append("avatar", values.avatar[0], avatar.value[0].name);
   data.append("id", String(userAuthStore.currentUser!.id));
 
-  const updateResult = await userAuthStore.updateUserInfo(data, values);
-  console.log(updateResult);
+  const updateResult: UpdateInfoResponse = await updatePublicUserInfo(data);
 
   if (updateResult.errorMessage) {
     isInfoUpdateError.value = true;
     errorMessage.value = updateResult.errorMessage;
     setTimeout(() => (isInfoUpdateError.value = false), 3500);
-    
   } else if (updateResult.isInfoUpdated) {
-    isInfoUpdated.value = true;
-    setTimeout(() => (isInfoUpdated.value = false), 3500);
+    //Так как данные хранятся в токене получаем новый токен.
+    const userId = userAuthStore.currentUser!.id;
+    const updateTokenResult = await userAuthStore.updateUserToken(userId);
+
+    if (updateTokenResult.errorMessage) {
+      isInfoUpdateError.value = true;
+      errorMessage.value = updateTokenResult.errorMessage;
+      setTimeout(() => (isInfoUpdateError.value = false), 3500);
+    } else if (updateTokenResult.isTokenUpdated) {
+      isInfoUpdated.value = true;
+      setTimeout(() => (isInfoUpdated.value = false), 3500);
+    }
   }
-  
 });
-
-
 
 //Предпросмотр аватара  пользователя---
 const previewAvatarImage = ref("");
@@ -148,11 +150,6 @@ function clearPreviewImage() {
   previewAvatarImage.value = "";
 }
 //-------------------------------------
-
-
-
-
-
 </script>
 
 <style lang="scss" scoped></style>

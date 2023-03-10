@@ -18,13 +18,14 @@
             v-model="oldPassword"
             :error-messages="oldPasswordErrors"
             label="Старый пароль"
-            type="password"
-
-          >
-          </v-text-field>
+            :type="isOldPasswordSeen ? 'text' : 'password'"
+            :append-inner-icon="isOldPasswordSeen ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append-inner="isOldPasswordSeen = !isOldPasswordSeen"
+          />
+      
         </v-col>
 
-        <v-col sm="6" cols="12" >
+        <v-col sm="6" cols="12">
           <v-text-field
             label="Новый пароль"
             v-model="newPassword"
@@ -32,8 +33,8 @@
             :type="isNewPasswordSeen ? 'text' : 'password'"
             :append-inner-icon="isNewPasswordSeen ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append-inner="isNewPasswordSeen = !isNewPasswordSeen"
-          >
-          </v-text-field>
+          />
+     
         </v-col>
 
         <v-col sm="6" cols="12">
@@ -42,9 +43,8 @@
             :error-messages="newPasswordConfirmErrors"
             label="Повторите новый пароль"
             :type="isNewPasswordSeen ? 'text' : 'password'"
-           
-          >
-          </v-text-field>
+          />
+
         </v-col>
         <v-col cols="12">
           <v-btn type="submit" :loading="isSubmitting" variant="flat" color="green">
@@ -64,14 +64,18 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useForm, useField } from "vee-validate";
 
 import type { UpdatePasswordFields } from "@/types/FormFields";
-import type { UpdatePasswordResponse } from "@/types/responses";
+import type { UpdatePasswordResponse } from "@/types/BackendResponses";
 
+import { updatePassword } from "@/api/updatePassword";
 
-const isUpdatePassMessageShown = ref(false); //После обновления пароля показываем уведомление пользователю 
+const isUpdatePassMessageShown = ref(false); //После обновления пароля показываем уведомление пользователю
 const updatePassMessageType = ref<"error" | "success" | "info">("success");
 const updatePassMessageText = ref("");
 
-const { updateUserPassword } = useUserAuthStore();
+const isNewPasswordSeen = ref(false);
+const isOldPasswordSeen = ref(false);
+
+const userAuthStore = useUserAuthStore();
 
 //---------------- Валидация формы -------------------------------------------------------------
 const { updatePasswordSchema } = useFormSchemas();
@@ -86,27 +90,38 @@ const { value: newPasswordConfirm, errorMessage: newPasswordConfirmErrors } =
   useField<string>("newPasswordConfirm");
 //----------------------------------------------------------------------------------------------
 
-const isNewPasswordSeen = ref(false);
 
 const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) => {
+  const userId = userAuthStore.currentUser!.id;
 
-  let res: UpdatePasswordResponse = await updateUserPassword(values);
+  let res: UpdatePasswordResponse = await updatePassword(values, userId);
   console.log(res);
 
-  isUpdatePassMessageShown.value = true;      
-  
+  isUpdatePassMessageShown.value = true;
+
+  console.log(res);
+
   if (res.errorMessage) {
     updatePassMessageText.value = "Ошибка + \n" + res.errorMessage + ", попробуйте повторить позже";
     updatePassMessageType.value = "error";
   } else if (res.isWrongPassword) {
     updatePassMessageText.value = "Неверный старый пароль от аккаунта";
     updatePassMessageType.value = "info";
-  } else if (res.newPassword) {
-    updatePassMessageText.value = "Пароль успешно обновлен!";
-    updatePassMessageType.value = "success";
-    resetForm();
-  }
+  } else if (res.isPasswordUpdated) {
+    //Так как даннные хранятся в токене, то получаемы новый токен
+    const tokenUpdateResult = await userAuthStore.updateUserToken(userId);
 
+    if (tokenUpdateResult.errorMessage) {
+      updatePassMessageText.value =
+        "Ошибка + \n" + res.errorMessage + ", попробуйте повторить позже";
+      updatePassMessageType.value = "error";
+    } else if (tokenUpdateResult.isTokenUpdated) {
+      
+      updatePassMessageText.value = "Пароль успешно обновлен!";
+      updatePassMessageType.value = "success";
+      resetForm();
+    }
+  }
   setTimeout(() => (isUpdatePassMessageShown.value = false), 3500);
 });
 </script>

@@ -8,7 +8,6 @@ export type RegisterFields = {
 };
 
 
-
 export type LoginFields = {
     email: string;
     password: string;

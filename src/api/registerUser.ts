@@ -1,7 +1,7 @@
 //Данные передаваемые в функции с формы
 
 //объект получаемый с запроса
-import type { RegisterResponse } from "@/types/responses";
+import type { RegisterResponse } from "@/types/BackendResponses";
 import type { RegisterFields } from "@/types/FormFields";
 
 

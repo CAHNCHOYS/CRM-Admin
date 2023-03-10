@@ -29,7 +29,7 @@ onMounted(async () => {
   if (localStorage.getItem("token")) {
     const token = localStorage.getItem("token")!;
     let checkToken = await verifyUserToken(token);
-    if (checkToken.isInvalidToken) {
+    if (checkToken) {
       router.push({
         name: "login-page",
         query: {
