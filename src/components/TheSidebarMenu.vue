@@ -65,7 +65,7 @@ const props = defineProps<{
   isOpened: boolean;
 }>();
 
-const userAuthStore = useUserAuthStore();
+
 
 const { smAndDown, mdAndUp } = useDisplay();
 
@@ -87,7 +87,7 @@ const menuItems = ref<MenuItem[]>([
   {
     title: "Товары",
     icon: "mdi-note",
-    link: "/goods"
+    link: "/products"
   },
   {
     title: "Личный кабинет",
@@ -100,6 +100,8 @@ const menuItems = ref<MenuItem[]>([
     link: "/about"
   }
 ]);
+
+const userAuthStore = useUserAuthStore();
 
 function logOut(): void {
   if (window.confirm("Вы уверены что хотите выйти с аккаунта ?")) {

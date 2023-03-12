@@ -15,6 +15,6 @@ export const verifyToken = async (token: string): Promise<VerifyTokenResponse> =
     return json;
   } catch (error) {
     console.log(error);
-    return { errorMessage: (error as Error).message };
+    return { isInvalidToken: true };
   }
 };

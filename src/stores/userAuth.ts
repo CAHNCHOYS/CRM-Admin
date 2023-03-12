@@ -2,157 +2,132 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 import type { IUser } from "@/types/interfaces";
-import type { LoginFields,  RegisterFields } from "@/types/FormFields";
+import type { LoginFields, RegisterFields } from "@/types/FormFields";
 import type {
   VerifyTokenResponse,
   DeleteAccountResponse,
+  RegisterResponse,
   LoginResponse,
-  RegisterResponse
+  ApiError
 } from "@/types/BackendResponses";
-import type { UpdateTokenResponse } from "@/types/BackendResponses";
 
-import { verifyToken } from "@/api/verifyToken";
-import { updateToken } from "@/api/updateToken";
-import { deleteAccount } from "@/api/deleteAccout";
-import { loginUser as login } from "@/api/loginUser";
-import { registerUser as register } from "@/api/registerUser";
+import {
+  loginUser as login,
+  registerUser as register,
+  verifyToken,
+  deleteAccount,
+  updateToken
+} from "@/services/UserAuthService";
 
 export const useUserAuthStore = defineStore("userAuth", () => {
   const currentUser = ref<IUser | null>(null);
 
-  const isAuthMessageShown = ref(false); //После регистрации и авторизации пользователю показывается алерт с сообщением
-  const authMessageType = ref<"success" | "info" | "warning" | "error">("success");
-  const authMessageText = ref("");
+  const isSuccessMessageShown = ref(false); //Уведомления после успешной регистрации|авторизации
+  const isErrorMessageShown = ref(false); // Если ошибка пре регистрации|авторизации
+  const authErrorMessage = ref("Произошла ошибка");
+
+  const isUserLoggedIn = ref(false);
+
+  async function loginUser(loginPayload: LoginFields, resetForm: Function): Promise<void> {
+    const loginResult: LoginResponse | ApiError = await login(loginPayload);
+
+    if ("error" in loginResult) {
+      isErrorMessageShown.value = true;
+      authErrorMessage.value = loginResult.error;
+
+      resetForm();
+      setTimeout(() => (isErrorMessageShown.value = false), 3500);
+    } else {
+      //Если залогинились
+      addTokenToStorage(loginResult.userTokenData);
+      isSuccessMessageShown.value = true;
+
+      isUserLoggedIn.value = true;
+      resetForm();
+      setTimeout(() => (isSuccessMessageShown.value = false), 3500);
+    }
+  }
+
+  async function registerUser(registerPayload: RegisterFields): Promise<void> {
+    const registerResult: RegisterResponse | ApiError = await register(registerPayload);
+
+    if ("error" in registerResult) {
+      isErrorMessageShown.value = true;
+      authErrorMessage.value = registerResult.error;
+      setTimeout(() => (isErrorMessageShown.value = false), 3500);
+    } else if (registerResult.isSuccess) {
+      isSuccessMessageShown.value = true;
+      setTimeout(() => (isSuccessMessageShown.value = false), 3500);
+    }
+  }
 
   function addTokenToStorage({ token, user }: { token: string; user: IUser }): void {
     localStorage.setItem("token", token);
     currentUser.value = user;
   }
 
-  async function loginUser(
-    loginData: LoginFields,
-    resetField: Function,
-    resetForm: Function
-  ): Promise<void> {
-    const loginResult: LoginResponse = await login(loginData);
-
-    isAuthMessageShown.value = true;
-    if (loginResult.errorMessage) {
-      authMessageType.value = "error";
-      authMessageText.value = loginResult.errorMessage;
-    } else if (loginResult.isNoExistEmail) {
-      resetField("password");
-      authMessageType.value = "info";
-      authMessageText.value = `Пользователь с эмейлом  ${loginData.email} не найден`;
-    } else if (loginResult.isWrongPassword) {
-      resetField("password");
-      authMessageType.value = "warning";
-      authMessageText.value = "Неверный пароль, пожалуйста, повторите попытку";
-    } else if (loginResult.userTokenData) {
-      resetForm();
-      authMessageType.value = "success";
-      authMessageText.value = "Вы успешно авторизировались, вскоре вы будете переведены на сайт!";
-      addTokenToStorage(loginResult.userTokenData);
-    }
-    setTimeout(() => (isAuthMessageShown.value = false), 3500);
-  }
-
-  async function registerUser(registerData: RegisterFields, resetForm: Function): Promise<void> {
-    const registerResult: RegisterResponse = await register(registerData);
-    isAuthMessageShown.value = true;
-
-    if (registerResult.errorMessage) {
-      authMessageType.value = "error";
-      authMessageText.value = registerResult.errorMessage;
-    } else if (registerResult.isUserAlreadyRegistered) {
-      authMessageType.value = "info";
-      authMessageText.value = "Пользователь с таким email уже зарегистрирован!";
-    } else if (registerResult.isSuccess) {
-      resetForm();
-      authMessageType.value = "success";
-      authMessageText.value = "Регистрация прошла успешно, можете переходить к авторизации!";
-    }
-    setTimeout(() => (isAuthMessageShown.value = false), 3500);
-  }
-
-
   function logOutUser(): void {
     currentUser.value = null;
     localStorage.removeItem("token");
+    isUserLoggedIn.value = false;
   }
 
-   
-  async function verifyUserToken(token: string): Promise<boolean> {
-    const checkToken: VerifyTokenResponse = await verifyToken(token);
-    console.log(checkToken);
-    if (checkToken.isInvalidToken || checkToken.errorMessage) {
-      logOutUser();
-    } else if (checkToken.userData) {
-      currentUser.value = checkToken.userData;
+  async function verifyUserToken(): Promise<void> {
+    let token = localStorage.getItem("token");
+    if (token) {
+      const checkToken: VerifyTokenResponse = await verifyToken(token);
+      console.log(checkToken);
+      if (checkToken.isInvalidToken) {
+        logOutUser();
+      } else if (checkToken.userData) {
+        currentUser.value = checkToken.userData;
+        isUserLoggedIn.value = true;
+      }
     }
-    return currentUser.value === null;
   }
 
-  async function deleteUserAccount(): Promise<DeleteAccountResponse> {
-    const deletionResult: DeleteAccountResponse = await deleteAccount(currentUser.value!.id);
-    if (deletionResult.isAccountDeleted) {
+  async function deleteUserAccount(): Promise<{ error: string } | { isAccountDeleted: true }> {
+    const deletionResult: DeleteAccountResponse | ApiError = await deleteAccount(
+      currentUser.value!.id
+    );
+
+    if ("error" in deletionResult) {
+      logOutUser();
+      return { error: deletionResult.error };
+    } else {
       logOutUser();
       return { isAccountDeleted: true };
-    } else return { errorMessage: deletionResult.errorMessage };
+    }
   }
 
   type UpdateTokenResult = {
     isTokenUpdated?: true;
-    errorMessage?: string;
-  }
+    error?: string;
+  };
 
   async function updateUserToken(userId: number): Promise<UpdateTokenResult> {
-    const updatedToken: UpdateTokenResponse = await updateToken(userId);
-    if (updatedToken.userTokenData) {
+    const updatedToken: LoginResponse | ApiError = await updateToken(userId);
+
+    if ("error" in updatedToken) {
+      return { error: updatedToken.error };
+    } else {
       addTokenToStorage(updatedToken.userTokenData);
       return { isTokenUpdated: true };
-    } else return { errorMessage: updatedToken.errorMessage };
+    }
   }
-
-  // async function updateUserInfo(formData: FormData) {
-  //   let updateResult: UpdateInfoResponse = await updatePublicUserInfo(formData);
-  //   console.log(updateResult);
-  //   if (updateResult.isInfoUpdated) {
-  //     //Так как данные хранятся в токене то получаем новый токен и закидываем в storage
-  //     return await updateUserToken(currentUser.value!.id);
-  //   } else return { errorMessage: updateResult.errorMessage };
-  // }
-
-  // async function updateUserPassword(
-  //   userPasswords: UpdatePasswordFields
-  // ): Promise<UpdatePasswordResponse> {
-  //   let res: UpdatePasswordResponse = await updatePassword(userPasswords, currentUser.value!.id);
-
-  //   if (res.newPassword) {
-  //     //Так как данные хранятся в токене то получаем новый токен и закидываем в storage
-  //     return await updateUserToken(currentUser.value!.id);
-  //   } else if (res.isWrongPassword) {
-  //     return { isWrongPassword: true };
-  //   } else return { errorMessage: res.errorMessage };
-  // }
-
- 
 
   return {
     currentUser,
-    authMessageText,
-    authMessageType,
-    isAuthMessageShown,
+    isUserLoggedIn,
+    isErrorMessageShown,
+    isSuccessMessageShown,
+    authErrorMessage,
 
     loginUser,
     registerUser,
     logOutUser,
-    addTokenToStorage,
     verifyUserToken,
     updateUserToken,
-
-   // updateUserInfo,
-  //  updateUserPassword,
     deleteUserAccount
   };
 });

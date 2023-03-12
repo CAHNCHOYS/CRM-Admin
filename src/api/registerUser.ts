@@ -4,9 +4,8 @@
 import type { RegisterResponse } from "@/types/BackendResponses";
 import type { RegisterFields } from "@/types/FormFields";
 
-
-
 export const registerUser = async (userInfo: RegisterFields): Promise<RegisterResponse> => {
+  
   try {
     let response = await fetch("http://localhost:3000/api/Registration", {
       method: "POST",

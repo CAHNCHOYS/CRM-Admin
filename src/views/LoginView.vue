@@ -1,16 +1,24 @@
 <template>
   <div class="fullscreen h-100 d-flex justify-center align-center">
-    <!----- Уведомление после авторизации ----------->
+    <!----- Уведомления после авторизации ----------->
+
     <v-dialog-transition>
-      <v-alert class="alert" :type="authMessageType" :max-width="400" v-show="isAuthMessageShown">
-        <v-alert-title class="text-h4 mb-2"> Уведомление </v-alert-title>
+      <v-alert class="alert" type="error" :max-width="400" v-show="isErrorMessageShown">
+        <v-alert-title class="text-h4 mb-2"> Ошибка </v-alert-title>
         <div class="text-white text-h6">
-          {{ authMessageText }}
+          {{ authErrorMessage }}
         </div>
       </v-alert>
     </v-dialog-transition>
 
-
+    <v-dialog-transition>
+      <v-alert class="alert" type="success" :max-width="400" v-show="isSuccessMessageShown">
+        <v-alert-title class="text-h4 mb-2"> Успех </v-alert-title>
+        <div class="text-white text-h6">
+          Вы успешно авторизировались, вскоре вы будете переведены на сайт!
+        </div>
+      </v-alert>
+    </v-dialog-transition>
 
     <v-card class="form-card flex-grow-1 pb-8 rounded-lg" :max-width="486" :elevation="0">
       <div class="form-title text-center text-h4 py-4">Авторизация</div>
@@ -63,7 +71,7 @@
               <v-btn
                 type="submit"
                 :loading="isSubmitting"
-                :disabled="isSubmitting || isAuthMessageShown"
+                :disabled="isSubmitting || isErrorMessageShown || isSuccessMessageShown"
                 block
                 color="dark-blue"
                 variant="flat"
@@ -100,9 +108,7 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 
 import type { LoginFields } from "@/types/FormFields";
 
-const userAuthStore = useUserAuthStore();
-const { isAuthMessageShown, authMessageText, authMessageType } = storeToRefs(userAuthStore);
-const { loginUser } = userAuthStore;
+
 
 const route = useRoute();
 const router = useRouter();
@@ -110,7 +116,7 @@ const router = useRouter();
 //Form validation -----------------------------------------------------------
 const { loginSchema } = useFormSchemas();
 
-const { handleSubmit, isSubmitting, resetForm, resetField } = useForm<LoginFields>({
+const { handleSubmit, isSubmitting, resetForm } = useForm<LoginFields>({
   validationSchema: loginSchema
 });
 
@@ -122,14 +128,19 @@ const isPasswordSeen = ref(false);
 
 
 
+const userAuthStore = useUserAuthStore();
+const { isUserLoggedIn, authErrorMessage, isSuccessMessageShown, isErrorMessageShown } =
+  storeToRefs(userAuthStore);
+const { loginUser } = userAuthStore;
+
+
 
 //Авторизация
 const loginSubmit = handleSubmit(async (values: LoginFields) => {
+  await loginUser(values, resetForm);
 
-  await loginUser(values, resetField, resetForm);
-  
   //Если вошли в аккаунт
-  if (localStorage.getItem("token")) {
+  if (isUserLoggedIn.value) {
     setTimeout(() => {
       if (route.query.redirectedFrom) {
         router.push({ name: route.query.redirectedFrom as string });
@@ -138,16 +149,14 @@ const loginSubmit = handleSubmit(async (values: LoginFields) => {
   }
 });
 
-
 watchEffect(() => {
   if (route.query.redirectedFrom) {
-    isAuthMessageShown.value = true;
-    authMessageType.value = "info";
-    authMessageText.value = `Для доступа к странице ${route.query.redirectedFrom} необходимо авторизироваться`;
-    setTimeout(()=> isAuthMessageShown.value = false, 3500);
+    isErrorMessageShown.value = true;
+
+    authErrorMessage.value = `Для доступа к странице ${route.query.redirectedFrom} необходимо авторизироваться`;
+    setTimeout(() => (isErrorMessageShown.value = false), 3500);
   }
 });
-
 </script>
 
 <style lang="scss" scoped>

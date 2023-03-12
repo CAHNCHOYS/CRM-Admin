@@ -15,29 +15,16 @@
 import { useLayouts } from "@/composables/useLayouts";
 import { onMounted, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useUserAuthStore } from "./stores/userAuth";
 
 const isLoading = ref(true);
-const router = useRouter();
 const route = useRoute();
 
-const { verifyUserToken } = useUserAuthStore();
+
 
 const { getCurrentLayout } = useLayouts(route);
 
 onMounted(async () => {
-  if (localStorage.getItem("token")) {
-    const token = localStorage.getItem("token")!;
-    let checkToken = await verifyUserToken(token);
-    if (checkToken) {
-      router.push({
-        name: "login-page",
-        query: {
-          redirectedFrom: route.name?.toString() || route.fullPath
-        }
-      });
-    }
-  }
+  
 
   isLoading.value = false;
 });
@@ -66,6 +53,6 @@ body {
 .slide-enter-from,
 .slide-leave-to {
   opacity: 0;
-  transform: translate(-20%, 0);
+  transform: translate(20%, 0);
 }
 </style>

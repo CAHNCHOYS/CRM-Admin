@@ -2,14 +2,14 @@
   <div v-if="userAuthStore.currentUser">
     <div class="title text-h2 mb-5">Аккаунт</div>
 
-    <v-card color="white" class="pa-5 mb-6 rounded-lg  mx-sm-0 mx-n5">
+    <v-card color="white" elevation="2" class="pa-5 mb-6 rounded-lg  mx-sm-0 mx-n5">
       <AccountInfo />
     </v-card>
-    <v-card color="white" class="pa-5 mb-6 rounded-lg mx-sm-0 mx-n5">
+    <v-card color="white" elevation="2" class="pa-5 mb-6 rounded-lg mx-sm-0 mx-n5">
       <AccountPrivateInfo  />
     </v-card>
     
-    <v-card color="white" class="pa-5 rounded-lg mx-sm-0 mx-n5">
+    <v-card color="white" elevation="2" class="pa-5 rounded-lg mx-sm-0 mx-n5">
       <AccountDeletion  />
     </v-card>
 

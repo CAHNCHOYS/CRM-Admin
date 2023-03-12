@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { useUserAuthStore } from '@/stores/userAuth';
 
 import 'vue-router';
 
@@ -54,6 +55,14 @@ const router = createRouter({
       
     },
     {
+      path:"/products",
+      name:"products-page",
+      component:()=> import('../views/ProductsView.vue'),
+      meta: {
+        requireAuth: true,
+      }
+    },
+    {
       path:"/workers",
       name:"workers",
       component:()=> import('../views/WorkersView.vue'),
@@ -68,7 +77,7 @@ const router = createRouter({
       meta: {
         requireAuth: true,
       }
-    }
+    },
  
 
   ]
@@ -76,9 +85,16 @@ const router = createRouter({
 
 
 
-router.beforeEach((to, from) => {
-   
-  if(to.meta.requireAuth && !localStorage.getItem("token")){
+router.beforeEach(async (to, from) => {
+  const userAuthStore = useUserAuthStore();
+
+  console.log(from.name);
+  //Если зашли первый раз
+  if(!from.name){
+    await userAuthStore.verifyUserToken()
+  }
+ 
+  if(to.meta.requireAuth && !userAuthStore.isUserLoggedIn){
     return {
       name: "login-page",
       query: {

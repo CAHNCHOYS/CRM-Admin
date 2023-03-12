@@ -2,15 +2,14 @@
   <div>
     <div class="text-h5 mb-4">Общая информация об аккаунте</div>
 
-    <v-snackbar location="right bottom" :max-width="400" color="success" v-model="isInfoUpdated">
+    <v-snackbar location="right bottom" :max-width="400" color="success" v-model="isUpdateSuccess">
       <div class="text-h6">Данные были успешно обновлены!</div>
     </v-snackbar>
 
-    <v-snackbar location="right bottom" color="error" :max-width="400" v-model="isInfoUpdateError">
-      <div class="text-h6">
-        Ошибка при обновлении информации! Попробуйте повторить позже.
-        <p>{{ errorMessage }}</p>
-      </div>
+    <v-snackbar location="right bottom" color="error" :max-width="400" v-model="isUpdateError">
+        <p class="text-h6">Ошибка: </p>
+        <p>{{ updateErrorMessage }}</p>
+
     </v-snackbar>
 
     <v-form @submit.prevent="updateInfoSubmit" enctype="multipart/form-data">
@@ -72,42 +71,41 @@ import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 import type { UpdateInfoFields } from "@/types/FormFields";
-import type { UpdateInfoResponse } from "@/types/BackendResponses";
+import type { ApiError, UpdateInfoResponse } from "@/types/BackendResponses";
 
-import { updatePublicUserInfo } from "@/api/updatePublicUserInfo";
+import { updateUserInfo } from "@/services/UserAuthService";
+
 
 const userAuthStore = useUserAuthStore();
-const { updateInfoShchema } = useFormSchemas();
 
 //Начальные значения формы
 const initialFormValues = computed(() => ({
-  name: userAuthStore.currentUser!.name,
-  email: userAuthStore.currentUser!.email,
-  country: userAuthStore.currentUser!.country,
+  name: userAuthStore.currentUser?.name || "user logged out",
+  email: userAuthStore.currentUser?.email || "user logged out",
+  country: userAuthStore.currentUser?.country || "user logged out",
   avatar: []
 }));
 
+
 //---------------- Валидация формы -------------------------------------------------------------
+const { updateInfoShchema } = useFormSchemas();
 const { handleSubmit, isSubmitting } = useForm<UpdateInfoFields>({
   validationSchema: updateInfoShchema,
   initialValues: initialFormValues
 });
-
 const { value: name, errorMessage: nameErrors } = useField<string>("name");
 const { value: email, errorMessage: emailErrors } = useField<string>("email");
 const { value: country, errorMessage: countryErrors } = useField<string>("country");
 const { value: avatar, errorMessage: avatarErrorMessages } = useField<File[]>("avatar");
-
 //--------------------------------------------------------------------------------------------
 
-const isInfoUpdated = ref(false);
-const isInfoUpdateError = ref(false);
 
-const errorMessage = ref("");
+const isUpdateSuccess = ref(false);
+const isUpdateError = ref(false);
+const updateErrorMessage = ref("");
 
 const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
-  console.log(values);
-  //  console.log(previewAvatarImage.value);
+ 
   let data = new FormData();
 
   data.append("name", values.name);
@@ -116,24 +114,28 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   data.append("avatar", values.avatar[0], avatar.value[0].name);
   data.append("id", String(userAuthStore.currentUser!.id));
 
-  const updateResult: UpdateInfoResponse = await updatePublicUserInfo(data);
+  const updateInfoResult : UpdateInfoResponse | ApiError = await updateUserInfo(data);
+  
+  console.log(updateInfoResult);
 
-  if (updateResult.errorMessage) {
-    isInfoUpdateError.value = true;
-    errorMessage.value = updateResult.errorMessage;
-    setTimeout(() => (isInfoUpdateError.value = false), 3500);
-  } else if (updateResult.isInfoUpdated) {
+
+  if ("error" in updateInfoResult) {
+    isUpdateError.value = true;
+    updateErrorMessage.value = updateInfoResult.error;
+    setTimeout(() => (isUpdateError.value = false), 3500);
+  } else  {
+
     //Так как данные хранятся в токене получаем новый токен.
     const userId = userAuthStore.currentUser!.id;
-    const updateTokenResult = await userAuthStore.updateUserToken(userId);
+    const updateTokenResult  = await userAuthStore.updateUserToken(userId);
 
-    if (updateTokenResult.errorMessage) {
-      isInfoUpdateError.value = true;
-      errorMessage.value = updateTokenResult.errorMessage;
-      setTimeout(() => (isInfoUpdateError.value = false), 3500);
+    if (updateTokenResult.error) {
+      isUpdateError.value = true;
+      updateErrorMessage.value = updateTokenResult.error;
+      setTimeout(() => (isUpdateError.value = false), 3500);
     } else if (updateTokenResult.isTokenUpdated) {
-      isInfoUpdated.value = true;
-      setTimeout(() => (isInfoUpdated.value = false), 3500);
+      isUpdateSuccess.value = true;
+      setTimeout(() => (isUpdateSuccess.value = false), 3500);
     }
   }
 });

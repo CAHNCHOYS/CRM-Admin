@@ -1,7 +1,7 @@
 import type { LoginResponse } from "@/types/BackendResponses";
 import type { LoginFields } from "@/types/FormFields";
 
-export const loginUser = async (userData: LoginFields): Promise<LoginResponse> => {
+export const loginUser = async (userData: LoginFields) => {
   try {
     let response = await fetch("http://localhost:3000/api/Login", {
       method: "POST",
@@ -10,12 +10,14 @@ export const loginUser = async (userData: LoginFields): Promise<LoginResponse> =
       },
       body: JSON.stringify(userData)
     });
+    
+
     let json: LoginResponse = await response.json();
+    console.log(json);
+    
     return json;
   } catch (error) {
     console.log(error);
-    return {
-      errorMessage: (error as Error).message
-    };
+    return { errorMessage: (error as Error).message };
   }
 };

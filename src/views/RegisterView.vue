@@ -1,11 +1,20 @@
 <template>
   <div class="fullscreen h-100 d-flex justify-center align-center">
-    <!------- Уведомление после регистрации ------>
+    <!------- Уведомления после регистрации ------>
     <v-dialog-transition>
-      <v-alert class="alert" :type="authMessageType" :max-width="450" v-if="isAuthMessageShown">
-        <v-alert-title class="text-h4 mb-2 text-weight-bold"> Уведомление </v-alert-title>
+      <v-alert class="alert" type="error" :max-width="400" v-show="isErrorMessageShown">
+        <v-alert-title class="text-h4 mb-2"> Ошибка </v-alert-title>
         <div class="text-white text-h6">
-          {{ authMessageText }}
+          {{ authErrorMessage }}
+        </div>
+      </v-alert>
+    </v-dialog-transition>
+
+    <v-dialog-transition>
+      <v-alert class="alert" type="success" :max-width="400" v-show="isSuccessMessageShown">
+        <v-alert-title class="text-h4 mb-2"> Успех </v-alert-title>
+        <div class="text-white text-h6">
+          Вы успешно зарегистрировались можете переходить к авторизации
         </div>
       </v-alert>
     </v-dialog-transition>
@@ -104,7 +113,7 @@
               <v-btn
                 type="submit"
                 :loading="isSubmitting"
-                :disabled="isSubmitting"
+                :disabled="isSubmitting || isErrorMessageShown || isSuccessMessageShown"
                 block
                 color="dark-blue"
                 variant="flat"
@@ -112,7 +121,7 @@
                 <span class="text-white text-h6 font-weight-medium">Зарегистрироваться</span>
               </v-btn>
 
-              <p class="mt-2" v-if="!isRegisterSucess">
+              <p class="mt-2" v-if="!userCanGoToLogin">
                 <router-link :to="{ name: 'login-page' }" class="text-black text-h6"
                   >Уже есть аккаунт?
                   <span class="text-decoration-underline text-green"> Перейти к авторизации </span>
@@ -122,7 +131,7 @@
 
             <v-col cols="12">
               <v-scale-transition>
-                <v-btn block variant="flat" color="success" v-if="isRegisterSucess">
+                <v-btn block variant="flat" color="success" v-if="userCanGoToLogin">
                   <router-link to="/login" class="text-white text-h6 font-weight-medium"
                     >Перейти к авторизации</router-link
                   >
@@ -139,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";
@@ -151,15 +160,10 @@ import { storeToRefs } from "pinia";
 
 import pageBackground from "@/assets/Images/LoginRegister/bg2.jpg";
 
-const userAuthStore = useUserAuthStore();
-
-const { isAuthMessageShown, authMessageText, authMessageType } = storeToRefs(userAuthStore);
-const { registerUser } = userAuthStore;
-
 //Валидация формы----------------------------------------------
 const { registerSchema } = useFormSchemas();
 
-const { handleSubmit, isSubmitting, resetForm } = useForm<RegisterFields>({
+const { handleSubmit, isSubmitting } = useForm<RegisterFields>({
   validationSchema: registerSchema
 });
 
@@ -173,17 +177,18 @@ const { value: agreement, errorMessage: agreementErrors } = useField<boolean>("a
 
 //--------------------------------------------------------------
 
-const isRegisterSucess = ref(false);
+const userCanGoToLogin = ref(false);
+
+const userAuthStore = useUserAuthStore();
+
+const { isErrorMessageShown, isSuccessMessageShown, authErrorMessage } = storeToRefs(userAuthStore);
+const { registerUser } = userAuthStore;
 
 const registerSubmit = handleSubmit(async (values: RegisterFields) => {
-  await registerUser(values, resetForm);
-  if (authMessageType.value === "success") {
-    isRegisterSucess.value = true;
+  await registerUser(values);
+  if (isSuccessMessageShown.value) {
+    userCanGoToLogin.value = true;
   }
-});
-
-onMounted(() => {
-  isAuthMessageShown.value = false;
 });
 </script>
 

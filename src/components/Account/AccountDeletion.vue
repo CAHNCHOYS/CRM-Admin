@@ -36,13 +36,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-
-import type { DeleteAccountResponse } from "@/types/BackendResponses";
-
 import { useUserAuthStore } from "@/stores/userAuth";
 
 const { deleteUserAccount } = useUserAuthStore();
-
 const router = useRouter();
 
 
@@ -57,15 +53,17 @@ const deletionSubmit = async () => {
 
   if (!window.confirm("Вы точно уверены?")) return;
 
-  let deleteResult: DeleteAccountResponse = await deleteUserAccount();
+  let deleteResult = await deleteUserAccount();
 
-  if (deleteResult.errorMessage) {
+  if("error" in deleteResult){
     isDeletionError.value = true;
-    deleteErrorMessage.value = deleteResult.errorMessage;
+    deleteErrorMessage.value = deleteResult.error;
     setTimeout(() => (isDeletionError.value = false), 3500);
-  } else if (deleteResult.isAccountDeleted) {
+  }else {
     router.push({ name: "login-page" });
   }
+
+
 };
 </script>
 
