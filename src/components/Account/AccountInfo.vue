@@ -71,9 +71,9 @@ import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 import type { UpdateInfoFields } from "@/types/FormFields";
-import type { ApiError, UpdateInfoResponse } from "@/types/BackendResponses";
+import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
 
-import { updateUserInfo } from "@/services/UserAuthService";
+import { fetchData } from "@/services/axiosFetch";
 
 
 const userAuthStore = useUserAuthStore();
@@ -114,7 +114,16 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   data.append("avatar", values.avatar[0], avatar.value[0].name);
   data.append("id", String(userAuthStore.currentUser!.id));
 
-  const updateInfoResult : UpdateInfoResponse | ApiError = await updateUserInfo(data);
+  const updateInfoResult : UpdateUserResponse | ApiError = await fetchData({
+    url: "/UpdateUserInfo",
+    method: "patch",
+    body: data,
+    settings:{
+      headers: {
+        "Content-Type": "multipart/form-data",
+      }
+    }
+  });
   
   console.log(updateInfoResult);
 
@@ -126,8 +135,7 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   } else  {
 
     //Так как данные хранятся в токене получаем новый токен.
-    const userId = userAuthStore.currentUser!.id;
-    const updateTokenResult  = await userAuthStore.updateUserToken(userId);
+    const updateTokenResult  = await userAuthStore.updateUserToken();
 
     if (updateTokenResult.error) {
       isUpdateError.value = true;

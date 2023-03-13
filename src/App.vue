@@ -53,6 +53,6 @@ body {
 .slide-enter-from,
 .slide-leave-to {
   opacity: 0;
-  transform: translate(20%, 0);
+  transform: translate(10%, 0);
 }
 </style>

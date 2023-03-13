@@ -12,7 +12,7 @@ export interface IUser{
 
 
 
-export interface IProduct {
+export interface IUserProduct {
     readonly id: number;
     name: string;
     price: number;

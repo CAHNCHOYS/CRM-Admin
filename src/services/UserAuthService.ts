@@ -7,9 +7,15 @@ import type {
   DeleteAccountResponse,
   LoginResponse,
   RegisterResponse,
-  UpdateInfoResponse,
+  UpdateUserResponse,
   VerifyTokenResponse
 } from "@/types/BackendResponses";
+
+
+
+
+
+
 
 import type { LoginFields, RegisterFields, UpdatePasswordFields } from "@/types/FormFields";
 
@@ -31,7 +37,8 @@ export const registerUser = async (
   registerPayload: RegisterFields
 ): Promise<RegisterResponse | ApiError> => {
   try {
-    let { data } = await axios.post<RegisterResponse>("/Login", registerPayload);
+    let { data } = await axios.post<RegisterResponse>("/Registration", registerPayload);
+     console.log(data);
     return data;
   } catch (error) {
     console.log(error);
@@ -41,19 +48,19 @@ export const registerUser = async (
   }
 };
 
-export const verifyToken = async (token: string): Promise<VerifyTokenResponse> => {
-  try {
-    let { data } = await axios.post<VerifyTokenResponse>("/VerifyToken", { token });
-    return data;
-  } catch (error) {
-    console.log(error);
-    return { isInvalidToken: true };
-  }
-};
+// export const verifyToken = async (token: string): Promise<VerifyTokenResponse> => {
+//   try {
+//     let { data } = await axios.post<VerifyTokenResponse>("/VerifyToken", { token });
+//     return data;
+//   } catch (error) {
+//     console.log(error);
+//     return { isInvalidToken: true };
+//   }
+// };
 
 export const deleteAccount = async (userId: number): Promise<DeleteAccountResponse | ApiError> => {
   try {
-    let { data } = await axios.delete<DeleteAccountResponse>("/DeleteAccount" + userId);
+    let { data } = await axios.delete<DeleteAccountResponse>("/DeleteAccount/" + userId);
     return data;
   } catch (error) {
     console.log(error);
@@ -74,9 +81,9 @@ export const updateToken = async (userId: number): Promise<LoginResponse | ApiEr
   }
 };
 
-export const updateUserInfo = async (newData: FormData): Promise<UpdateInfoResponse | ApiError> => {
+export const updateUserInfo = async (newData: FormData): Promise<UpdateUserResponse | ApiError> => {
   try {
-    let { data } = await axios<UpdateInfoResponse>({
+    let { data } = await axios<UpdateUserResponse>({
       url: "/UpdateUserInfo",
       method: "patch",
       headers: {
@@ -96,9 +103,9 @@ export const updateUserInfo = async (newData: FormData): Promise<UpdateInfoRespo
 export const updateUserPassword = async (
   newData: UpdatePasswordFields,
   userId: number
-): Promise<UpdateInfoResponse | ApiError> => {
+): Promise<UpdateUserResponse | ApiError> => {
   try {
-    let { data } = await axios.patch<UpdateInfoResponse>("/UpdateUserPassword", {
+    let { data } = await axios.patch<UpdateUserResponse>("/UpdateUserPassword", {
       ...newData,
       id: userId
     });
