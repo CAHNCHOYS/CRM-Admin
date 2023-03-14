@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "@vue/reactivity";
+import { computed, ref } from "vue";
 
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";

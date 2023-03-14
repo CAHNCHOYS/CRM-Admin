@@ -108,8 +108,6 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 
 import type { LoginFields } from "@/types/FormFields";
 
-
-
 const route = useRoute();
 const router = useRouter();
 
@@ -127,13 +125,10 @@ const { value: password, errorMessage: passwordErrors } = useField<string>("pass
 const isPasswordSeen = ref(false);
 
 
-
 const userAuthStore = useUserAuthStore();
 const { isUserLoggedIn, authErrorMessage, isSuccessMessageShown, isErrorMessageShown } =
   storeToRefs(userAuthStore);
 const { loginUser } = userAuthStore;
-
-
 
 //Авторизация
 const loginSubmit = handleSubmit(async (values: LoginFields) => {
@@ -152,7 +147,6 @@ const loginSubmit = handleSubmit(async (values: LoginFields) => {
 watchEffect(() => {
   if (route.query.redirectedFrom) {
     isErrorMessageShown.value = true;
-
     authErrorMessage.value = `Для доступа к странице ${route.query.redirectedFrom} необходимо авторизироваться`;
     setTimeout(() => (isErrorMessageShown.value = false), 3500);
   }

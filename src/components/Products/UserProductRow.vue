@@ -24,7 +24,7 @@
             v-bind="props"
             variant="flat"
             icon="mdi-trash-can"
-            @click="$emit('delete', product.name, product.id)"
+            @click="$emit('openDialog', product, 'delete')"
             color="error"
             class="mr-2"
           />
@@ -33,7 +33,13 @@
 
       <v-tooltip text="Редактировать" location="right">
         <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" variant="flat" icon="mdi-pencil" color="info" />
+          <v-btn
+            v-bind="props"
+            variant="flat"
+            icon="mdi-pencil"
+            color="info"
+            @click="$emit('openDialog', product, 'edit')"
+          />
         </template>
       </v-tooltip>
     </td>
@@ -49,7 +55,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "delete", name: string, productId: number): void;
+  (e: "openDialog", product: IUserProduct, dialogName: "edit" | "delete"): void;
+  (e: "openDialog", product: IUserProduct, dialogName: "edit" | "delete"): void;
 }>();
 </script>
 

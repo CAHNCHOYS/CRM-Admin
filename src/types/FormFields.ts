@@ -13,6 +13,7 @@ export type LoginFields = {
     password: string;
 }
 
+
 export type UpdateInfoFields = {
     name: string;
     email: string;
@@ -20,12 +21,18 @@ export type UpdateInfoFields = {
     avatar:  File[] | string;
 };
 
-
-
 export type UpdatePasswordFields = {
     oldPassword: string;
     newPassword: string;
     newPasswordConfirm: string;
 }
 
+export type UserProductFields = {
+    name: string;
+    categoryId: number;
+    category?: string;
+    count: number;
+    price: number;
+
+}
 

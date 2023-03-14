@@ -31,6 +31,8 @@ export type DeleteAccountResponse = {
   readonly isAccountDeleted: boolean;
 };
 
+
+//Товары--------------------------------------------
 export type GetProductsResponse = {
     data: IUserProduct[];
 }
@@ -38,3 +40,19 @@ export type GetProductsResponse = {
 export type DeleteProductResponse = {
   isProductDeleted: true;
 }
+
+export type GetProductCategoriseResponse = {
+    data: {name: string, id: number}[];
+}
+
+export type UpdateUserProductResponse = {
+  data: IUserProduct;
+}
+
+export type AddProductResponse = {
+  data: IUserProduct;
+}
+
+
+
+//--------------------------------------------------

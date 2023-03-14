@@ -64,7 +64,7 @@ import { useForm, useField } from "vee-validate";
 import type { UpdatePasswordFields } from "@/types/FormFields";
 import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
 
-import {updateUserPassword} from "@/services/UserAuthService";
+
 import { fetchData } from "@/services/axiosFetch";
 
 //---------------- Валидация формы -------------------------------------------------------------

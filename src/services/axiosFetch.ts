@@ -15,7 +15,7 @@ type FetchSettings = {
 
 export const fetchData = async <T>({  method,  url,  body,  settings}: FetchSettings): Promise<T | ApiError> => {
   try {
-    let { data } = await axios[method]<T>(url, body, settings);
+    const { data } = await axios[method]<T>(url, body, settings);
     return data;
   } catch (error) {
     console.log(error);

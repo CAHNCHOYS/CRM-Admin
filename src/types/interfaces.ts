@@ -18,6 +18,7 @@ export interface IUserProduct {
     price: number;
     count: number;
     category: string;
+    categoryId: number;
 }
 
 export interface ICustomer {

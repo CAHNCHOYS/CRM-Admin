@@ -6,7 +6,7 @@ export const updatePassword = async (
   userId: number
 ): Promise<UpdatePasswordResponse> => {
   try {
-    let response = await fetch("http://localhost:3000/api/UpdateUserPassword", {
+    const response = await fetch("http://localhost:3000/api/UpdateUserPassword", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
@@ -14,7 +14,7 @@ export const updatePassword = async (
       body: JSON.stringify({ ...userPasswords, id: userId })
     });
     
-    let json: UpdatePasswordResponse = await response.json();
+    const json: UpdatePasswordResponse = await response.json();
     return json;
   } catch (error) {
     console.log(error);

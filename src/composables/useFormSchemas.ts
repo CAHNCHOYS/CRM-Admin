@@ -79,5 +79,43 @@ export const useFormSchemas = () => {
       .oneOf([yup.ref("newPassword")], "Новый пароль должен совпадать")
   });
 
-  return { loginSchema, registerSchema, updateInfoShchema, updatePasswordSchema };
+  const userProductSchema = yup.object({
+    name: yup
+      .string()
+      .required("Введите имя товара")
+      .min(2, "Минимум 2 символа")
+      .max(125, "Слишком длинное название"),
+    categoryId: yup.number().required("Выберете категорию!"),
+
+    count: yup
+      .number()
+      .typeError("Введите нормальное число")
+      .integer("Введите целое число")
+      .required("Введите количество товара")
+      .min(0, "Число должно быть положительным")
+      .max(999999, "Слишком  большое число"),
+    price: yup
+      .number()
+      .typeError("Введите нормальное число")
+      .integer("Введите целое число")
+      .required("Введите цену товара")
+      .min(0, "Число должно быть положительным")
+      .max(999999, "Слишком  большое число")
+  });
+
+
+
+
+
+ 
+
+  return {
+    loginSchema,
+    registerSchema,
+    updateInfoShchema,
+    updatePasswordSchema,
+    userProductSchema,
+
+  
+  };
 };

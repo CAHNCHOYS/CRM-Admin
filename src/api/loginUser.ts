@@ -3,7 +3,7 @@ import type { LoginFields } from "@/types/FormFields";
 
 export const loginUser = async (userData: LoginFields) => {
   try {
-    let response = await fetch("http://localhost:3000/api/Login", {
+    const response = await fetch("http://localhost:3000/api/Login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -12,7 +12,7 @@ export const loginUser = async (userData: LoginFields) => {
     });
     
 
-    let json: LoginResponse = await response.json();
+    const json: LoginResponse = await response.json();
     console.log(json);
     
     return json;

@@ -12,17 +12,20 @@ import type {
 } from "@/types/BackendResponses";
 import { fetchData } from "@/services/axiosFetch";
 
-
 export const useUserAuthStore = defineStore("userAuth", () => {
+  
   const currentUser = ref<IUser | null>(null);
 
   const isSuccessMessageShown = ref(false); //Уведомления после успешной регистрации|авторизации
   const isErrorMessageShown = ref(false); // Если ошибка пре регистрации|авторизации
   const authErrorMessage = ref("Произошла ошибка");
 
+
+
   const isUserLoggedIn = ref(false);
 
   async function loginUser(loginPayload: LoginFields, resetForm: Function): Promise<void> {
+
     const loginResult: LoginResponse | ApiError = await fetchData<LoginResponse>({
       method: "post",
       url: "/Login",
@@ -40,15 +43,16 @@ export const useUserAuthStore = defineStore("userAuth", () => {
       addTokenToStorage(loginResult.userTokenData);
       isSuccessMessageShown.value = true;
 
+      setTimeout(() => (isSuccessMessageShown.value = false), 3500);
       isUserLoggedIn.value = true;
       resetForm();
-      setTimeout(() => (isSuccessMessageShown.value = false), 3500);
     }
   }
 
   async function registerUser(registerPayload: RegisterFields): Promise<void> {
+
     const registerResult: RegisterResponse | ApiError = await fetchData<RegisterResponse>({
-      url: "/Register",
+      url: "/Registration",
       body: registerPayload,
       method: "post"
     });
@@ -75,9 +79,9 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     isUserLoggedIn.value = false;
   }
 
+  
   async function verifyUserToken(): Promise<void> {
-    let token = localStorage.getItem("token");
-
+    const token = localStorage.getItem("token");
     if (token) {
       const checkToken: VerifyTokenResponse | ApiError = await fetchData<VerifyTokenResponse>({
         url: "/VerifyToken",
@@ -93,22 +97,7 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     }
   }
 
-  async function deleteUserAccount(): Promise<{ error: string } | { isAccountDeleted: true }> {
-    const deletionResult: DeleteAccountResponse | ApiError = await fetchData<DeleteAccountResponse>(
-      {
-        method: "delete",
-        url: "/DeleteAccount" + currentUser.value!.id
-      }
-    );
 
-    if ("error" in deletionResult) {
-      logOutUser();
-      return { error: deletionResult.error };
-    } else {
-      logOutUser();
-      return { isAccountDeleted: true };
-    }
-  }
 
   type UpdateTokenResult = {
     isTokenUpdated?: true;
@@ -116,11 +105,10 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   };
 
   async function updateUserToken(): Promise<UpdateTokenResult> {
-
     const updatedToken: LoginResponse | ApiError = await fetchData<LoginResponse>({
-      url:"/UpdateToken",
+      url: "/UpdateToken",
       method: "patch",
-      body: {id: currentUser.value!.id}
+      body: { id: currentUser.value!.id }
     });
 
     if ("error" in updatedToken) {
@@ -143,6 +131,5 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     logOutUser,
     verifyUserToken,
     updateUserToken,
-    deleteUserAccount
   };
 });
