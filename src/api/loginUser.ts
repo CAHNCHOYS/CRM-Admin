@@ -1,5 +1,5 @@
 import type { LoginResponse } from "@/types/BackendResponses";
-import type { LoginFields } from "@/types/FormFields";
+import type { LoginFields } from "@/types/Forms";
 
 export const loginUser = async (userData: LoginFields) => {
   try {

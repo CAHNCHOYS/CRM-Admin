@@ -16,15 +16,27 @@ import { useLayouts } from "@/composables/useLayouts";
 import { onMounted, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
+import { useUserAuthStore } from "./stores/userAuth";
+
+const userAuthStore = useUserAuthStore();
+
 const isLoading = ref(true);
 const route = useRoute();
-
-
 
 const { getCurrentLayout } = useLayouts(route);
 
 onMounted(async () => {
-  
+  // await userAuthStore.verifyUserToken();
+
+  // console.log(route.meta.fullPath);
+  // if (route.meta.requireAuth && !userAuthStore.isUserLoggedIn) {
+  //   return {
+  //     name: "login-page",
+  //     query: {
+  //       redirectedFrom: route.name?.toString() || route.fullPath
+  //     }
+  //   };
+  // }
 
   isLoading.value = false;
 });
@@ -55,4 +67,9 @@ body {
   opacity: 0;
   transform: translate(10%, 0);
 }
+
+
+
+
+
 </style>

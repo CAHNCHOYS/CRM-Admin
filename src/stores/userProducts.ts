@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import {  ref } from "vue";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 import type { IUserProduct } from "@/types/interfaces";
@@ -10,17 +10,20 @@ import type {
   GetProductsResponse,
   UpdateUserProductResponse
 } from "@/types/BackendResponses";
+import type { UserProductFields } from "@/types/Forms";
 
 import { fetchData } from "@/services/axiosFetch";
-import type { UserProductFields } from "@/types/FormFields";
+
 
 export const useUserProductsStore = defineStore("userProducts", () => {
+  
   const userProducts = ref<IUserProduct[]>([]);
-
-  const isProductsFetching = ref(false);
+ 
   const isProductsError = ref(false);
+  const isProductsFetching = ref(false);
   const loadProductsError = ref("");
 
+   
   const isProductActionLoading = ref(false);
   const isActionMessageShown = ref(false); //После добавления или удалени тоавра показываем уведомление
   const actionMessageText = ref("");
@@ -53,14 +56,13 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       }
     );
 
+    isActionMessageShown.value = true;
     if ("error" in deletionResult) {
-      isActionMessageShown.value = true;
       actionMessageType.value = "error";
       actionMessageText.value = deletionResult.error;
     } else {
       //обновляем на фронте
       userProducts.value = userProducts.value.filter((product) => product.id != productId);
-      isActionMessageShown.value = true;
       actionMessageType.value = "success";
       actionMessageText.value = "Товар был успешно удален!";
     }
@@ -69,6 +71,7 @@ export const useUserProductsStore = defineStore("userProducts", () => {
 
   async function updateUserProduct(updatePayload: UserProductFields, productId: number) {
     const userAuthStore = useUserAuthStore();
+    
     const updateResult: UpdateUserProductResponse | ApiError = await fetchData({
       url: "/UpdateUserProduct",
       method: "patch",
@@ -79,17 +82,14 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       }
     });
     console.log(updateResult);
+    isActionMessageShown.value = true;
     if ("error" in updateResult) {
-      isActionMessageShown.value = true;
+    
       actionMessageType.value = "error";
       actionMessageText.value = updateResult.error;
     } else {
-      let productToUpdate = userProducts.value.findIndex((product) => product.id === productId);
-      console.log(productToUpdate);
-      if (productToUpdate!=-1) {
-         userProducts.value[productToUpdate] = updateResult.data;
-      }
-      isActionMessageShown.value = true;
+      let index = userProducts.value.findIndex((product) => product.id === productId);
+      userProducts.value[index] = updateResult.data;
       actionMessageType.value = "success";
       actionMessageText.value = "Товар был изменен";
     }
@@ -103,37 +103,31 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       method: "post",
       body: {
         ...data,
-        userId: userAuthStore.currentUser?.id
+        userId: userAuthStore.currentUser!.id
       }
     });
+
+    isActionMessageShown.value = true;
     if ("error" in addResult) {
-      isActionMessageShown.value = true;
+     
       actionMessageType.value = "error";
       actionMessageText.value = addResult.error;
     } else {
       userProducts.value.push(addResult.data);
-      isActionMessageShown.value = true;
       actionMessageType.value = "success";
       actionMessageText.value = `Товар ${data.name} был успешно добавлен!`;
     }
     setTimeout(() => (isActionMessageShown.value = false), 3500);
   }
 
-  const sortProductsByField = computed(() => {
-    return function (field: "name" | "count" | "price" | "id" | "category", inverse = false) {
-      return inverse
-        ? [...userProducts.value].sort((a, b) => (a[field] > b[field] ? 1 : -1))
-        : [...userProducts.value].sort((a, b) => (a[field] > b[field] ? -1 : 1));
-    };
-  });
+
 
   return {
     userProducts,
-    isProductsFetching,
     isProductsError,
+    isProductsFetching,
     loadProductsError,
     isProductActionLoading,
-    sortProductsByField,
     actionMessageText,
     actionMessageType,
     isActionMessageShown,

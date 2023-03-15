@@ -1,5 +1,5 @@
 import type { UpdatePasswordResponse } from "@/types/BackendResponses";
-import type { UpdatePasswordFields } from "@/types/FormFields";
+import type { UpdatePasswordFields } from "@/types/Forms";
 
 export const updatePassword = async (
   userPasswords: UpdatePasswordFields,

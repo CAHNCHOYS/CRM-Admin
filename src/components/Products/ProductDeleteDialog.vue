@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :model-value="modelValue" :max-width="450" persistent>
+  <v-dialog :model-value="isActive" :max-width="450" persistent>
     <v-card class="pa-4">
       <v-card-title class="pa-0 mb-3">
         <p class="font-weight-bold text-h5">Подтверждение удаления</p>
@@ -11,7 +11,7 @@
         </p>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="$emit('close')" height="40" color="orange" variant="flat">
+        <v-btn @click="$emit('closeModal')" height="40" color="blue-darken-4" variant="flat">
           <span class="text-white">Нет</span>
         </v-btn>
         <v-btn
@@ -35,11 +35,11 @@ import type { IUserProduct } from "@/types/interfaces";
 
 const props = defineProps<{
   product: IUserProduct;
-  modelValue: boolean;
+  isActive: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: "close"): void;
+  (e: "closeModal"): void;
 }>();
 
 const userProductsStore = useUserProductsStore();
@@ -53,8 +53,10 @@ const deleteProduct = async () => {
   await deleteUserProduct(props.product.id);
 
   isProductActionLoading.value = false;
-  emit("close");
+  emit("closeModal");
 };
 </script>
 
-<style scoped></style>
+<style  scoped>
+
+</style>

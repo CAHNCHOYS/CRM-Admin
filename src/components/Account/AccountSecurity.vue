@@ -61,7 +61,7 @@ import { useUserAuthStore } from "@/stores/userAuth";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useForm, useField } from "vee-validate";
 
-import type { UpdatePasswordFields } from "@/types/FormFields";
+import type { UpdatePasswordFields } from "@/types/Forms";
 import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
 
 

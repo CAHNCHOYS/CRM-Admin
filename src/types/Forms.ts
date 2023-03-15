@@ -30,7 +30,6 @@ export type UpdatePasswordFields = {
 export type UserProductFields = {
     name: string;
     categoryId: number;
-    category?: string;
     count: number;
     price: number;
 

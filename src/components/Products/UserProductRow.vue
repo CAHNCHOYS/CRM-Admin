@@ -1,13 +1,11 @@
 <template>
   <tr>
-    <td>
-      {{ index + 1 }}
-    </td>
+ 
     <td>
       {{ product.name }}
     </td>
     <td>
-      {{ product.price }}
+      {{ product.price }}₽
     </td>
 
     <td>
@@ -51,7 +49,6 @@ import type { IUserProduct } from "@/types/interfaces";
 
 const props = defineProps<{
   product: IUserProduct;
-  index: number;
 }>();
 
 const emit = defineEmits<{

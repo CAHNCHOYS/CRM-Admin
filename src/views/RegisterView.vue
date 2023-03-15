@@ -153,7 +153,7 @@ import { ref } from "vue";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";
 
-import type { RegisterFields } from "@/types/FormFields";
+import type { RegisterFields } from "@/types/Forms";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 import { storeToRefs } from "pinia";

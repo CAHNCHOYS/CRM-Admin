@@ -106,7 +106,7 @@ import pageBackground from "@/assets/Images/LoginRegister/bg.png";
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 
-import type { LoginFields } from "@/types/FormFields";
+import type { LoginFields } from "@/types/Forms";
 
 const route = useRoute();
 const router = useRouter();

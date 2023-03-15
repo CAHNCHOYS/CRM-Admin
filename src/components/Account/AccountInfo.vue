@@ -70,7 +70,7 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
-import type { UpdateInfoFields } from "@/types/FormFields";
+import type { UpdateInfoFields } from "@/types/Forms";
 import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
 
 import { fetchData } from "@/services/axiosFetch";

@@ -1,8 +1,13 @@
 <template>
-  <v-dialog max-width="500" @update:model-value="$emit('close')" :model-value="isActive">
+  <v-dialog
+    transition="dialog-bottom-transition"
+    max-width="500"
+    @update:model-value="$emit('closeModal')"
+    :model-value="isActive"
+  >
     <v-card class="pa-5" color="white" elevation="4">
       <v-card-title>
-        <p class="text-h6 font-weight-bold mb-4">Добавление товара товара</p>
+        <p class="text-h6 font-weight-bold mb-4">Добавление нового товара</p>
       </v-card-title>
 
       <v-card-actions>
@@ -23,7 +28,7 @@
                 v-if="categories.length"
               />
               <p v-if="isCategoriesLoadError" class="text-h6 text-red">
-                {{ categoriesLoadErroMessage }}
+                {{ categoriesLoadErrorMessage }}
               </p>
             </v-col>
 
@@ -41,15 +46,17 @@
                 v-model="price"
                 :error-messages="priceErrors"
                 label="Цена"
+                suffix="руб"
                 type="number"
+                
               />
             </v-col>
 
             <v-col cols="12">
-              <v-btn color="green" variant="flat" :loading="isSubmitting" type="submit">
+              <v-btn color="green-darken-4" variant="flat" :loading="isSubmitting" type="submit">
                 Добавить
               </v-btn>
-              <v-btn color="info" variant="flat" @click="$emit('close')"> Отмена </v-btn>
+              <v-btn color="blue-darken-4" variant="flat" @click="$emit('close')"> Отмена </v-btn>
             </v-col>
           </v-row>
         </v-form>
@@ -64,14 +71,14 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useProductsCategoiresFetch } from "@/composables/useProductsCategoriesFetch";
 import { useUserProductsStore } from "@/stores/userProducts";
 
-import type { UserProductFields } from "@/types/FormFields";
+import type { UserProductFields } from "@/types/Forms";
 
 const props = defineProps<{
   isActive: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: "close"): void;
+  (e: "closeModal"): void;
 }>();
 //-----------------------------------------------------------
 const { userProductSchema } = useFormSchemas();
@@ -87,15 +94,20 @@ const { value: price, errorMessage: priceErrors } = useField("price");
 
 const { addUserProduct } = useUserProductsStore();
 
-const { categories, isCategoriesLoadError, categoriesLoadErroMessage } =
+const { categories, isCategoriesLoadError, categoriesLoadErrorMessage } =
   useProductsCategoiresFetch();
+
 
 const addProductSubmit = handleSubmit(async (values) => {
   console.log(values);
   await addUserProduct(values);
   resetForm();
-  emit("close");
+  emit("closeModal");
 });
+
 </script>
 
-<style scoped></style>
+<style  scoped>
+
+
+</style>

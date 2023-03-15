@@ -2,10 +2,9 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 import type { IUser } from "@/types/interfaces";
-import type { LoginFields, RegisterFields } from "@/types/FormFields";
+import type { LoginFields, RegisterFields } from "@/types/Forms";
 import type {
   VerifyTokenResponse,
-  DeleteAccountResponse,
   RegisterResponse,
   LoginResponse,
   ApiError
@@ -13,19 +12,15 @@ import type {
 import { fetchData } from "@/services/axiosFetch";
 
 export const useUserAuthStore = defineStore("userAuth", () => {
-  
   const currentUser = ref<IUser | null>(null);
 
   const isSuccessMessageShown = ref(false); //Уведомления после успешной регистрации|авторизации
   const isErrorMessageShown = ref(false); // Если ошибка пре регистрации|авторизации
   const authErrorMessage = ref("Произошла ошибка");
 
-
-
   const isUserLoggedIn = ref(false);
 
   async function loginUser(loginPayload: LoginFields, resetForm: Function): Promise<void> {
-
     const loginResult: LoginResponse | ApiError = await fetchData<LoginResponse>({
       method: "post",
       url: "/Login",
@@ -37,7 +32,7 @@ export const useUserAuthStore = defineStore("userAuth", () => {
       isErrorMessageShown.value = true;
       authErrorMessage.value = loginResult.error;
       resetForm();
-      setTimeout(() => (isErrorMessageShown.value = false), 3500);
+      setTimeout(() => (isErrorMessageShown.value = false), 4000);
     } else {
       //Если залогинились
       addTokenToStorage(loginResult.userTokenData);
@@ -50,7 +45,6 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   }
 
   async function registerUser(registerPayload: RegisterFields): Promise<void> {
-
     const registerResult: RegisterResponse | ApiError = await fetchData<RegisterResponse>({
       url: "/Registration",
       body: registerPayload,
@@ -61,7 +55,7 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     if ("error" in registerResult) {
       isErrorMessageShown.value = true;
       authErrorMessage.value = registerResult.error;
-      setTimeout(() => (isErrorMessageShown.value = false), 3500);
+      setTimeout(() => (isErrorMessageShown.value = false), 4000);
     } else if (registerResult.isSuccess) {
       isSuccessMessageShown.value = true;
       setTimeout(() => (isSuccessMessageShown.value = false), 3500);
@@ -79,7 +73,6 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     isUserLoggedIn.value = false;
   }
 
-  
   async function verifyUserToken(): Promise<void> {
     const token = localStorage.getItem("token");
     if (token) {
@@ -96,8 +89,6 @@ export const useUserAuthStore = defineStore("userAuth", () => {
       }
     }
   }
-
-
 
   type UpdateTokenResult = {
     isTokenUpdated?: true;
@@ -130,6 +121,6 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     registerUser,
     logOutUser,
     verifyUserToken,
-    updateUserToken,
+    updateUserToken
   };
 });

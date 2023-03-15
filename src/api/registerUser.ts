@@ -2,7 +2,7 @@
 
 //объект получаемый с запроса
 import type { RegisterResponse } from "@/types/BackendResponses";
-import type { RegisterFields } from "@/types/FormFields";
+import type { RegisterFields } from "@/types/Forms";
 
 export const registerUser = async (userInfo: RegisterFields): Promise<RegisterResponse> => {
   

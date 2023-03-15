@@ -8,9 +8,10 @@ type Category = {
 }
 
 export const useProductsCategoiresFetch = () => {
+  
   const categories = ref<Category[]>([]);
   const isCategoriesLoadError = ref(false);
-  const categoriesLoadErroMessage = ref("");
+  const categoriesLoadErrorMessage = ref("");
 
   onMounted(async () => {
 
@@ -21,7 +22,7 @@ export const useProductsCategoiresFetch = () => {
     });
     if ("error" in getCategories) {
       isCategoriesLoadError.value = true;
-      categoriesLoadErroMessage.value = getCategories.error;
+      categoriesLoadErrorMessage.value = getCategories.error;
     } else {
       console.log(getCategories.data);
       categories.value = getCategories.data;
@@ -30,5 +31,5 @@ export const useProductsCategoiresFetch = () => {
   });
 
 
-  return {categories, isCategoriesLoadError, categoriesLoadErroMessage}
+  return {categories, isCategoriesLoadError, categoriesLoadErrorMessage}
 };
