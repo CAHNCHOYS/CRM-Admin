@@ -48,7 +48,6 @@
                 label="Цена"
                 suffix="руб"
                 type="number"
-                
               />
             </v-col>
 
@@ -70,7 +69,6 @@ import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useProductsCategoiresFetch } from "@/composables/useProductsCategoriesFetch";
 import { useUserProductsStore } from "@/stores/userProducts";
-
 import type { UserProductFields } from "@/types/Forms";
 
 const props = defineProps<{
@@ -80,6 +78,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "closeModal"): void;
 }>();
+
 //-----------------------------------------------------------
 const { userProductSchema } = useFormSchemas();
 
@@ -97,17 +96,11 @@ const { addUserProduct } = useUserProductsStore();
 const { categories, isCategoriesLoadError, categoriesLoadErrorMessage } =
   useProductsCategoiresFetch();
 
-
 const addProductSubmit = handleSubmit(async (values) => {
-  console.log(values);
   await addUserProduct(values);
   resetForm();
   emit("closeModal");
 });
-
 </script>
 
-<style  scoped>
-
-
-</style>
+<style scoped></style>

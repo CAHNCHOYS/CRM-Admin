@@ -13,9 +13,10 @@
 
     <v-card color="white" elevation="3" class="pa-5 mb-6 rounded-lg mx-sm-0 mx-n5">
       <TableActions
-        @toggle-add-dialog="addDialogActive = true"
-        :model-value="productsByPage"
-        @update-products-by-page-count="productsByPage = $event"
+        v-model:count="productsByPage"
+        @update:count="productsByPage = $event"
+        @toggle-add-dialog="isAddDialogActive = true"
+        @toggle-search="isSearchFormActive = !isSearchFormActive"
         v-if="userProducts.length"
       >
         Все товары({{ userProducts.length }})
@@ -26,11 +27,45 @@
         <v-progress-linear color="green" height="4" indeterminate />
       </div>
 
+      <VExpandTransition>
+        <div class="mb-6" v-if="isSearchFormActive">
+          <v-form>
+            <v-row align="center">
+              <v-col sm="6" cols="12">
+                <v-text-field
+                  v-model.lazy="searchName"
+                  variant="outlined"
+                  label="Название товара"
+                />
+              </v-col>
+              <v-col sm="6" cols="12">
+                <v-range-slider
+                  v-model.lazy="searchPrices"
+                  thumb-label="always"
+                  min="1"
+                  step="10"
+                  max="999999"
+                  strict
+                  color="blue-grey-darken-2"
+                  label="Цена:"
+                  hide-details="auto"
+                >
+                </v-range-slider>
+              </v-col>
+
+              <v-col cols="auto">
+                <v-btn variant="flat" color="red-darken-4" @click="resetSearch"> Сбросить поиск </v-btn>
+              </v-col>
+            </v-row>
+          </v-form>
+        </div>
+      </VExpandTransition>
+
       <v-table density="comfortable" v-if="userProducts.length">
         <thead>
           <tr>
             <th
-              v-for="head in tableFields"
+              v-for="head in tableSortFields"
               :key="head.text"
               class="text-left text-h6"
               @click="setSortField(head.field)"
@@ -63,7 +98,7 @@
       </v-alert>
 
       <p class="text-h6" v-else-if="userProducts.length === 0 && !isProductsFetching">
-        Пока в таблице нет товаров, исправьте это
+        Пока в таблице нет товаров, добавьте хоть одинф
       </p>
 
       <v-pagination
@@ -78,17 +113,17 @@
     <ProductEditDialog
       v-if="productToEdit"
       :product="productToEdit"
-      @close-modal="editDialogActive = false"
-      :is-active="editDialogActive"
+      @close-modal="isEditDialogActive = false"
+      :is-active="isEditDialogActive"
     />
     <ProductDeleteDialog
       v-if="productToEdit"
-      :is-active="deleteDialogActive"
+      :is-active="isDeleteDialogActive"
       :product="productToEdit"
-      @close-modal="deleteDialogActive = false"
+      @close-modal="isDeleteDialogActive = false"
     />
 
-    <ProductAddDialog @close-modal="addDialogActive = false" :is-active="addDialogActive" />
+    <ProductAddDialog @close-modal="isAddDialogActive = false" :is-active="isAddDialogActive" />
   </div>
 </template>
 
@@ -98,6 +133,7 @@ import { storeToRefs } from "pinia";
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useTablePagination } from "@/composables/useTablePagination";
 import { useListAnimations } from "@/composables/useListAnimtaions";
+import { useProductsFilter } from "@/composables/useProductsFilter";
 
 import UserProductRow from "@/components/Products/UserProductRow.vue";
 import ProductEditDialog from "@/components/Products/ProductEditDialog.vue";
@@ -120,61 +156,41 @@ const {
 } = storeToRefs(userProductsStore);
 
 onMounted(async () => {
-  if (!userProductsStore.userProducts.length) {
+  if(!userProducts.value.length){
     await userProductsStore.fetchUserProducts();
   }
 });
 
-const tableFields = ref<
-  {
-    text: string;
-    field: keyof IUserProduct;
-  }[]
->([
-  {
-    text: "Имя",
-    field: "name"
-  },
-  {
-    text: "Цена(руб)",
-    field: "price"
-  },
-  {
-    text: "Количество",
-    field: "count"
-  },
-  {
-    text: "Категория",
-    field: "category"
-  }
-]);
-const currentSortValue = ref<keyof IUserProduct>("name");
-const productsByPage = ref(10);
-
-const { currentPage, paginatedProducts, totalPages, isInverseSort, setSortField } =
-  useTablePagination<IUserProduct>(userProducts, productsByPage, currentSortValue);
-
-const deleteDialogActive = ref(false);
-const addDialogActive = ref(false);
-const editDialogActive = ref(false);
+const isDeleteDialogActive = ref(false);
+const isAddDialogActive = ref(false);
+const isEditDialogActive = ref(false);
+const isSearchFormActive = ref(false);
 
 const productToEdit = ref<IUserProduct | null>(null);
 
 const openProductDialog = (product: IUserProduct, dialogName: "edit" | "delete") => {
   console.log(dialogName);
   productToEdit.value = product;
-  if (dialogName === "delete") deleteDialogActive.value = true;
+  if (dialogName === "delete") isDeleteDialogActive.value = true;
   else if (dialogName === "edit") {
-    editDialogActive.value = true;
+    isEditDialogActive.value = true;
   }
 };
+
+const { filterProducts, searchName, searchPrices, tableSortFields, resetSearch } =
+  useProductsFilter(userProducts);
+
+const currentSortValue = ref<keyof IUserProduct>(tableSortFields.value[0].field);
+
+const { currentPage, paginatedProducts, totalPages, isInverseSort, productsByPage, setSortField } =
+  useTablePagination<IUserProduct>(filterProducts, currentSortValue);
 </script>
 
 <style scoped>
 th {
   cursor: pointer;
 }
-tr{
+tr {
   position: relative;
 }
 
@@ -183,9 +199,6 @@ tr{
 .list-leave-active {
   transition: all 0.5s ease;
 }
-
-
-
 
 .list-enter-from {
   opacity: 0;

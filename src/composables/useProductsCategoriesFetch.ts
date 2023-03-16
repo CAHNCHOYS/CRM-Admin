@@ -1,22 +1,20 @@
 import { ref, onMounted } from "vue";
 import type { ApiError, GetProductCategoriseResponse } from "@/types/BackendResponses";
-import { fetchData } from "@/services/axiosFetch";
+import { makeRequest } from "@/services/axiosFetch";
 
 type Category = {
-    id: number;
-    name: string;
-}
+  id: number;
+  name: string;
+};
 
 export const useProductsCategoiresFetch = () => {
-  
   const categories = ref<Category[]>([]);
   const isCategoriesLoadError = ref(false);
   const categoriesLoadErrorMessage = ref("");
 
   onMounted(async () => {
-
     console.log("I am mounted");
-    const getCategories: GetProductCategoriseResponse | ApiError = await fetchData({
+    const getCategories: GetProductCategoriseResponse | ApiError = await makeRequest({
       url: "/ProductCategories",
       method: "get"
     });
@@ -27,9 +25,7 @@ export const useProductsCategoiresFetch = () => {
       console.log(getCategories.data);
       categories.value = getCategories.data;
     }
-
   });
 
-
-  return {categories, isCategoriesLoadError, categoriesLoadErrorMessage}
+  return { categories, isCategoriesLoadError, categoriesLoadErrorMessage };
 };

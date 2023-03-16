@@ -73,7 +73,7 @@ import { useUserAuthStore } from "@/stores/userAuth";
 import type { UpdateInfoFields } from "@/types/Forms";
 import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
 
-import { fetchData } from "@/services/axiosFetch";
+import { makeRequest } from "@/services/axiosFetch";
 
 
 const userAuthStore = useUserAuthStore();
@@ -85,8 +85,6 @@ const initialFormValues = computed(() => ({
   country: userAuthStore.currentUser?.country || "user logged out",
   avatar: []
 }));
-
-
 //---------------- Валидация формы -------------------------------------------------------------
 const { updateInfoShchema } = useFormSchemas();
 const { handleSubmit, isSubmitting } = useForm<UpdateInfoFields>({
@@ -114,7 +112,7 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   data.append("avatar", values.avatar[0], avatar.value[0].name);
   data.append("id", String(userAuthStore.currentUser!.id));
 
-  const updateInfoResult : UpdateUserResponse | ApiError = await fetchData({
+  const updateInfoResult : UpdateUserResponse | ApiError = await makeRequest({
     url: "/UpdateUserInfo",
     method: "patch",
     body: data,
@@ -125,18 +123,13 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
     }
   });
   
-  console.log(updateInfoResult);
-
-
   if ("error" in updateInfoResult) {
     isUpdateError.value = true;
     updateErrorMessage.value = updateInfoResult.error;
     setTimeout(() => (isUpdateError.value = false), 3500);
   } else  {
-
     //Так как данные хранятся в токене получаем новый токен.
     const updateTokenResult  = await userAuthStore.updateUserToken();
-
     if (updateTokenResult.error) {
       isUpdateError.value = true;
       updateErrorMessage.value = updateTokenResult.error;

@@ -38,16 +38,14 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserAuthStore } from "@/stores/userAuth";
 
-import type{ DeleteAccountResponse, ApiError } from "@/types/BackendResponses";
+import type { DeleteAccountResponse, ApiError } from "@/types/BackendResponses";
 
-import { fetchData } from "@/services/axiosFetch";
+import { makeRequest } from "@/services/axiosFetch";
 
 const userAuthStore = useUserAuthStore();
 const router = useRouter();
 
-
 const accountDeletionConfirm = ref(false);
-
 
 const isDeletionError = ref(false);
 const deleteErrorMessage = ref("");
@@ -57,24 +55,19 @@ const deletionSubmit = async () => {
 
   if (!window.confirm("Вы точно уверены?")) return;
 
-  const deleteResult: DeleteAccountResponse | ApiError = await fetchData<DeleteAccountResponse>(
-      {
-        method: "delete",
-        url: "/DeleteAccount" + userAuthStore.currentUser!.id
-      }
-    );
+  const deleteResult: DeleteAccountResponse | ApiError = await makeRequest<DeleteAccountResponse>({
+    method: "delete",
+    url: "/DeleteAccount" + userAuthStore.currentUser!.id
+  });
 
-
-  if("error" in deleteResult){
+  if ("error" in deleteResult) {
     isDeletionError.value = true;
     deleteErrorMessage.value = deleteResult.error;
     setTimeout(() => (isDeletionError.value = false), 3500);
-  }else {
+  } else {
     userAuthStore.logOutUser();
     router.push({ name: "login-page" });
   }
-
-
 };
 </script>
 

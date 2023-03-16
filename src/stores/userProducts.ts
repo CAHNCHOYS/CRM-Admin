@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import {  ref } from "vue";
+import { ref } from "vue";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 import type { IUserProduct } from "@/types/interfaces";
@@ -12,28 +12,25 @@ import type {
 } from "@/types/BackendResponses";
 import type { UserProductFields } from "@/types/Forms";
 
-import { fetchData } from "@/services/axiosFetch";
-
+import { makeRequest } from "@/services/axiosFetch";
 
 export const useUserProductsStore = defineStore("userProducts", () => {
-  
   const userProducts = ref<IUserProduct[]>([]);
- 
+  const userAuthStore = useUserAuthStore();
+
   const isProductsError = ref(false);
   const isProductsFetching = ref(false);
   const loadProductsError = ref("");
 
-   
   const isProductActionLoading = ref(false);
-  const isActionMessageShown = ref(false); //После добавления или удалени тоавра показываем уведомление
+  const isActionMessageShown = ref(false); //После добавления,удаления, изменения тоавра показываем уведомление
   const actionMessageText = ref("");
   const actionMessageType = ref<"success" | "error">("success");
 
   async function fetchUserProducts() {
     isProductsFetching.value = true;
-    const userAuthStore = useUserAuthStore();
-
-    const products: GetProductsResponse | ApiError = await fetchData<GetProductsResponse>({
+   
+    const products = await makeRequest<GetProductsResponse>({
       method: "get",
       url: "/AllUserProducts/" + userAuthStore.currentUser!.id
     });
@@ -42,14 +39,13 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       console.log(products.error);
       isProductsError.value = true;
       loadProductsError.value = products.error;
-    } else if (products.data) {
-      userProducts.value = products.data;
-    }
+    } else if (products.data) userProducts.value = products.data;
+
     isProductsFetching.value = false;
   }
 
   async function deleteUserProduct(productId: number): Promise<void> {
-    const deletionResult: DeleteProductResponse | ApiError = await fetchData<DeleteProductResponse>(
+    const deletionResult = await makeRequest<DeleteProductResponse>(
       {
         url: "/DeleteProduct/" + productId,
         method: "delete"
@@ -70,9 +66,7 @@ export const useUserProductsStore = defineStore("userProducts", () => {
   }
 
   async function updateUserProduct(updatePayload: UserProductFields, productId: number) {
-    const userAuthStore = useUserAuthStore();
-    
-    const updateResult: UpdateUserProductResponse | ApiError = await fetchData({
+    const updateResult = await makeRequest<UpdateUserProductResponse>({
       url: "/UpdateUserProduct",
       method: "patch",
       body: {
@@ -84,7 +78,6 @@ export const useUserProductsStore = defineStore("userProducts", () => {
     console.log(updateResult);
     isActionMessageShown.value = true;
     if ("error" in updateResult) {
-    
       actionMessageType.value = "error";
       actionMessageText.value = updateResult.error;
     } else {
@@ -97,8 +90,7 @@ export const useUserProductsStore = defineStore("userProducts", () => {
   }
 
   async function addUserProduct(data: UserProductFields): Promise<void> {
-    const userAuthStore = useUserAuthStore();
-    const addResult: AddProductResponse | ApiError = await fetchData({
+    const addResult = await makeRequest<AddProductResponse>({
       url: "/AddProduct",
       method: "post",
       body: {
@@ -109,7 +101,6 @@ export const useUserProductsStore = defineStore("userProducts", () => {
 
     isActionMessageShown.value = true;
     if ("error" in addResult) {
-     
       actionMessageType.value = "error";
       actionMessageText.value = addResult.error;
     } else {
@@ -119,8 +110,6 @@ export const useUserProductsStore = defineStore("userProducts", () => {
     }
     setTimeout(() => (isActionMessageShown.value = false), 3500);
   }
-
-
 
   return {
     userProducts,

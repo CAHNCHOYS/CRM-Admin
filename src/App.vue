@@ -26,9 +26,8 @@ const route = useRoute();
 const { getCurrentLayout } = useLayouts(route);
 
 onMounted(async () => {
-  // await userAuthStore.verifyUserToken();
+ // await userAuthStore.verifyUserToken();
 
-  // console.log(route.meta.fullPath);
   // if (route.meta.requireAuth && !userAuthStore.isUserLoggedIn) {
   //   return {
   //     name: "login-page",

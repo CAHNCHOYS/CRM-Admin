@@ -23,7 +23,6 @@
             @click:append-inner="isOldPasswordSeen = !isOldPasswordSeen"
           />
         </v-col>
-        
 
         <v-col sm="6" cols="12">
           <v-text-field
@@ -64,8 +63,7 @@ import { useForm, useField } from "vee-validate";
 import type { UpdatePasswordFields } from "@/types/Forms";
 import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
 
-
-import { fetchData } from "@/services/axiosFetch";
+import { makeRequest } from "@/services/axiosFetch";
 
 //---------------- Валидация формы -------------------------------------------------------------
 const { updatePasswordSchema } = useFormSchemas();
@@ -92,12 +90,12 @@ const userAuthStore = useUserAuthStore();
 const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) => {
   const userId = userAuthStore.currentUser!.id;
 
-  let updatePasswordResult:  UpdateUserResponse | ApiError = await fetchData<UpdateUserResponse>({
+  let updatePasswordResult: UpdateUserResponse | ApiError = await makeRequest<UpdateUserResponse>({
     url: "/UpdateUserPassword",
     method: "patch",
     body: {
       ...values,
-      id: userId,
+      id: userId
     }
   });
 
@@ -109,7 +107,7 @@ const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) =
     setTimeout(() => (isUpdateError.value = false), 3500);
   } else if (updatePasswordResult.isInfoUpdated) {
     //Так как даннные хранятся в токене, то получаемы новый токен
- 
+
     const updateTokenResult = await userAuthStore.updateUserToken();
     if (updateTokenResult.error) {
       isUpdateError.value = true;

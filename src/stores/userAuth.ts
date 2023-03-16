@@ -9,7 +9,8 @@ import type {
   LoginResponse,
   ApiError
 } from "@/types/BackendResponses";
-import { fetchData } from "@/services/axiosFetch";
+import { makeRequest } from "@/services/axiosFetch";
+
 
 export const useUserAuthStore = defineStore("userAuth", () => {
   const currentUser = ref<IUser | null>(null);
@@ -21,20 +22,18 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   const isUserLoggedIn = ref(false);
 
   async function loginUser(loginPayload: LoginFields, resetForm: Function): Promise<void> {
-    const loginResult: LoginResponse | ApiError = await fetchData<LoginResponse>({
+
+    const loginResult: LoginResponse | ApiError = await makeRequest<LoginResponse>({
       method: "post",
       url: "/Login",
       body: loginPayload
     });
-
-    //Если ошибка
     if ("error" in loginResult) {
       isErrorMessageShown.value = true;
       authErrorMessage.value = loginResult.error;
       resetForm();
       setTimeout(() => (isErrorMessageShown.value = false), 4000);
     } else {
-      //Если залогинились
       addTokenToStorage(loginResult.userTokenData);
       isSuccessMessageShown.value = true;
 
@@ -45,10 +44,10 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   }
 
   async function registerUser(registerPayload: RegisterFields): Promise<void> {
-    const registerResult: RegisterResponse | ApiError = await fetchData<RegisterResponse>({
+    const registerResult: RegisterResponse | ApiError = await makeRequest<RegisterResponse>({
       url: "/Registration",
-      body: registerPayload,
-      method: "post"
+      method: "post",
+      body: registerPayload
     });
 
     console.log(registerResult);
@@ -76,12 +75,13 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   async function verifyUserToken(): Promise<void> {
     const token = localStorage.getItem("token");
     if (token) {
-      const checkToken: VerifyTokenResponse | ApiError = await fetchData<VerifyTokenResponse>({
+      const checkToken: VerifyTokenResponse | ApiError = await makeRequest<VerifyTokenResponse>({
         url: "/VerifyToken",
         method: "post",
         body: { token }
       });
       console.log(checkToken);
+      //Если токен не валиден или произошла ошибка
       if ("error" in checkToken) logOutUser();
       else {
         currentUser.value = checkToken.userData;
@@ -96,7 +96,7 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   };
 
   async function updateUserToken(): Promise<UpdateTokenResult> {
-    const updatedToken: LoginResponse | ApiError = await fetchData<LoginResponse>({
+    const updatedToken: LoginResponse | ApiError = await makeRequest<LoginResponse>({
       url: "/UpdateToken",
       method: "patch",
       body: { id: currentUser.value!.id }

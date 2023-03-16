@@ -3,15 +3,16 @@ import { useRouter, useRoute } from "vue-router";
 
 export const useTablePagination = <T extends {}>(
   tableElements: Ref<T[]> = ref([]),
-  productsByPage: Ref<number>,
-  selectedField: Ref<keyof T>
+  selectedField: Ref<keyof T>,
 ) => {
   
   const route = useRoute();
   const router = useRouter();
 
   const currentPage = ref(+(route.query.currentPage as string) || 1);
+  const productsByPage = ref(10);
   const totalPages = computed(() => Math.ceil(tableElements.value.length / productsByPage.value));
+
   const isInverseSort = ref(false);
 
   const setSortField = (field: keyof T) => {
@@ -27,6 +28,7 @@ export const useTablePagination = <T extends {}>(
     currentPage.value = page;
   };
 
+
   const paginatedProducts = computed(() => {
     const elementsCount = tableElements.value.length;
     let start = (currentPage.value - 1) * productsByPage.value;
@@ -38,6 +40,7 @@ export const useTablePagination = <T extends {}>(
     let end = start + productsByPage.value;
   
     const paginated = tableElements.value.slice(start, end);
+
 
     if (!isInverseSort.value)
       return [...paginated].sort((a, b) =>
@@ -53,7 +56,8 @@ export const useTablePagination = <T extends {}>(
     router.push({
       name: "products-page",
       query: {
-        currentPage: currentPage.value
+        ...route.query,
+        currentPage: currentPage.value,
       }
     });
   });
@@ -63,6 +67,7 @@ export const useTablePagination = <T extends {}>(
     paginatedProducts,
     totalPages,
     isInverseSort,
+    productsByPage,
     setSortField
   };
 };
