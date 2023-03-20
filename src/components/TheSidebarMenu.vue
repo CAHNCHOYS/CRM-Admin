@@ -11,7 +11,7 @@
     v-if="userAuthStore.currentUser"
   >
     <v-list class="pa-0">
-      <v-list-item class="text-center d-block">
+      <v-list-item class="text-center d-block link">
         <v-list-item-title class="text-white text-h6"
           >{{ userAuthStore.currentUser?.name }}
         </v-list-item-title>
@@ -34,6 +34,7 @@
         :value="item.link"
         @click="navigateTo(item.link)"
         active-class="active"
+        class="link"
       >
         <v-list-item-title>
           <router-link :to="item.link" class="text-subtitle-1 text-white">
@@ -45,7 +46,7 @@
     </v-list>
 
     <template #append>
-      <div class="px-4">
+      <div class="px-4 btn">
         <v-btn @click="logOut" block variant="flat" color="red-darken-2" :rounded="0">
           <span class="font-weight-medium">Выйти с аккаунта</span>
           <v-icon end icon="mdi-exit-to-app" size="x-large" />
@@ -56,17 +57,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useDisplay } from "vuetify/lib/framework.mjs";
 import { useUserAuthStore } from "@/stores/userAuth";
 import { useRouter } from "vue-router";
+
+import gsap from "gsap";
 
 const props = defineProps<{
   isOpened: boolean;
 }>();
 
 const { smAndDown, mdAndUp } = useDisplay();
-
 
 const router = useRouter();
 type MenuItem = {
@@ -75,16 +77,17 @@ type MenuItem = {
   link: string;
 };
 
+
 const menuItems = ref<MenuItem[]>([
   {
     title: "Статиститка",
-    icon: "mdi-account",
+    icon: "mdi-chart-areaspline",
     link: "/workers"
   },
 
   {
     title: "Товары",
-    icon: "mdi-note",
+    icon: "mdi-cards-variant",
     link: "/products"
   },
   {
@@ -92,11 +95,18 @@ const menuItems = ref<MenuItem[]>([
     icon: "mdi-account-circle",
     link: "/account"
   },
+
   {
     title: "О приложении",
     icon: "mdi-information",
     link: "/about"
+  },
+  {
+    title: "Анимации",
+    icon: "mdi-animation",
+    link: "/gsap"
   }
+
 ]);
 
 const userAuthStore = useUserAuthStore();
@@ -109,6 +119,24 @@ function logOut(): void {
 function navigateTo(link: string) {
   router.push(`${link}`);
 }
+
+onMounted(()=>{
+  gsap.from(".link", {
+    x: 200,
+    opacity: 0,
+    stagger: 0.3,
+    duration: 0.8,
+    ease:"sine.out",
+  });
+  gsap.from(".btn",{
+    scale: 0,
+    opacity: 0,
+    delay: 1.5,
+    duration: 0.5,
+  });
+});
+
+
 
 </script>
 

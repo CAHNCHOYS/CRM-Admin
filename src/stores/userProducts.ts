@@ -16,6 +16,7 @@ import type { UserProductFields } from "@/types/Forms";
 import { makeRequest } from "@/services/axiosFetch";
 
 export const useUserProductsStore = defineStore("userProducts", () => {
+  
   const userProducts = ref<IUserProduct[]>([]);
 
   const userAuthStore = useUserAuthStore();
@@ -23,15 +24,14 @@ export const useUserProductsStore = defineStore("userProducts", () => {
 
   const isProductsError = ref(false);
   const isProductsFetching = ref(false);
-  const loadProductsError = ref("");
+  const loadErrorMessage = ref("");
 
   const isProductActionLoading = ref(false);
-
 
   async function fetchUserProducts() {
     isProductsFetching.value = true;
 
-    const products = await makeRequest<GetProductsResponse>({
+    const products: GetProductsResponse | ApiError = await makeRequest({
       method: "get",
       url: "/AllUserProducts/" + userAuthStore.currentUser!.id
     });
@@ -39,7 +39,7 @@ export const useUserProductsStore = defineStore("userProducts", () => {
     if ("error" in products) {
       console.log(products.error);
       isProductsError.value = true;
-      loadProductsError.value = products.error;
+      loadErrorMessage.value = products.error;
     } else if (products.data) userProducts.value = products.data;
 
     isProductsFetching.value = false;
@@ -107,7 +107,7 @@ export const useUserProductsStore = defineStore("userProducts", () => {
     userProducts,
     isProductsError,
     isProductsFetching,
-    loadProductsError,
+    loadErrorMessage,
     isProductActionLoading,
 
     clearUserProducts,

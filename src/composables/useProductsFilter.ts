@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 
 
 export const useProductsFilter = (products: Ref<IUserProduct[]>) => {
+  
   const route = useRoute();
   const router = useRouter();
 

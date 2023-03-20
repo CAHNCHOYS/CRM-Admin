@@ -7,9 +7,8 @@
     </v-snackbar>
 
     <v-snackbar location="right bottom" color="error" :max-width="400" v-model="isUpdateError">
-        <p class="text-h6">Ошибка: </p>
-        <p>{{ updateErrorMessage }}</p>
-
+      <p class="text-h6">Ошибка:</p>
+      <p>{{ updateErrorMessage }}</p>
     </v-snackbar>
 
     <v-form @submit.prevent="updateInfoSubmit" enctype="multipart/form-data">
@@ -38,7 +37,7 @@
           </div>
         </v-col>
         <v-col sm="6" cols="12">
-          <v-text-field v-model="name" :error-messages="nameErrors" label="Ваше имя"  />
+          <v-text-field v-model="name" :error-messages="nameErrors" label="Ваше имя" />
         </v-col>
         <v-col sm="6" cols="12">
           <v-text-field v-model="email" :error-messages="emailErrors" label="Ваша почта" />
@@ -75,6 +74,9 @@ import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
 
 import { makeRequest } from "@/services/axiosFetch";
 
+import { updateInfo } from "@/services/users";
+import { isAxiosError } from "axios";
+import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 const userAuthStore = useUserAuthStore();
 
@@ -97,46 +99,36 @@ const { value: country, errorMessage: countryErrors } = useField<string>("countr
 const { value: avatar, errorMessage: avatarErrorMessages } = useField<File[]>("avatar");
 //--------------------------------------------------------------------------------------------
 
-
 const isUpdateSuccess = ref(false);
 const isUpdateError = ref(false);
 const updateErrorMessage = ref("");
 
 const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
- 
-  let data = new FormData();
+  try {
+    let formData = new FormData();
 
-  data.append("name", values.name);
-  data.append("email", values.email);
-  data.append("country", values.country);
-  data.append("avatar", values.avatar[0], avatar.value[0].name);
-  data.append("id", String(userAuthStore.currentUser!.id));
+    formData.append("name", values.name);
+    formData.append("email", values.email);
+    formData.append("country", values.country);
+    formData.append("avatar", values.avatar[0], avatar.value[0].name);
+    formData.append("id", String(userAuthStore.currentUser!.id));
 
-  const updateInfoResult : UpdateUserResponse | ApiError = await makeRequest({
-    url: "/UpdateUserInfo",
-    method: "patch",
-    body: data,
-    settings:{
-      headers: {
-        "Content-Type": "multipart/form-data",
-      }
-    }
-  });
-  
-  if ("error" in updateInfoResult) {
-    isUpdateError.value = true;
-    updateErrorMessage.value = updateInfoResult.error;
-    setTimeout(() => (isUpdateError.value = false), 3500);
-  } else  {
-    //Так как данные хранятся в токене получаем новый токен.
-    const updateTokenResult  = await userAuthStore.updateUserToken();
-    if (updateTokenResult.error) {
-      isUpdateError.value = true;
-      updateErrorMessage.value = updateTokenResult.error;
-      setTimeout(() => (isUpdateError.value = false), 3500);
-    } else if (updateTokenResult.isTokenUpdated) {
+    //Разобраться тут !!!!
+    const { data } = await updateInfo(formData);
+    console.log(data);
+    if (data.isInfoUpdated) {
+      await userAuthStore.updateUserToken();
       isUpdateSuccess.value = true;
       setTimeout(() => (isUpdateSuccess.value = false), 3500);
+    }
+  } catch (error) {
+    console.log(error);
+    isUpdateError.value = true;
+    setTimeout(() => (isUpdateError.value = false), 3500);
+    if (isAxiosError(error)) {
+      updateErrorMessage.value = handleAxiosError(error).error;
+    } else {
+      updateErrorMessage.value = "Ошибка при обновлении информации";
     }
   }
 });

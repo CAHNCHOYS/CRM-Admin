@@ -72,7 +72,7 @@
             <v-select
               v-model="currentSortValue"
               variant="underlined"
-               label="Сортировать по"
+              label="Сортировать по"
               :items="tableSortFields"
               item-title="text"
               item-value="field"
@@ -81,13 +81,16 @@
           </div>
         </thead>
         <tbody v-if="paginatedProducts.length">
-          <TransitionGroup name="list">
+          <TransitionGroup
+            appear
+            name="list"
+          >
             <UserProductRow
               v-for="(item, index) in paginatedProducts"
               :product="item"
               :key="item.id"
               @open-dialog="openProductDialog"
-             
+              :data-index="index"
             />
           </TransitionGroup>
         </tbody>
@@ -102,7 +105,7 @@
 
       <v-alert type="error" border="end" variant="tonal" v-if="isProductsError">
         <v-alert-title class="mb-2"> Ошибка при загрузке товаров </v-alert-title>
-        <p>{{ loadProductsError }}</p>
+        <p>{{ loadErrorMessage }}</p>
       </v-alert>
 
       <p class="text-h6" v-else-if="userProducts.length === 0 && !isProductsFetching">
@@ -155,9 +158,8 @@ import type { IUserProduct } from "@/types/interfaces";
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
 
-const { userProducts, loadProductsError, isProductsFetching, isProductsError } =
+const { userProducts, loadErrorMessage, isProductsFetching, isProductsError } =
   storeToRefs(userProductsStore);
-
 const { isMessageShown, messageText, messageType } = storeToRefs(alertStore);
 
 onMounted(async () => {
@@ -217,6 +219,7 @@ const { currentPage, paginatedProducts, totalPages, isInverseSort, productsByPag
   useTablePagination<IUserProduct>(filteredProducts, currentSortValue);
 
 //Анимация с gsap
+const { beforeEnter, enter, afterEnter, leave } = useListAnimations();
 </script>
 
 <style scoped>

@@ -61,9 +61,11 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useForm, useField } from "vee-validate";
 
 import type { UpdatePasswordFields } from "@/types/Forms";
-import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
 
-import { makeRequest } from "@/services/axiosFetch";
+
+import { updatePassword } from "@/services/users";
+import { isAxiosError } from "axios";
+import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 //---------------- Валидация формы -------------------------------------------------------------
 const { updatePasswordSchema } = useFormSchemas();
@@ -89,35 +91,24 @@ const userAuthStore = useUserAuthStore();
 
 const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) => {
   const userId = userAuthStore.currentUser!.id;
+  try {
+    const { data } = await updatePassword({ ...values, id: userId });
+    if (data.isInfoUpdated) {
+      await userAuthStore.updateUserToken();
 
-  let updatePasswordResult: UpdateUserResponse | ApiError = await makeRequest({
-    url: "/UpdateUserPassword",
-    method: "patch",
-    body: {
-      ...values,
-      id: userId
-    }
-  });
-
-  console.log(updatePasswordResult);
-
-  if ("error" in updatePasswordResult) {
-    isUpdateError.value = true;
-    updatePassErrorMessage.value = updatePasswordResult.error;
-    setTimeout(() => (isUpdateError.value = false), 3500);
-  } else if (updatePasswordResult.isInfoUpdated) {
-    //Так как даннные хранятся в токене, то получаемы новый токен
-
-    const updateTokenResult = await userAuthStore.updateUserToken();
-    if (updateTokenResult.error) {
-      isUpdateError.value = true;
-      updatePassErrorMessage.value = updateTokenResult.error;
-      setTimeout(() => (isUpdateError.value = false), 3500);
-    } else if (updateTokenResult.isTokenUpdated) {
       isUpdateSuccess.value = true;
+      
       setTimeout(() => (isUpdateSuccess.value = false), 3500);
-      resetForm();
     }
+  } catch (error) {
+    isUpdateError.value = true;
+    setTimeout(() => (isUpdateError.value = false), 3500);
+    if (isAxiosError(error)) {
+      updatePassErrorMessage.value = handleAxiosError(error).error;
+    } else {
+      updatePassErrorMessage.value = "Ошибка при обновлении пароля";
+    }
+    console.log(error);
   }
 });
 </script>

@@ -29,18 +29,22 @@ const router = useRouter();
 const { getCurrentLayout } = useLayouts(route);
 
 onMounted(async () => {
-  await userAuthStore.verifyUserToken();
+  console.log("mounted");
 
-  if (route.meta.requireAuth && !userAuthStore.isUserLoggedIn) {
-    router.push({
-      name: "login-page",
-      query: {
-        redirectedFrom: route.name?.toString() || route.fullPath
-      }
-    });
-  }
 
-  isLoading.value = false;
+  // if (route.meta.requireAuth && !userAuthStore.isUserLoggedIn) {
+  //   router.push({
+  //     name: "login-page",
+  //     query: {
+  //       redirectedFrom: route.name?.toString() || route.fullPath
+  //     }
+  //   });
+  // }
+
+  setTimeout(()=>{
+    isLoading.value = false;
+  },1000)
+
 });
 </script>
 

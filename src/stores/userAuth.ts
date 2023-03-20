@@ -13,52 +13,51 @@ import type {
   ApiError
 } from "@/types/BackendResponses";
 import { makeRequest } from "@/services/axiosFetch";
+import { login, register, updateToken } from "@/services/users";
+import { isAxiosError, type AxiosError, type AxiosResponse } from "axios";
+import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 export const useUserAuthStore = defineStore("userAuth", () => {
-  
   const currentUser = ref<IUser | null>(null);
   const isUserLoggedIn = ref(false);
 
   const alertStore = useAlertStore(); //Показ уведомлений
 
   async function loginUser(loginPayload: LoginFields, resetForm: Function): Promise<void> {
-    const loginResult: LoginResponse | ApiError = await makeRequest({
-      method: "post",
-      url: "/Login",
-      body: loginPayload
-    });
+    try {
+      const { data }: AxiosResponse<LoginResponse> = await login(loginPayload);
 
-    if ("error" in loginResult) {
-      resetForm();
-      alertStore.showMessage("error", loginResult.error);
-    } else {
-      addTokenToStorage(loginResult.userTokenData);
+      addTokenToStorage(data.userTokenData);
+      isUserLoggedIn.value = true;
       alertStore.showMessage(
         "success",
         "Вы успешно авторизировались, вскоре вы будете переведены на сайт"
       );
-      isUserLoggedIn.value = true;
+    } catch (error) {
+      if (isAxiosError<ApiError>(error)) {
+        alertStore.showMessage("error", handleAxiosError(error).error);
+      } else {
+        alertStore.showMessage("error", "Ошибка при авторизации, попробуйте позже");
+      }
       resetForm();
     }
   }
 
   async function registerUser(registerPayload: RegisterFields): Promise<boolean> {
-    const registerResult: RegisterResponse | ApiError = await makeRequest({
-      url: "/Registration",
-      method: "post",
-      body: registerPayload
-    });
-
-    console.log(registerResult);
-    if ("error" in registerResult) {
-      alertStore.showMessage("error", registerResult.error);
-      return false;
-    } else {
+    try {
+      const { data } = await register(registerPayload);
       alertStore.showMessage(
         "success",
         "Вы успешно зарегистрировались, можете переходить к авторизации!"
       );
       return true;
+    } catch (error) {
+      if (isAxiosError<ApiError>(error)) {
+        alertStore.showMessage("error", handleAxiosError(error).error);
+      } else {
+        alertStore.showMessage("error", "Ошибка при регистрации, попробуйте позже");
+      }
+      return false;
     }
   }
 
@@ -93,23 +92,12 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     }
   }
 
-  type UpdateTokenResult = {
-    isTokenUpdated?: true;
-    error?: string;
-  };
-
-  async function updateUserToken(): Promise<UpdateTokenResult> {
-    const updatedToken: LoginResponse | ApiError = await makeRequest({
-      url: "/UpdateToken",
-      method: "patch",
-      body: { id: currentUser.value!.id }
-    });
-
-    if ("error" in updatedToken) {
-      return { error: updatedToken.error };
-    } else {
-      addTokenToStorage(updatedToken.userTokenData);
-      return { isTokenUpdated: true };
+  async function updateUserToken(): Promise<void> {
+    try {
+      const { data } = await updateToken(currentUser.value!.id);
+      addTokenToStorage(data.userTokenData);
+    } catch (error) {
+      throw error;
     }
   }
 

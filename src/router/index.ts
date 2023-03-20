@@ -97,9 +97,9 @@ router.beforeEach(async (to, from) => {
   const userAuthStore = useUserAuthStore();
 
   console.log(from.name);
-  //Если зашли первый раз
+ // Если зашли первый раз
   if(!from.name){
-     return true;
+     await userAuthStore.verifyUserToken();
   }
  
   if(to.meta.requireAuth && !userAuthStore.isUserLoggedIn){

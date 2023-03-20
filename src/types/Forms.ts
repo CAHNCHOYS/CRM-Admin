@@ -25,6 +25,7 @@ export type UpdatePasswordFields = {
     oldPassword: string;
     newPassword: string;
     newPasswordConfirm: string;
+    id?:number;
 }
 
 export type UserProductFields = {
