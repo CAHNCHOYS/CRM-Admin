@@ -18,7 +18,7 @@
         <template #prepend>
           <v-avatar class="mx-auto mb-2" size="60px">
             <v-img
-              :src="`http://localhost:3000/UserAvatars/${userAuthStore.currentUser.avatar}`"
+              :src="`https://crm-backend-mocha.vercel.app/UserAvatars/${userAuthStore.currentUser.avatar}`"
               alt="No avatar"
               cover
             />
@@ -46,7 +46,7 @@
 
     <template #append>
       <div class="px-4">
-        <v-btn @click="logOut" block variant="flat" color="deep-orange-darken-2" :rounded="0">
+        <v-btn @click="logOut" block variant="flat" color="red-darken-2" :rounded="0">
           <span class="font-weight-medium">Выйти с аккаунта</span>
           <v-icon end icon="mdi-exit-to-app" size="x-large" />
         </v-btn>
@@ -65,12 +65,10 @@ const props = defineProps<{
   isOpened: boolean;
 }>();
 
-
-
 const { smAndDown, mdAndUp } = useDisplay();
 
-const router = useRouter();
 
+const router = useRouter();
 type MenuItem = {
   title: string;
   icon: string;
@@ -102,14 +100,12 @@ const menuItems = ref<MenuItem[]>([
 ]);
 
 const userAuthStore = useUserAuthStore();
-
 function logOut(): void {
   if (window.confirm("Вы уверены что хотите выйти с аккаунта ?")) {
     userAuthStore.logOutUser();
     router.push({ name: "login-page" });
   }
 }
-
 function navigateTo(link: string) {
   router.push(`${link}`);
 }

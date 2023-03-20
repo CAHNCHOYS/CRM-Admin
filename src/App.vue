@@ -1,7 +1,9 @@
 <template>
   <v-app>
-    <p v-if="isLoading">Site Loading... pls wait</p>
-    <component :is="getCurrentLayout" v-else>
+    <v-overlay :model-value="isLoading" class="align-center justify-center">
+      <v-progress-circular color="primary" indeterminate size="124" />
+    </v-overlay>
+    <component :is="getCurrentLayout" v-if="!isLoading">
       <router-view v-slot="{ Component }">
         <transition name="slide" mode="out-in">
           <component :is="Component"> </component>
@@ -22,20 +24,21 @@ const userAuthStore = useUserAuthStore();
 
 const isLoading = ref(true);
 const route = useRoute();
+const router = useRouter();
 
 const { getCurrentLayout } = useLayouts(route);
 
 onMounted(async () => {
- // await userAuthStore.verifyUserToken();
+  await userAuthStore.verifyUserToken();
 
-  // if (route.meta.requireAuth && !userAuthStore.isUserLoggedIn) {
-  //   return {
-  //     name: "login-page",
-  //     query: {
-  //       redirectedFrom: route.name?.toString() || route.fullPath
-  //     }
-  //   };
-  // }
+  if (route.meta.requireAuth && !userAuthStore.isUserLoggedIn) {
+    router.push({
+      name: "login-page",
+      query: {
+        redirectedFrom: route.name?.toString() || route.fullPath
+      }
+    });
+  }
 
   isLoading.value = false;
 });
@@ -67,8 +70,14 @@ body {
   transform: translate(10%, 0);
 }
 
+th {
+  cursor: pointer;
+}
+tr {
+  position: relative;
+}
 
-
-
-
+.v-dialog {
+  min-width: 320px !important;
+}
 </style>

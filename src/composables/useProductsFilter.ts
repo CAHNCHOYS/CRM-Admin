@@ -1,40 +1,11 @@
 import type { IUserProduct } from "@/types/interfaces";
-import { computed, ref, watch, type Ref } from "vue";
+import { computed, ref,  watchEffect, type Ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-type FilterValues = {
-  searchName: Ref<string>;
-  searchPrices: Ref<[number, number]>; // от и до
-};
 
 export const useProductsFilter = (products: Ref<IUserProduct[]>) => {
   const route = useRoute();
   const router = useRouter();
-
-  //Заголвки  в шапке таблице и используются  для сортировки по полю
-  const tableSortFields = ref<
-    {
-      text: string;
-      field: keyof IUserProduct;
-    }[]
-  >([
-    {
-      text: "Имя",
-      field: "name"
-    },
-    {
-      text: "Цена(руб)",
-      field: "price"
-    },
-    {
-      text: "Количество",
-      field: "count"
-    },
-    {
-      text: "Категория",
-      field: "category"
-    }
-  ]);
 
   const searchPrices = ref<[number, number]>([
     +(route.query.startPrice as string) || 1,
@@ -42,7 +13,9 @@ export const useProductsFilter = (products: Ref<IUserProduct[]>) => {
   ]);
   const searchName = ref((route.query.name as string) || "");
 
-  const filterProducts = computed(() => {
+
+  
+  const filteredProducts = computed(() => {
     const filteredByPrice = products.value.filter(
       (product) => product.price > searchPrices.value[0] && product.price < searchPrices.value[1]
     );
@@ -54,24 +27,33 @@ export const useProductsFilter = (products: Ref<IUserProduct[]>) => {
   const resetSearch = () => {
     searchName.value = "";
     searchPrices.value = [1, 999999];
-    // router.push({
-    //   name: "products-page",
-    //   query: {}
-    // });
   };
 
-  watch([searchName, searchPrices], () => {
-    console.log("changes appeared!");
-    router.push({
-      name: "products-page",
-      query: {
-        ...route.query,
-        name: searchName.value,
-        startPrice: searchPrices.value[0],
-        endPrice: searchPrices.value[1]
-      }
+
+  watchEffect((onIvalidate) => {
+    console.log("watchEffect called");
+
+    const name = searchName.value;
+    const startPrice = searchPrices.value[0];
+    const endPrice = searchPrices.value[1];
+
+    const timeout = setTimeout(() => {
+      router.push({
+        name: "products-page",
+        query: {
+          ...route.query,
+          name,
+          startPrice,
+          endPrice
+        }
+      });
+    }, 800);
+
+    onIvalidate(() => {
+      clearInterval(timeout);
     });
+
   });
 
-  return { tableSortFields, searchName, searchPrices, filterProducts, resetSearch };
+  return {  searchName, searchPrices, filteredProducts, resetSearch };
 };

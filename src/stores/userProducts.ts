@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 import { useUserAuthStore } from "@/stores/userAuth";
+import { useAlertStore } from "./alert";
 import type { IUserProduct } from "@/types/interfaces";
 import type {
   AddProductResponse,
@@ -16,20 +17,20 @@ import { makeRequest } from "@/services/axiosFetch";
 
 export const useUserProductsStore = defineStore("userProducts", () => {
   const userProducts = ref<IUserProduct[]>([]);
+
   const userAuthStore = useUserAuthStore();
+  const alertStore = useAlertStore();
 
   const isProductsError = ref(false);
   const isProductsFetching = ref(false);
   const loadProductsError = ref("");
 
   const isProductActionLoading = ref(false);
-  const isActionMessageShown = ref(false); //После добавления,удаления, изменения тоавра показываем уведомление
-  const actionMessageText = ref("");
-  const actionMessageType = ref<"success" | "error">("success");
+
 
   async function fetchUserProducts() {
     isProductsFetching.value = true;
-   
+
     const products = await makeRequest<GetProductsResponse>({
       method: "get",
       url: "/AllUserProducts/" + userAuthStore.currentUser!.id
@@ -45,24 +46,18 @@ export const useUserProductsStore = defineStore("userProducts", () => {
   }
 
   async function deleteUserProduct(productId: number): Promise<void> {
-    const deletionResult = await makeRequest<DeleteProductResponse>(
-      {
-        url: "/DeleteProduct/" + productId,
-        method: "delete"
-      }
-    );
+    const deletionResult = await makeRequest<DeleteProductResponse>({
+      url: "/DeleteProduct/" + productId,
+      method: "delete"
+    });
 
-    isActionMessageShown.value = true;
     if ("error" in deletionResult) {
-      actionMessageType.value = "error";
-      actionMessageText.value = deletionResult.error;
+      alertStore.showMessage("error", deletionResult.error);
     } else {
       //обновляем на фронте
       userProducts.value = userProducts.value.filter((product) => product.id != productId);
-      actionMessageType.value = "success";
-      actionMessageText.value = "Товар был успешно удален!";
+      alertStore.showMessage("success", "Товар был успешно удален");
     }
-    setTimeout(() => (isActionMessageShown.value = false), 3500);
   }
 
   async function updateUserProduct(updatePayload: UserProductFields, productId: number) {
@@ -76,17 +71,14 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       }
     });
     console.log(updateResult);
-    isActionMessageShown.value = true;
+
     if ("error" in updateResult) {
-      actionMessageType.value = "error";
-      actionMessageText.value = updateResult.error;
+      alertStore.showMessage("error", updateResult.error);
     } else {
       let index = userProducts.value.findIndex((product) => product.id === productId);
       userProducts.value[index] = updateResult.data;
-      actionMessageType.value = "success";
-      actionMessageText.value = "Товар был изменен";
+      alertStore.showMessage("success", "Товар был изменен");
     }
-    setTimeout(() => (isActionMessageShown.value = false), 3500);
   }
 
   async function addUserProduct(data: UserProductFields): Promise<void> {
@@ -99,16 +91,16 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       }
     });
 
-    isActionMessageShown.value = true;
     if ("error" in addResult) {
-      actionMessageType.value = "error";
-      actionMessageText.value = addResult.error;
+      alertStore.showMessage("error", addResult.error);
     } else {
       userProducts.value.push(addResult.data);
-      actionMessageType.value = "success";
-      actionMessageText.value = `Товар ${data.name} был успешно добавлен!`;
+      alertStore.showMessage("success", `Товар ${data.name} был успешно добавлен!`);
     }
-    setTimeout(() => (isActionMessageShown.value = false), 3500);
+  }
+
+  function clearUserProducts() {
+    userProducts.value = [];
   }
 
   return {
@@ -117,10 +109,8 @@ export const useUserProductsStore = defineStore("userProducts", () => {
     isProductsFetching,
     loadProductsError,
     isProductActionLoading,
-    actionMessageText,
-    actionMessageType,
-    isActionMessageShown,
 
+    clearUserProducts,
     fetchUserProducts,
     deleteUserProduct,
     updateUserProduct,

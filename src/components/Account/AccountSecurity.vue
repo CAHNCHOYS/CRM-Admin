@@ -90,7 +90,7 @@ const userAuthStore = useUserAuthStore();
 const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) => {
   const userId = userAuthStore.currentUser!.id;
 
-  let updatePasswordResult: UpdateUserResponse | ApiError = await makeRequest<UpdateUserResponse>({
+  let updatePasswordResult: UpdateUserResponse | ApiError = await makeRequest({
     url: "/UpdateUserPassword",
     method: "patch",
     body: {

@@ -78,6 +78,14 @@ const router = createRouter({
         requireAuth: true,
       }
     },
+    {
+      path:"/gsap",
+      name:"gsap",
+      component:()=> import('../views/LearGsap.vue'),
+      meta: {
+        requireAuth: false,
+      }
+    },
  
 
   ]
@@ -91,7 +99,7 @@ router.beforeEach(async (to, from) => {
   console.log(from.name);
   //Если зашли первый раз
   if(!from.name){
-    await userAuthStore.verifyUserToken();
+     return true;
   }
  
   if(to.meta.requireAuth && !userAuthStore.isUserLoggedIn){

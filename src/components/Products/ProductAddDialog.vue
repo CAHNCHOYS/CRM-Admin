@@ -32,7 +32,7 @@
               </p>
             </v-col>
 
-            <v-col cols="6">
+            <v-col sm="6" cols="12">
               <v-text-field
                 v-model="count"
                 :error-messages="countErrors"
@@ -41,7 +41,7 @@
               />
             </v-col>
 
-            <v-col cols="6">
+            <v-col sm="6" cols="12">
               <v-text-field
                 v-model="price"
                 :error-messages="priceErrors"

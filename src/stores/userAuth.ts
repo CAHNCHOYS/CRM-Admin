@@ -1,6 +1,9 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
+import { useUserProductsStore } from "./userProducts";
+import { useAlertStore } from "./alert";
+
 import type { IUser } from "@/types/interfaces";
 import type { LoginFields, RegisterFields } from "@/types/Forms";
 import type {
@@ -11,40 +14,36 @@ import type {
 } from "@/types/BackendResponses";
 import { makeRequest } from "@/services/axiosFetch";
 
-
 export const useUserAuthStore = defineStore("userAuth", () => {
+  
   const currentUser = ref<IUser | null>(null);
-
-  const isSuccessMessageShown = ref(false); //Уведомления после успешной регистрации|авторизации
-  const isErrorMessageShown = ref(false); // Если ошибка пре регистрации|авторизации
-  const authErrorMessage = ref("Произошла ошибка");
-
   const isUserLoggedIn = ref(false);
 
-  async function loginUser(loginPayload: LoginFields, resetForm: Function): Promise<void> {
+  const alertStore = useAlertStore(); //Показ уведомлений
 
-    const loginResult: LoginResponse | ApiError = await makeRequest<LoginResponse>({
+  async function loginUser(loginPayload: LoginFields, resetForm: Function): Promise<void> {
+    const loginResult: LoginResponse | ApiError = await makeRequest({
       method: "post",
       url: "/Login",
       body: loginPayload
     });
+
     if ("error" in loginResult) {
-      isErrorMessageShown.value = true;
-      authErrorMessage.value = loginResult.error;
       resetForm();
-      setTimeout(() => (isErrorMessageShown.value = false), 4000);
+      alertStore.showMessage("error", loginResult.error);
     } else {
       addTokenToStorage(loginResult.userTokenData);
-      isSuccessMessageShown.value = true;
-
-      setTimeout(() => (isSuccessMessageShown.value = false), 3500);
+      alertStore.showMessage(
+        "success",
+        "Вы успешно авторизировались, вскоре вы будете переведены на сайт"
+      );
       isUserLoggedIn.value = true;
       resetForm();
     }
   }
 
-  async function registerUser(registerPayload: RegisterFields): Promise<void> {
-    const registerResult: RegisterResponse | ApiError = await makeRequest<RegisterResponse>({
+  async function registerUser(registerPayload: RegisterFields): Promise<boolean> {
+    const registerResult: RegisterResponse | ApiError = await makeRequest({
       url: "/Registration",
       method: "post",
       body: registerPayload
@@ -52,12 +51,14 @@ export const useUserAuthStore = defineStore("userAuth", () => {
 
     console.log(registerResult);
     if ("error" in registerResult) {
-      isErrorMessageShown.value = true;
-      authErrorMessage.value = registerResult.error;
-      setTimeout(() => (isErrorMessageShown.value = false), 4000);
-    } else if (registerResult.isSuccess) {
-      isSuccessMessageShown.value = true;
-      setTimeout(() => (isSuccessMessageShown.value = false), 3500);
+      alertStore.showMessage("error", registerResult.error);
+      return false;
+    } else {
+      alertStore.showMessage(
+        "success",
+        "Вы успешно зарегистрировались, можете переходить к авторизации!"
+      );
+      return true;
     }
   }
 
@@ -67,15 +68,17 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   }
 
   function logOutUser(): void {
+    const userProductsStore = useUserProductsStore();
     currentUser.value = null;
     localStorage.removeItem("token");
     isUserLoggedIn.value = false;
+    userProductsStore.clearUserProducts();
   }
 
   async function verifyUserToken(): Promise<void> {
     const token = localStorage.getItem("token");
     if (token) {
-      const checkToken: VerifyTokenResponse | ApiError = await makeRequest<VerifyTokenResponse>({
+      const checkToken: VerifyTokenResponse | ApiError = await makeRequest({
         url: "/VerifyToken",
         method: "post",
         body: { token }
@@ -96,7 +99,7 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   };
 
   async function updateUserToken(): Promise<UpdateTokenResult> {
-    const updatedToken: LoginResponse | ApiError = await makeRequest<LoginResponse>({
+    const updatedToken: LoginResponse | ApiError = await makeRequest({
       url: "/UpdateToken",
       method: "patch",
       body: { id: currentUser.value!.id }
@@ -113,9 +116,6 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   return {
     currentUser,
     isUserLoggedIn,
-    isErrorMessageShown,
-    isSuccessMessageShown,
-    authErrorMessage,
 
     loginUser,
     registerUser,

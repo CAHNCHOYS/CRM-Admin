@@ -55,7 +55,7 @@ const deletionSubmit = async () => {
 
   if (!window.confirm("Вы точно уверены?")) return;
 
-  const deleteResult: DeleteAccountResponse | ApiError = await makeRequest<DeleteAccountResponse>({
+  const deleteResult: DeleteAccountResponse | ApiError = await makeRequest({
     method: "delete",
     url: "/DeleteAccount" + userAuthStore.currentUser!.id
   });

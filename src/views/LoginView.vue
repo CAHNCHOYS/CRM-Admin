@@ -3,19 +3,12 @@
     <!----- Уведомления после авторизации ----------->
 
     <v-dialog-transition>
-      <v-alert class="alert" type="error" :max-width="400" v-show="isErrorMessageShown">
-        <v-alert-title class="text-h4 mb-2"> Ошибка </v-alert-title>
+      <v-alert class="alert" :type="messageType" :max-width="400" v-model="isMessageShown">
+        <v-alert-title class="text-h4 mb-2">
+          {{ messageType === "error" ? "Ошибка" : "Уведомление" }}
+        </v-alert-title>
         <div class="text-white text-h6">
-          {{ authErrorMessage }}
-        </div>
-      </v-alert>
-    </v-dialog-transition>
-
-    <v-dialog-transition>
-      <v-alert class="alert" type="success" :max-width="400" v-show="isSuccessMessageShown">
-        <v-alert-title class="text-h4 mb-2"> Успех </v-alert-title>
-        <div class="text-white text-h6">
-          Вы успешно авторизировались, вскоре вы будете переведены на сайт!
+          {{ messageText }}
         </div>
       </v-alert>
     </v-dialog-transition>
@@ -71,7 +64,7 @@
               <v-btn
                 type="submit"
                 :loading="isSubmitting"
-                :disabled="isSubmitting || isErrorMessageShown || isSuccessMessageShown"
+                :disabled="isSubmitting || isMessageShown"
                 block
                 color="dark-blue"
                 variant="flat"
@@ -100,6 +93,7 @@ import { useRoute, useRouter } from "vue-router";
 
 import { storeToRefs } from "pinia";
 import { useUserAuthStore } from "@/stores/userAuth";
+import { useAlertStore } from "@/stores/alert";
 
 import pageBackground from "@/assets/Images/LoginRegister/bg.png";
 
@@ -108,8 +102,7 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 
 import type { LoginFields } from "@/types/Forms";
 
-const route = useRoute();
-const router = useRouter();
+
 
 //Form validation -----------------------------------------------------------
 const { loginSchema } = useFormSchemas();
@@ -124,31 +117,36 @@ const { value: password, errorMessage: passwordErrors } = useField<string>("pass
 
 const isPasswordSeen = ref(false);
 
-
 const userAuthStore = useUserAuthStore();
-const { isUserLoggedIn, authErrorMessage, isSuccessMessageShown, isErrorMessageShown } =
-  storeToRefs(userAuthStore);
-const { loginUser } = userAuthStore;
+const alertStore = useAlertStore();
+const { isMessageShown, messageText, messageType } = storeToRefs(alertStore);
+
+const route = useRoute();
+const router = useRouter();
 
 //Авторизация
 const loginSubmit = handleSubmit(async (values: LoginFields) => {
-  await loginUser(values, resetForm);
+  await userAuthStore.loginUser(values, resetForm);
 
   //Если вошли в аккаунт
-  if (isUserLoggedIn.value) {
+  if (userAuthStore.isUserLoggedIn) {
     setTimeout(() => {
       if (route.query.redirectedFrom) {
         router.push({ name: route.query.redirectedFrom as string });
       } else router.push("/");
-    }, 2500);
+    }, 3500);
   }
+  
 });
 
+
+//Если зашли на страницу, которая требует авторизации, то перекидываем на эту странциу и показываем сообщение
 watchEffect(() => {
   if (route.query.redirectedFrom) {
-    isErrorMessageShown.value = true;
-    authErrorMessage.value = `Для доступа к странице ${route.query.redirectedFrom} необходимо авторизироваться`;
-    setTimeout(() => (isErrorMessageShown.value = false), 3500);
+    alertStore.showMessage(
+      "error",
+      `Для доступа к странице ${route.query.redirectedFrom} необходимо авторизироваться`
+    );
   }
 });
 </script>

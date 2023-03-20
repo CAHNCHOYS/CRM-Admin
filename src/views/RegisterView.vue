@@ -2,22 +2,16 @@
   <div class="fullscreen h-100 d-flex justify-center align-center">
     <!------- Уведомления после регистрации ------>
     <v-dialog-transition>
-      <v-alert class="alert" type="error" :max-width="400" v-show="isErrorMessageShown">
-        <v-alert-title class="text-h4 mb-2"> Ошибка </v-alert-title>
+      <v-alert class="alert" :type="messageType" :max-width="400" v-model="isMessageShown">
+        <v-alert-title class="text-h4 mb-2">
+          {{ messageType === "error" ? "Ошибка" : "Уведомление" }}
+        </v-alert-title>
         <div class="text-white text-h6">
-          {{ authErrorMessage }}
+          {{ messageText }}
         </div>
       </v-alert>
     </v-dialog-transition>
 
-    <v-dialog-transition>
-      <v-alert class="alert" type="success" :max-width="400" v-show="isSuccessMessageShown">
-        <v-alert-title class="text-h4 mb-2"> Успех </v-alert-title>
-        <div class="text-white text-h6">
-          Вы успешно зарегистрировались можете переходить к авторизации
-        </div>
-      </v-alert>
-    </v-dialog-transition>
 
     <v-card class="form-card flex-grow-1 pb-2 rounded-lg" :max-width="486" :elevation="0">
       <div class="form-title text-center text-h4 py-4">Регистрация</div>
@@ -113,7 +107,7 @@
               <v-btn
                 type="submit"
                 :loading="isSubmitting"
-                :disabled="isSubmitting || isErrorMessageShown || isSuccessMessageShown"
+                :disabled="isSubmitting || isMessageShown || userCanGoToLogin"
                 block
                 color="dark-blue"
                 variant="flat"
@@ -153,12 +147,12 @@ import { ref } from "vue";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";
 
-import type { RegisterFields } from "@/types/Forms";
-
 import { useUserAuthStore } from "@/stores/userAuth";
+import { useAlertStore } from "@/stores/alert";
 import { storeToRefs } from "pinia";
 
 import pageBackground from "@/assets/Images/LoginRegister/bg2.jpg";
+import type { RegisterFields } from "@/types/Forms";
 
 //Валидация формы----------------------------------------------
 const { registerSchema } = useFormSchemas();
@@ -180,16 +174,17 @@ const { value: agreement, errorMessage: agreementErrors } = useField<boolean>("a
 const userCanGoToLogin = ref(false);
 
 const userAuthStore = useUserAuthStore();
+const alertStore = useAlertStore();
+const { isMessageShown, messageText, messageType } = storeToRefs(alertStore);
 
-const { isErrorMessageShown, isSuccessMessageShown, authErrorMessage } = storeToRefs(userAuthStore);
-const { registerUser } = userAuthStore;
 
 const registerSubmit = handleSubmit(async (values: RegisterFields) => {
-  await registerUser(values);
-  if (isSuccessMessageShown.value) {
+  if (await userAuthStore.registerUser(values)) {
     userCanGoToLogin.value = true;
   }
+
 });
+
 </script>
 
 <style lang="scss" scoped>
