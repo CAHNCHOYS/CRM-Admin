@@ -16,10 +16,10 @@
         </v-btn>
         <v-btn
           height="40"
-          :loading="isProductActionLoading"
+          :loading="isDeleting"
           color="error"
           variant="flat"
-          @click="deleteProduct"
+          @click="deletUserProduct"
           >Да</v-btn
         >
       </v-card-actions>
@@ -28,9 +28,13 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import { useUserProductsStore } from "@/stores/userProducts";
+import { useAlertStore } from "@/stores/alert";
+import { isAxiosError } from "axios";
+import { deleteProduct } from "@/services/ProductService";
+import { handleAxiosError } from "@/services/axioxErrorHandle";
 
-import { storeToRefs } from "pinia";
 import type { IUserProduct } from "@/types/interfaces";
 
 const props = defineProps<{
@@ -42,21 +46,28 @@ const emit = defineEmits<{
   (e: "closeModal"): void;
 }>();
 
+const isDeleting = ref(false);
+
 const userProductsStore = useUserProductsStore();
+const alertStore = useAlertStore();
 
-const { deleteUserProduct } = userProductsStore;
-const { isProductActionLoading } = storeToRefs(userProductsStore);
+const deletUserProduct = async () => {
+  try {
+    isDeleting.value = true;
+    await deleteProduct(props.product.id);
 
-const deleteProduct = async () => {
-  isProductActionLoading.value = true;
+    userProductsStore.deleteUserProduct(props.product.id);
 
-  await deleteUserProduct(props.product.id);
-
-  isProductActionLoading.value = false;
-  emit("closeModal");
+    alertStore.showMessage("success", "Товар был успешно удален");
+  } catch (error) {
+    if (isAxiosError(error)) {
+      alertStore.showMessage("error", handleAxiosError(error));
+    } else alertStore.showMessage("error", "Ошибка при удалении товара!");
+  } finally {
+    isDeleting.value = false;
+    emit("closeModal");
+  }
 };
 </script>
 
-<style  scoped>
-
-</style>
+<style scoped></style>

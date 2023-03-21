@@ -21,7 +21,7 @@
         Все товары({{ userProducts.length }})
       </TableActions>
 
-      <div v-if="isProductsFetching">
+      <div v-if="isProductsLoading">
         <div class="text-center mb-3 text-h6">Идет загрузка...</div>
         <v-progress-linear color="green" height="4" indeterminate />
       </div>
@@ -108,7 +108,7 @@
         <p>{{ loadErrorMessage }}</p>
       </v-alert>
 
-      <p class="text-h6" v-else-if="userProducts.length === 0 && !isProductsFetching">
+      <p class="text-h6" v-else-if="userProducts.length === 0 && !isProductsLoading">
         Пока в таблице нет товаров, добавьте хоть один
       </p>
 
@@ -158,7 +158,7 @@ import type { IUserProduct } from "@/types/interfaces";
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
 
-const { userProducts, loadErrorMessage, isProductsFetching, isProductsError } =
+const { userProducts, loadErrorMessage, isProductsLoading, isProductsError } =
   storeToRefs(userProductsStore);
 const { isMessageShown, messageText, messageType } = storeToRefs(alertStore);
 
@@ -166,6 +166,7 @@ onMounted(async () => {
   if (!userProducts.value.length) {
     await userProductsStore.fetchUserProducts();
   }
+  await userProductsStore.fetchProductsCategories();
 });
 
 //Заголвки  в шапке таблице и используются  для сортировки по полю

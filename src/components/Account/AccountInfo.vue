@@ -70,12 +70,10 @@ import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 import type { UpdateInfoFields } from "@/types/Forms";
-import type { ApiError, UpdateUserResponse } from "@/types/BackendResponses";
+import type {  UpdateUserResponse } from "@/types/BackendResponses";
 
-import { makeRequest } from "@/services/axiosFetch";
-
-import { updateInfo } from "@/services/users";
-import { isAxiosError } from "axios";
+import { updateInfo } from "@/services/UserService";
+import { isAxiosError, type AxiosResponse } from "axios";
 import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 const userAuthStore = useUserAuthStore();
@@ -113,8 +111,8 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
     formData.append("avatar", values.avatar[0], avatar.value[0].name);
     formData.append("id", String(userAuthStore.currentUser!.id));
 
-    //Разобраться тут !!!!
-    const { data } = await updateInfo(formData);
+    //Разобраться тут !!!! ?:?????
+    const { data }: AxiosResponse<UpdateUserResponse> = await updateInfo(formData);
     console.log(data);
     if (data.isInfoUpdated) {
       await userAuthStore.updateUserToken();
@@ -126,10 +124,8 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
     isUpdateError.value = true;
     setTimeout(() => (isUpdateError.value = false), 3500);
     if (isAxiosError(error)) {
-      updateErrorMessage.value = handleAxiosError(error).error;
-    } else {
-      updateErrorMessage.value = "Ошибка при обновлении информации";
-    }
+      updateErrorMessage.value = handleAxiosError(error);
+    } else updateErrorMessage.value = "Ошибка при обновлении информации";
   }
 });
 

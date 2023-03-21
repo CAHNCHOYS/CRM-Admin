@@ -1,5 +1,10 @@
 <template>
-  <v-dialog   transition="dialog-bottom-transition" max-width="500" @update:model-value="$emit('closeModal')" :model-value="isActive">
+  <v-dialog
+    transition="dialog-bottom-transition"
+    max-width="500"
+    @update:model-value="$emit('closeModal')"
+    :model-value="isActive"
+  >
     <v-card class="pa-5" color="white" elevation="4">
       <v-card-title>
         <p class="text-h6 font-weight-bold mb-4">Редактирование товара</p>
@@ -17,12 +22,12 @@
                 v-model="categoryId"
                 label="Категория товара"
                 :error-messages="categoryIdErrors"
-                :items="categories"
+                :items="productsCategories"
                 item-title="name"
                 item-value="id"
-                v-if="categories.length"
+                v-if="productsCategories.length"
               />
-              <p v-if="isCategoriesLoadError" class="text-h6 text-red">
+              <p v-if="isCategoriesFetchError" class="text-h6 text-red">
                 {{ categoriesLoadErrorMessage }}
               </p>
             </v-col>
@@ -50,7 +55,9 @@
               <v-btn color="green-darken-4" variant="flat" :loading="isSubmitting" type="submit">
                 Сохранить
               </v-btn>
-              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')"> Отмена </v-btn>
+              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')">
+                Отмена
+              </v-btn>
             </v-col>
           </v-row>
         </v-form>
@@ -61,12 +68,15 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { storeToRefs } from "pinia";
+import { isAxiosError } from "axios";
 
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
-
-import { useProductsCategoiresFetch } from "@/composables/useProductsCategoriesFetch";
 import { useUserProductsStore } from "@/stores/userProducts";
+import { useAlertStore } from "@/stores/alert";
+import { updateProduct } from "@/services/ProductService";
+import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UserProductFields } from "@/types/Forms";
 import type { IUserProduct } from "@/types/interfaces";
@@ -100,18 +110,25 @@ const { value: count, errorMessage: countErrors } = useField("count");
 const { value: categoryId, errorMessage: categoryIdErrors } = useField("categoryId");
 //------------------------------------------------------------
 
-const { categories, isCategoriesLoadError, categoriesLoadErrorMessage } =
-  useProductsCategoiresFetch();
+const userProductsStore = useUserProductsStore();
+const alertStore = useAlertStore();
 
-const { updateUserProduct } = useUserProductsStore();
+const { productsCategories, isCategoriesFetchError, categoriesLoadErrorMessage } =
+  storeToRefs(userProductsStore);
 
 const updateProductSubmit = handleSubmit(async (formValues: UserProductFields) => {
-  await updateUserProduct(formValues, props.product.id);
-  emit("closeModal");
+  try {
+    const { data } = await updateProduct(formValues, props.product.id, props.product.userId);
+    userProductsStore.updateUserProduct(data.product);
+    alertStore.showMessage("success", "Товар был изменен");
+  } catch (error) {
+    if (isAxiosError(error)) {
+      alertStore.showMessage("error", handleAxiosError(error));
+    } else alertStore.showMessage("error", "Ошибка при обновлении товара!");
+  } finally {
+    emit("closeModal");
+  }
 });
 </script>
 
-<style  scoped>
-
-
-</style>
+<style scoped></style>

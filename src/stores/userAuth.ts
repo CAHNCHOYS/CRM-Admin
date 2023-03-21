@@ -4,18 +4,15 @@ import { ref } from "vue";
 import { useUserProductsStore } from "./userProducts";
 import { useAlertStore } from "./alert";
 
+import { login, register, updateToken, verifyToken } from "@/services/UserService";
+import { isAxiosError, type AxiosResponse } from "axios";
+import { handleAxiosError } from "@/services/axioxErrorHandle";
+
 import type { IUser } from "@/types/interfaces";
 import type { LoginFields, RegisterFields } from "@/types/Forms";
-import type {
-  VerifyTokenResponse,
-  RegisterResponse,
-  LoginResponse,
-  ApiError
-} from "@/types/BackendResponses";
-import { makeRequest } from "@/services/axiosFetch";
-import { login, register, updateToken } from "@/services/users";
-import { isAxiosError, type AxiosError, type AxiosResponse } from "axios";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+import type { VerifyTokenResponse, LoginResponse, ApiError } from "@/types/BackendResponses";
+
+
 
 export const useUserAuthStore = defineStore("userAuth", () => {
   const currentUser = ref<IUser | null>(null);
@@ -35,17 +32,15 @@ export const useUserAuthStore = defineStore("userAuth", () => {
       );
     } catch (error) {
       if (isAxiosError<ApiError>(error)) {
-        alertStore.showMessage("error", handleAxiosError(error).error);
-      } else {
-        alertStore.showMessage("error", "Ошибка при авторизации, попробуйте позже");
-      }
+        alertStore.showMessage("error", handleAxiosError(error));
+      } else alertStore.showMessage("error", "Ошибка при авторизации, попробуйте позже");
       resetForm();
     }
   }
 
   async function registerUser(registerPayload: RegisterFields): Promise<boolean> {
     try {
-      const { data } = await register(registerPayload);
+      await register(registerPayload);
       alertStore.showMessage(
         "success",
         "Вы успешно зарегистрировались, можете переходить к авторизации!"
@@ -53,10 +48,8 @@ export const useUserAuthStore = defineStore("userAuth", () => {
       return true;
     } catch (error) {
       if (isAxiosError<ApiError>(error)) {
-        alertStore.showMessage("error", handleAxiosError(error).error);
-      } else {
-        alertStore.showMessage("error", "Ошибка при регистрации, попробуйте позже");
-      }
+        alertStore.showMessage("error", handleAxiosError(error));
+      } else alertStore.showMessage("error", "Ошибка при регистрации, попробуйте позже");
       return false;
     }
   }
@@ -77,24 +70,21 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   async function verifyUserToken(): Promise<void> {
     const token = localStorage.getItem("token");
     if (token) {
-      const checkToken: VerifyTokenResponse | ApiError = await makeRequest({
-        url: "/VerifyToken",
-        method: "post",
-        body: { token }
-      });
-      console.log(checkToken);
-      //Если токен не валиден или произошла ошибка
-      if ("error" in checkToken) logOutUser();
-      else {
-        currentUser.value = checkToken.userData;
+      try {
+        const { data }: AxiosResponse<VerifyTokenResponse> = await verifyToken(token);
+        currentUser.value = data.userData;
+        console.log(data);
         isUserLoggedIn.value = true;
+      } catch (error) {
+        console.log(error);
+        logOutUser();
       }
     }
   }
 
   async function updateUserToken(): Promise<void> {
     try {
-      const { data } = await updateToken(currentUser.value!.id);
+      const { data }: AxiosResponse<LoginResponse> = await updateToken(currentUser.value!.id);
       addTokenToStorage(data.userTokenData);
     } catch (error) {
       throw error;

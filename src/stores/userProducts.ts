@@ -2,101 +2,64 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 import { useUserAuthStore } from "@/stores/userAuth";
-import { useAlertStore } from "./alert";
-import type { IUserProduct } from "@/types/interfaces";
-import type {
-  AddProductResponse,
-  ApiError,
-  DeleteProductResponse,
-  GetProductsResponse,
-  UpdateUserProductResponse
-} from "@/types/BackendResponses";
-import type { UserProductFields } from "@/types/Forms";
 
-import { makeRequest } from "@/services/axiosFetch";
+import { isAxiosError } from "axios";
+import { handleAxiosError } from "@/services/axioxErrorHandle";
+import { getUserProducts, getCategories } from "@/services/ProductService";
+
+import type { IUserProduct, IUserProductCategory } from "@/types/interfaces";
 
 export const useUserProductsStore = defineStore("userProducts", () => {
-  
   const userProducts = ref<IUserProduct[]>([]);
 
   const userAuthStore = useUserAuthStore();
-  const alertStore = useAlertStore();
 
+  const isProductsLoading = ref(false);
   const isProductsError = ref(false);
-  const isProductsFetching = ref(false);
+
   const loadErrorMessage = ref("");
 
-  const isProductActionLoading = ref(false);
+  const productsCategories = ref<IUserProductCategory[]>([]);
+  const isCategoriesFetchError = ref(false);
+  const categoriesLoadErrorMessage = ref("");
 
   async function fetchUserProducts() {
-    isProductsFetching.value = true;
-
-    const products: GetProductsResponse | ApiError = await makeRequest({
-      method: "get",
-      url: "/AllUserProducts/" + userAuthStore.currentUser!.id
-    });
-
-    if ("error" in products) {
-      console.log(products.error);
+    isProductsLoading.value = true;
+    try {
+      const { data } = await getUserProducts(userAuthStore.currentUser!.id);
+      userProducts.value = data.products;
+    } catch (error) {
       isProductsError.value = true;
-      loadErrorMessage.value = products.error;
-    } else if (products.data) userProducts.value = products.data;
+      if (isAxiosError(error)) {
+        loadErrorMessage.value = handleAxiosError(error);
+      } else loadErrorMessage.value = "Ошибка при загрузке товаров";
+    }
+    isProductsLoading.value = false;
+  }
 
-    isProductsFetching.value = false;
+  async function fetchProductsCategories() {
+    try {
+      const { data } = await getCategories();
+      productsCategories.value = data.categories;
+    } catch (error) {
+      isCategoriesFetchError.value = true;
+      if (isAxiosError(error)) {
+        categoriesLoadErrorMessage.value = handleAxiosError(error);
+      } else categoriesLoadErrorMessage.value = "Ошибка при загрузке категорий";
+    }
   }
 
   async function deleteUserProduct(productId: number): Promise<void> {
-    const deletionResult = await makeRequest<DeleteProductResponse>({
-      url: "/DeleteProduct/" + productId,
-      method: "delete"
-    });
-
-    if ("error" in deletionResult) {
-      alertStore.showMessage("error", deletionResult.error);
-    } else {
-      //обновляем на фронте
-      userProducts.value = userProducts.value.filter((product) => product.id != productId);
-      alertStore.showMessage("success", "Товар был успешно удален");
-    }
+    userProducts.value = userProducts.value.filter((product) => product.id != productId);
   }
 
-  async function updateUserProduct(updatePayload: UserProductFields, productId: number) {
-    const updateResult = await makeRequest<UpdateUserProductResponse>({
-      url: "/UpdateUserProduct",
-      method: "patch",
-      body: {
-        ...updatePayload,
-        userId: userAuthStore.currentUser!.id,
-        productId
-      }
-    });
-    console.log(updateResult);
-
-    if ("error" in updateResult) {
-      alertStore.showMessage("error", updateResult.error);
-    } else {
-      let index = userProducts.value.findIndex((product) => product.id === productId);
-      userProducts.value[index] = updateResult.data;
-      alertStore.showMessage("success", "Товар был изменен");
-    }
+  async function updateUserProduct(newProduct: IUserProduct) {
+    let index = userProducts.value.findIndex((product) => product.id === newProduct.id);
+    userProducts.value[index] = newProduct;
   }
 
-  async function addUserProduct(data: UserProductFields): Promise<void> {
-    const addResult = await makeRequest<AddProductResponse>({
-      url: "/AddProduct",
-      method: "post",
-      body: {
-        ...data,
-        userId: userAuthStore.currentUser!.id
-      }
-    });
-
-    if ("error" in addResult) {
-      alertStore.showMessage("error", addResult.error);
-    } else {
-      userProducts.value.push(addResult.data);
-      alertStore.showMessage("success", `Товар ${data.name} был успешно добавлен!`);
-    }
+  async function addUserProduct(newProduct: IUserProduct): Promise<void> {
+    userProducts.value.push(newProduct);
   }
 
   function clearUserProducts() {
@@ -106,14 +69,17 @@ export const useUserProductsStore = defineStore("userProducts", () => {
   return {
     userProducts,
     isProductsError,
-    isProductsFetching,
+    isProductsLoading,
     loadErrorMessage,
-    isProductActionLoading,
+    productsCategories,
+    isCategoriesFetchError,
+    categoriesLoadErrorMessage,
 
     clearUserProducts,
     fetchUserProducts,
     deleteUserProduct,
     updateUserProduct,
-    addUserProduct
+    addUserProduct,
+    fetchProductsCategories
   };
 });

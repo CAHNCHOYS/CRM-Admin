@@ -9,16 +9,19 @@ export interface IUser{
 }
 
 
-
-
-
 export interface IUserProduct {
     readonly id: number;
+    readonly userId: number;
     name: string;
     price: number;
     count: number;
     category: string;
     categoryId: number;
+}
+
+export interface IUserProductCategory{
+    id: number;
+    name: string;
 }
 
 export interface ICustomer {

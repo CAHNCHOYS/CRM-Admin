@@ -22,12 +22,13 @@
                 v-model="categoryId"
                 label="Категория товара"
                 :error-messages="categoryIdErrors"
-                :items="categories"
+                :items="productsCategories"
                 item-title="name"
+                :clearable="false"
                 item-value="id"
-                v-if="categories.length"
+                v-if="productsCategories.length"
               />
-              <p v-if="isCategoriesLoadError" class="text-h6 text-red">
+              <p v-if="isCategoriesFetchError" class="text-h6 text-red">
                 {{ categoriesLoadErrorMessage }}
               </p>
             </v-col>
@@ -65,10 +66,16 @@
 </template>
 
 <script setup lang="ts">
+import { isAxiosError } from "axios";
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
-import { useProductsCategoiresFetch } from "@/composables/useProductsCategoriesFetch";
+import { storeToRefs } from "pinia";
 import { useUserProductsStore } from "@/stores/userProducts";
+import { useAlertStore } from "@/stores/alert";
+import { useUserAuthStore } from "@/stores/userAuth";
+import { addProduct } from "@/services/ProductService";
+import { handleAxiosError } from "@/services/axioxErrorHandle";
+
 import type { UserProductFields } from "@/types/Forms";
 
 const props = defineProps<{
@@ -91,15 +98,26 @@ const { value: count, errorMessage: countErrors } = useField("count");
 const { value: price, errorMessage: priceErrors } = useField("price");
 //-----------------------------------------------------------
 
-const { addUserProduct } = useUserProductsStore();
+const userProductsStore = useUserProductsStore();
+const alertStore = useAlertStore();
+const userAuthStore = useUserAuthStore();
 
-const { categories, isCategoriesLoadError, categoriesLoadErrorMessage } =
-  useProductsCategoiresFetch();
+const { productsCategories, isCategoriesFetchError, categoriesLoadErrorMessage } =
+  storeToRefs(userProductsStore);
 
 const addProductSubmit = handleSubmit(async (values) => {
-  await addUserProduct(values);
-  resetForm();
-  emit("closeModal");
+  try {
+    const { data } = await addProduct(values, userAuthStore.currentUser!.id);
+    userProductsStore.addUserProduct(data.product);
+    alertStore.showMessage("success", `Товар ${values.name} был успешно добавлен!`);
+  } catch (error) {
+    if (isAxiosError(error)) {
+      alertStore.showMessage("error", handleAxiosError(error));
+    } else alertStore.showMessage("error", "Ошибка при добавлении товара !");
+  } finally {
+    resetForm();
+    emit("closeModal");
+  }
 });
 </script>
 

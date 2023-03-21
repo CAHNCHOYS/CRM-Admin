@@ -34,7 +34,7 @@ export type DeleteAccountResponse = {
 
 //Товары--------------------------------------------
 export type GetProductsResponse = {
-    data: IUserProduct[];
+    products: IUserProduct[];
 }
 
 export type DeleteProductResponse = {
@@ -42,15 +42,13 @@ export type DeleteProductResponse = {
 }
 
 export type GetProductCategoriseResponse = {
-    data: {name: string, id: number}[];
+    categories: {name: string, id: number}[];
 }
 
-export type UpdateUserProductResponse = {
-  data: IUserProduct;
-}
 
-export type AddProductResponse = {
-  data: IUserProduct;
+
+export type NewProductResponse = {
+  product: IUserProduct;
 }
 
 
