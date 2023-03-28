@@ -3,7 +3,8 @@ export const theme =  {
       light: {
         dark: false,
         colors: {
-          'dark-blue': '#0F1E54'
+          'dark-blue': '#0F1E54',
+          'not-found':'#0C091E',
         }
       },
     },

@@ -7,7 +7,7 @@
       <v-card-text class="pa-0">
         <p class="text-h6">
           Вы уверены что хотите удалить товар
-          <span class="text-red">{{ props.product?.name }} </span> с базы данных ?
+          <span class="text-red">{{ props.product.name }} </span> из списка?
         </p>
       </v-card-text>
       <v-card-actions class="justify-center">
@@ -55,7 +55,7 @@ const deletUserProduct = async () => {
   try {
     isDeleting.value = true;
     await deleteProduct(props.product.id);
-
+  
     userProductsStore.deleteUserProduct(props.product.id);
 
     alertStore.showMessage("success", "Товар был успешно удален");

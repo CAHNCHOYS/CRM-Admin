@@ -28,8 +28,8 @@
                 item-value="id"
                 v-if="productsCategories.length"
               />
-              <p v-if="isCategoriesFetchError" class="text-h6 text-red">
-                {{ categoriesLoadErrorMessage }}
+              <p v-if="categoriesErrorMessage" class="text-h6 text-red">
+                {{ categoriesErrorMessage }}
               </p>
             </v-col>
 
@@ -56,7 +56,7 @@
               <v-btn color="green-darken-4" variant="flat" :loading="isSubmitting" type="submit">
                 Добавить
               </v-btn>
-              <v-btn color="blue-darken-4" variant="flat" @click="$emit('close')"> Отмена </v-btn>
+              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')"> Отмена </v-btn>
             </v-col>
           </v-row>
         </v-form>
@@ -73,6 +73,7 @@ import { storeToRefs } from "pinia";
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
 import { useUserAuthStore } from "@/stores/userAuth";
+
 import { addProduct } from "@/services/ProductService";
 import { handleAxiosError } from "@/services/axioxErrorHandle";
 
@@ -88,7 +89,6 @@ const emit = defineEmits<{
 
 //-----------------------------------------------------------
 const { userProductSchema } = useFormSchemas();
-
 const { handleSubmit, isSubmitting, resetForm } = useForm<UserProductFields>({
   validationSchema: userProductSchema
 });
@@ -102,14 +102,16 @@ const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
 const userAuthStore = useUserAuthStore();
 
-const { productsCategories, isCategoriesFetchError, categoriesLoadErrorMessage } =
+const { productsCategories, categoriesErrorMessage } =
   storeToRefs(userProductsStore);
 
-const addProductSubmit = handleSubmit(async (values) => {
+const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
     const { data } = await addProduct(values, userAuthStore.currentUser!.id);
+    
     userProductsStore.addUserProduct(data.product);
     alertStore.showMessage("success", `Товар ${values.name} был успешно добавлен!`);
+    
   } catch (error) {
     if (isAxiosError(error)) {
       alertStore.showMessage("error", handleAxiosError(error));

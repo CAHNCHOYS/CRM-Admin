@@ -1,4 +1,4 @@
-import type { IUser, IUserProduct } from "./interfaces";
+import type { IUser, IUserNote, IUserProduct } from "./interfaces";
 
 
 export type ApiError = {
@@ -8,28 +8,24 @@ export type ApiError = {
 
 //Ответы с backend если нет ошибки
 export type RegisterResponse =  {
-  readonly isSuccess: boolean; // Если регистрация успешна
+  readonly isSuccess: true; // Если регистрация успешна
 };
 
 export type LoginResponse = {
   //Если авторизация удалась получаем токен и объекьт пользователя
-  readonly userTokenData: {
+
     token: string;
     user: IUser;
-  };
+
 };
 
-export type VerifyTokenResponse = {
-  readonly userData: IUser; // Если токен прошел валидацию то возвращаем декодированый токен, а это объект IUser
-};
-
+export type GetUserResponse = {
+  user: IUser;
+}
 export type UpdateUserResponse = {
-  readonly isInfoUpdated: boolean;
+  readonly isInfoUpdated: true;
 };
 
-export type DeleteAccountResponse = {
-  readonly isAccountDeleted: boolean;
-};
 
 
 //Товары--------------------------------------------
@@ -37,20 +33,34 @@ export type GetProductsResponse = {
     products: IUserProduct[];
 }
 
-export type DeleteProductResponse = {
-  isProductDeleted: true;
-}
 
 export type GetProductCategoriseResponse = {
     categories: {name: string, id: number}[];
 }
 
-
-
 export type NewProductResponse = {
   product: IUserProduct;
 }
-
-
-
 //--------------------------------------------------
+
+export type GetNotesResponse = {
+     notes: IUserNote[];    
+}
+
+export type UpdateNoteResponse = {
+  isUpdated: true;
+}
+
+export type AddNoteResponse = {
+  noteId: number;
+}
+
+
+//Generic ----------------
+export type DeleteResponse = {
+  isDeleted: true;
+}
+
+export type UpdateResponse = {
+  isUpdated: true;
+}

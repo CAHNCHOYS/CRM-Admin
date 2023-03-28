@@ -10,6 +10,9 @@
     :temporary="smAndDown"
     v-if="userAuthStore.currentUser"
   >
+     <div v-if="smAndDown" style="position: absolute; right: 10px; top: 5px; " @click="$emit('closeMenu')">
+        <v-icon icon="mdi-arrow-left" class="text-white text-h4"></v-icon>
+     </div>
     <v-list class="pa-0">
       <v-list-item class="text-center d-block link">
         <v-list-item-title class="text-white text-h6"
@@ -18,7 +21,7 @@
         <template #prepend>
           <v-avatar class="mx-auto mb-2" size="60px">
             <v-img
-              :src="`https://crm-backend-mocha.vercel.app/UserAvatars/${userAuthStore.currentUser.avatar}`"
+              :src="`http://localhost:3000/UserAvatars/${userAuthStore.currentUser.avatar}`"
               alt="No avatar"
               cover
             />
@@ -91,16 +94,28 @@ const menuItems = ref<MenuItem[]>([
     link: "/products"
   },
   {
+    title: "Клиенты",
+    icon: "mdi-account-group",
+    link: "/clients"
+  },
+ 
+  {
     title: "Личный кабинет",
     icon: "mdi-account-circle",
     link: "/account"
   },
-
-  {
-    title: "О приложении",
-    icon: "mdi-information",
-    link: "/about"
+ {
+    title: "Заметки",
+    icon: "mdi-note-multiple",
+    link: "/notes"
   },
+  {
+    title: "Страница 404",
+    icon: "mdi-alert-circle-outline",
+    link: "/404"
+  },
+
+
   {
     title: "Анимации",
     icon: "mdi-animation",
@@ -110,6 +125,7 @@ const menuItems = ref<MenuItem[]>([
 ]);
 
 const userAuthStore = useUserAuthStore();
+
 function logOut(): void {
   if (window.confirm("Вы уверены что хотите выйти с аккаунта ?")) {
     userAuthStore.logOutUser();
@@ -120,24 +136,24 @@ function navigateTo(link: string) {
   router.push(`${link}`);
 }
 
+
+
+//Анимация gsap
 onMounted(()=>{
   gsap.from(".link", {
     x: 200,
     opacity: 0,
-    stagger: 0.3,
-    duration: 0.8,
+    stagger: 0.25,
+    duration: 0.5,
     ease:"sine.out",
   });
   gsap.from(".btn",{
     scale: 0,
     opacity: 0,
-    delay: 1.5,
+    delay: 1.2,
     duration: 0.5,
   });
 });
-
-
-
 </script>
 
 <style lang="scss" scoped>

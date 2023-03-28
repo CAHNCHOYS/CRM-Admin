@@ -3,7 +3,7 @@
     <TheSidebarMenu @close-menu="isSidebarOpened = false" :is-opened="isSidebarOpened" />
 
     <v-app-bar
-      color="blue-grey-darken-4"
+      color="green-accent-1"
       :height="65"
       :elevation="0"
     >

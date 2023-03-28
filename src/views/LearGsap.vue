@@ -1,48 +1,54 @@
 <template>
-  <div>
-   
+  <div class="text">
+    <div class="text-h2">Примеры анимация на gsap</div>
   </div>
 </template>
 
-<script lang="ts" setup>
-
-
-
-
-
-
-
-</script>
+<script lang="ts" setup></script>
 
 <style lang="scss" scoped>
 .box {
-  height: 100px;
-  width: 100px;
+  border: 2px solid black;
+  height: 700px;
+  width: 100%;
+  position: relative;
 
-  margin-bottom: 5px;
-  background-color: black;
+  flex-wrap: wrap;
+  display: flex;
 }
 
-.ball {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background-color: cornflowerblue;
-}
-
-.ball1 {
-  background-color: green;
-}
-
-.ball2 {
-  background-color: black;
-}
-
-.ball3 {
+.item {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 50px;
+  height: 50px;
   background-color: coral;
 }
 
-.ball4 {
+.sections {
+}
+
+.section {
+}
+
+.square {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  background-color: cornflowerblue;
+  z-index: 3;
+}
+
+.square2 {
+  width: 100px;
+  height: 100px;
+  position: relative;
   background-color: crimson;
+  z-index: 3;
+}
+
+.red {
+  background-color: red;
 }
 </style>

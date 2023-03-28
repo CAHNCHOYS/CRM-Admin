@@ -4,7 +4,7 @@
       <v-progress-circular color="primary" indeterminate size="124" />
     </v-overlay>
     <component :is="getCurrentLayout" v-if="!isLoading">
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{Component}">
         <transition name="slide" mode="out-in">
           <component :is="Component"> </component>
         </transition>
@@ -40,10 +40,10 @@ onMounted(async () => {
   //     }
   //   });
   // }
-
+  
   setTimeout(()=>{
     isLoading.value = false;
-  },1000)
+  },500)
 
 });
 </script>

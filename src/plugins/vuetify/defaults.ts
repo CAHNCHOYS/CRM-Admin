@@ -37,6 +37,9 @@ export default {
   VAlertTitle:{
 
   },
+  VSnackbar:{
+   location: "bottom right",
+  },
   
  
   VTextField: {

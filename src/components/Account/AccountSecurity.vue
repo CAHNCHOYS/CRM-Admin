@@ -91,20 +91,18 @@ const userAuthStore = useUserAuthStore();
 const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) => {
   const userId = userAuthStore.currentUser!.id;
   try {
-    const { data } = await updatePassword({ ...values, id: userId });
-    if (data.isInfoUpdated) {
-      await userAuthStore.updateUserToken();
-      isUpdateSuccess.value = true;
-      setTimeout(() => (isUpdateSuccess.value = false), 3500);
-    }
+    await updatePassword(values, userId);
+    await userAuthStore.fetchUser();
+
+    isUpdateSuccess.value = true;
+    setTimeout(() => (isUpdateSuccess.value = false), 3500);
   } catch (error) {
     isUpdateError.value = true;
     setTimeout(() => (isUpdateError.value = false), 3500);
     if (isAxiosError(error)) {
       updatePassErrorMessage.value = handleAxiosError(error);
-    } else {
-      updatePassErrorMessage.value = "Ошибка при обновлении пароля";
-    }
+    } else updatePassErrorMessage.value = "Ошибка при обновлении пароля";
+
     console.log(error);
   }
 });

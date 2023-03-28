@@ -58,7 +58,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "openDialog", product: IUserProduct, dialogName: "edit" | "delete"): void;
-  (e: "openDialog", product: IUserProduct, dialogName: "edit" | "delete"): void;
 }>();
 </script>
 

@@ -64,17 +64,17 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { isAxiosError } from "axios";
 
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
-import type { UpdateInfoFields } from "@/types/Forms";
-import type {  UpdateUserResponse } from "@/types/BackendResponses";
 
 import { updateInfo } from "@/services/UserService";
-import { isAxiosError, type AxiosResponse } from "axios";
 import { handleAxiosError } from "@/services/axioxErrorHandle";
+
+import type { UpdateInfoFields } from "@/types/Forms";
 
 const userAuthStore = useUserAuthStore();
 
@@ -111,16 +111,12 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
     formData.append("avatar", values.avatar[0], avatar.value[0].name);
     formData.append("id", String(userAuthStore.currentUser!.id));
 
-    //Разобраться тут !!!! ?:?????
-    const { data }: AxiosResponse<UpdateUserResponse> = await updateInfo(formData);
-    console.log(data);
-    if (data.isInfoUpdated) {
-      await userAuthStore.updateUserToken();
-      isUpdateSuccess.value = true;
-      setTimeout(() => (isUpdateSuccess.value = false), 3500);
-    }
+    await updateInfo(formData);
+    await userAuthStore.fetchUser();
+
+    isUpdateSuccess.value = true;
+    setTimeout(() => (isUpdateSuccess.value = false), 3500);
   } catch (error) {
-    console.log(error);
     isUpdateError.value = true;
     setTimeout(() => (isUpdateError.value = false), 3500);
     if (isAxiosError(error)) {

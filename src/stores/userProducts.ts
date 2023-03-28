@@ -15,13 +15,10 @@ export const useUserProductsStore = defineStore("userProducts", () => {
   const userAuthStore = useUserAuthStore();
 
   const isProductsLoading = ref(false);
-  const isProductsError = ref(false);
-
-  const loadErrorMessage = ref("");
+  const productsErrorMessage = ref<string | null>(null);
 
   const productsCategories = ref<IUserProductCategory[]>([]);
-  const isCategoriesFetchError = ref(false);
-  const categoriesLoadErrorMessage = ref("");
+  const categoriesErrorMessage = ref<string | null >(null);
 
   async function fetchUserProducts() {
     isProductsLoading.value = true;
@@ -29,10 +26,9 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       const { data } = await getUserProducts(userAuthStore.currentUser!.id);
       userProducts.value = data.products;
     } catch (error) {
-      isProductsError.value = true;
       if (isAxiosError(error)) {
-        loadErrorMessage.value = handleAxiosError(error);
-      } else loadErrorMessage.value = "Ошибка при загрузке товаров";
+        productsErrorMessage.value = handleAxiosError(error);
+      } else productsErrorMessage.value = "Ошибка при загрузке товаров";
     }
     isProductsLoading.value = false;
   }
@@ -42,10 +38,9 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       const { data } = await getCategories();
       productsCategories.value = data.categories;
     } catch (error) {
-      isCategoriesFetchError.value = true;
       if (isAxiosError(error)) {
-        categoriesLoadErrorMessage.value = handleAxiosError(error);
-      } else categoriesLoadErrorMessage.value = "Ошибка при загрузке категорий";
+        categoriesErrorMessage.value = handleAxiosError(error);
+      } else categoriesErrorMessage.value = "Ошибка при загрузке категорий";
     }
   }
 
@@ -68,12 +63,10 @@ export const useUserProductsStore = defineStore("userProducts", () => {
 
   return {
     userProducts,
-    isProductsError,
     isProductsLoading,
-    loadErrorMessage,
+    productsErrorMessage,
     productsCategories,
-    isCategoriesFetchError,
-    categoriesLoadErrorMessage,
+    categoriesErrorMessage,
 
     clearUserProducts,
     fetchUserProducts,

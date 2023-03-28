@@ -2,10 +2,11 @@ import axios from "./axios";
 
 import type { LoginFields, RegisterFields, UpdatePasswordFields } from "@/types/Forms";
 import type {
+ DeleteResponse,
+  GetUserResponse,
   LoginResponse,
   RegisterResponse,
-  UpdateUserResponse,
-  VerifyTokenResponse
+  UpdateUserResponse
 } from "@/types/BackendResponses";
 import type { AxiosResponse } from "axios";
 
@@ -19,21 +20,23 @@ export const register = async (
   return await axios.post("/Registration", registerPayload);
 };
 
-export const verifyToken = async (token: string): Promise<AxiosResponse<VerifyTokenResponse>> => {
-  return await axios.post("/VerifyToken", { token });
+export const deleteAccount = async (id: number): Promise<AxiosResponse<DeleteResponse>> => {
+  return await axios.delete(`/DeleteAccount/${id}`);
 };
 
-export const updateToken = async (id: number): Promise<AxiosResponse<LoginResponse>> => {
-  return await axios.patch("/UpdateToken", { id });
+export const getUserByToken = async (token: string): Promise<AxiosResponse<GetUserResponse>> => {
+  return await axios.get("/FetchUser", {
+    headers: {
+      authorization: `Bearer ${token}`
+    }
+  });
 };
 
-type UpdatePasswordPayload = UpdatePasswordFields & {
-  id: number;
-};
 export const updatePassword = async (
-  updatePasswordPayload: UpdatePasswordPayload
+  updatePasswordPayload: UpdatePasswordFields,
+  id: number
 ): Promise<AxiosResponse<UpdateUserResponse>> => {
-  return await axios.patch("/UpdateUserPassword", updatePasswordPayload);
+  return await axios.patch("/UpdateUserPassword", { ...updatePasswordPayload, id });
 };
 
 export const updateInfo = async (
@@ -45,3 +48,5 @@ export const updateInfo = async (
     }
   });
 };
+
+

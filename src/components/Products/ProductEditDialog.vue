@@ -27,8 +27,8 @@
                 item-value="id"
                 v-if="productsCategories.length"
               />
-              <p v-if="isCategoriesFetchError" class="text-h6 text-red">
-                {{ categoriesLoadErrorMessage }}
+              <p v-if="categoriesErrorMessage" class="text-h6 text-red">
+                {{ categoriesErrorMessage }}
               </p>
             </v-col>
 
@@ -80,6 +80,7 @@ import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UserProductFields } from "@/types/Forms";
 import type { IUserProduct } from "@/types/interfaces";
+import { useUserAuthStore } from "@/stores/userAuth";
 
 const props = defineProps<{
   isActive: boolean;
@@ -100,7 +101,7 @@ const initialFormValues = computed(() => ({
 
 const { userProductSchema } = useFormSchemas();
 
-const { handleSubmit, isSubmitting } = useForm<UserProductFields>({
+const { handleSubmit, isSubmitting, resetForm } = useForm<UserProductFields>({
   validationSchema: userProductSchema,
   initialValues: initialFormValues
 });
@@ -112,20 +113,28 @@ const { value: categoryId, errorMessage: categoryIdErrors } = useField("category
 
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
+const userUserAuthStore = useUserAuthStore();
 
-const { productsCategories, isCategoriesFetchError, categoriesLoadErrorMessage } =
+const { productsCategories, categoriesErrorMessage } =
   storeToRefs(userProductsStore);
 
 const updateProductSubmit = handleSubmit(async (formValues: UserProductFields) => {
   try {
-    const { data } = await updateProduct(formValues, props.product.id, props.product.userId);
+    const { data } = await updateProduct(
+      formValues,
+      userUserAuthStore.currentUser!.id,
+      props.product.id
+    );
+
     userProductsStore.updateUserProduct(data.product);
     alertStore.showMessage("success", "Товар был изменен");
   } catch (error) {
+    console.log("error");
     if (isAxiosError(error)) {
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при обновлении товара!");
   } finally {
+    resetForm();
     emit("closeModal");
   }
 });

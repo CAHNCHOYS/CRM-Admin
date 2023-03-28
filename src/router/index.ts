@@ -71,11 +71,19 @@ const router = createRouter({
       }
     },
     {
-      path:"/about",
-      name:"about-page",
-      component:()=> import('../views/AboutView.vue'),
+      path:"/notes",
+      name:"notes-page",
+      component:()=> import('../views/NotesView.vue'),
       meta: {
         requireAuth: true,
+      }
+    },
+    {
+      path:"/clients",
+      name:"clients-page",
+      component:()=> import('../views/ClientsView.vue'),
+      meta: {
+        requireAuth: false,
       }
     },
     {
@@ -84,6 +92,15 @@ const router = createRouter({
       component:()=> import('../views/LearGsap.vue'),
       meta: {
         requireAuth: false,
+      }
+    },
+    {
+      path: "/:catchAll(.*)",
+      name:"not-found-page",
+      component:()=> import('../views/NotFoundView.vue'),
+      meta: {
+        requireAuth: false,
+        layout: "login",
       }
     },
  
@@ -99,7 +116,7 @@ router.beforeEach(async (to, from) => {
   console.log(from.name);
  // Если зашли первый раз
   if(!from.name){
-     await userAuthStore.verifyUserToken();
+     await userAuthStore.fetchUser();
   }
  
   if(to.meta.requireAuth && !userAuthStore.isUserLoggedIn){

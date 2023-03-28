@@ -102,8 +102,6 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 
 import type { LoginFields } from "@/types/Forms";
 
-
-
 //Form validation -----------------------------------------------------------
 const { loginSchema } = useFormSchemas();
 
@@ -126,7 +124,7 @@ const router = useRouter();
 
 //Авторизация
 const loginSubmit = handleSubmit(async (values: LoginFields) => {
-  await userAuthStore.loginUser(values, resetForm);
+  await userAuthStore.loginUser(values);
 
   //Если вошли в аккаунт
   if (userAuthStore.isUserLoggedIn) {
@@ -135,10 +133,8 @@ const loginSubmit = handleSubmit(async (values: LoginFields) => {
         router.push({ name: route.query.redirectedFrom as string });
       } else router.push("/");
     }, 3500);
-  }
-  
+  } else resetForm();
 });
-
 
 //Если зашли на страницу, которая требует авторизации, то перекидываем на эту странциу и показываем сообщение
 watchEffect(() => {

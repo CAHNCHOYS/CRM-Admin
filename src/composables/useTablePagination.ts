@@ -3,9 +3,8 @@ import { useRouter, useRoute } from "vue-router";
 
 export const useTablePagination = <T extends {}>(
   tableElements: Ref<T[]> = ref([]),
-  selectedField: Ref<keyof T>,
+  sortField: Ref<keyof T>
 ) => {
-  
   const route = useRoute();
   const router = useRouter();
 
@@ -16,40 +15,31 @@ export const useTablePagination = <T extends {}>(
   const isInverseSort = ref(false);
 
   const setSortField = (field: keyof T) => {
-    if (selectedField.value === field) {
+    if (sortField.value === field) {
       isInverseSort.value = !isInverseSort.value;
     } else isInverseSort.value = false;
-    selectedField.value = field;
+    sortField.value = field;
   };
-
-
 
   const setCurrentPage = (page: number) => {
     currentPage.value = page;
   };
 
-
   const paginatedProducts = computed(() => {
     const elementsCount = tableElements.value.length;
     let start = (currentPage.value - 1) * productsByPage.value;
 
-    if (start > elementsCount) {
+    if (start >= elementsCount) {
       setCurrentPage(Math.ceil(elementsCount / productsByPage.value));
       start = (currentPage.value - 1) * productsByPage.value;
     }
     let end = start + productsByPage.value;
-  
+
     const paginated = tableElements.value.slice(start, end);
 
-
     if (!isInverseSort.value)
-      return [...paginated].sort((a, b) =>
-        a[selectedField.value] > b[selectedField.value] ? 1 : -1
-      );
-    else
-      return [...paginated].sort((a, b) =>
-        a[selectedField.value] > b[selectedField.value] ? -1 : 1
-      );
+      return [...paginated].sort((a, b) => (a[sortField.value] > b[sortField.value] ? 1 : -1));
+    else return [...paginated].sort((a, b) => (a[sortField.value] > b[sortField.value] ? -1 : 1));
   });
 
   watch(currentPage, () => {
@@ -57,7 +47,7 @@ export const useTablePagination = <T extends {}>(
       name: "products-page",
       query: {
         ...route.query,
-        currentPage: currentPage.value,
+        currentPage: currentPage.value
       }
     });
   });

@@ -1,52 +1,60 @@
-import gsap from 'gsap';
+import gsap from "@/plugins/gsap/index";
+
+export const useListAnimations = () => {
+  const elementEnter = (el: Element, done: GSAPCallback) => {
+    gsap.from(el, {
+      duration: 0.6,
+      opacity: 0,
+      y: "-50%",
 
 
-export const useListAnimations = ()=>{
+      onComplete: done,
+      ease: "power1.out"
+    });
+  };
+
+  const elementLeave = (el: Element, done: GSAPCallback) => {
+    gsap.to(el, {
+      duration: 0.6,
+      opacity: 0,
+      scale: 0,
+      x: "100%",
+      position: "absolute",
+      visibility: "hidden",
+
+      onComplete: done,
+      ease: "power1.out"
+    });
+  };
 
 
-    const beforeEnter: any = (el: HTMLElement)=>{
-       gsap.from(el, {
-          y: -200,
-          opacity: 0,
+  const noteEnter = (el: any, done: GSAPCallback) => {
+    gsap.from(el, {
+      opacity: 0,
+      scale: 0,
+      ease: "sine.out",
+     
+      onComplete: done,
+      duration: 0.8
+    });
+  };
+  
+  const noteLeave = (el: any, done: GSAPCallback) => {
+    console.log("leaving");
+    gsap.to(el, {
+      duration: 0.8,
+      ease: "sine.out",
+      opacity: 0,
+  
+      scale: 0,
+      onComplete: done
+    });
+  };
 
-       })
-    }
-
-
-    const enter: any = (el: any, done: GSAPCallback)=>{
-        
-        gsap.to(el, {
-            y: 0,
-            opacity: 1,
-            duration: 0.5,
-            delay: el.dataset.index * 2, 
-            onComplete: done,
-        })
-    }
-
-    const afterEnter: any = (el: HTMLElement, done: GSAPCallback)=>{
-        console.log("after Enter");
-        done;
-    }
-
-    const leave: any = (el: any, done: GSAPCallback)=>{
-        gsap.to(el, {
-            y: 200,
-            
-       
-            opacity: 0,
-           
-            duration: 0.5,
-            onComplete: done,
-            
-        })
-    }
-    
-
-   return{
-     beforeEnter, 
-     enter,
-     afterEnter,
-     leave,
-   }
-}
+  return {
+    elementEnter,
+    elementLeave,
+    noteEnter,
+    noteLeave,
+  };
+};

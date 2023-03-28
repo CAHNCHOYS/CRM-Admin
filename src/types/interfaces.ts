@@ -11,7 +11,6 @@ export interface IUser{
 
 export interface IUserProduct {
     readonly id: number;
-    readonly userId: number;
     name: string;
     price: number;
     count: number;
@@ -24,8 +23,13 @@ export interface IUserProductCategory{
     name: string;
 }
 
-export interface ICustomer {
-    id: number;
-    name: string;
+export type NoteType = "В процессе" | "Сделать потом" | "Сделано";
+
+export interface IUserNote {
+    readonly id: number;
+    title: string;
+    type: NoteType,
+    
 }
+
 
