@@ -3,6 +3,7 @@
     transition="dialog-bottom-transition"
     max-width="500"
     @update:model-value="$emit('closeModal')"
+    scrollable
     :model-value="isActive"
   >
     <v-card class="pa-5" color="white" elevation="4">
@@ -66,7 +67,6 @@
 </template>
 
 <script setup lang="ts">
-import { isAxiosError } from "axios";
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { storeToRefs } from "pinia";
@@ -75,6 +75,7 @@ import { useAlertStore } from "@/stores/alert";
 import { useUserAuthStore } from "@/stores/userAuth";
 
 import { addProduct } from "@/services/ProductService";
+import { isAxiosError } from "axios";
 import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UserProductFields } from "@/types/Forms";
@@ -109,7 +110,8 @@ const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
     const { data } = await addProduct(values, userAuthStore.currentUser!.id);
     
-    userProductsStore.addUserProduct(data.product);
+    console.log(data);
+    userProductsStore.addUserProduct({...values, ...data});
     alertStore.showMessage("success", `Товар ${values.name} был успешно добавлен!`);
     
   } catch (error) {

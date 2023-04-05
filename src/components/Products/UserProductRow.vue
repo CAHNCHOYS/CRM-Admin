@@ -61,13 +61,6 @@ const emit = defineEmits<{
 }>();
 </script>
 
-<style lang="scss" scoped>
-@media (max-width: 600px) {
-  td {
-    border-bottom: unset !important;
-  }
-  tr {
-    border-bottom: 1px solid lightgray !important;
-  }
-}
+<style scoped>
+
 </style>

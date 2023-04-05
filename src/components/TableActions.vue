@@ -8,10 +8,10 @@
         label="Элементов на странице"
         variant="underlined"
    
-        v-model="count"
+        :model-value="count"
         :clearable="false"
         :items="[10, 15, 20, 30, 50]"
-        @update:model-value="$emit('update:count', count)"
+        @update:model-value="$emit('update:count', $event)"
       >
       </v-select>
     </v-col>
@@ -23,8 +23,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
 const props = defineProps<{
   count: number;
 }>();
@@ -35,7 +33,8 @@ const emit = defineEmits<{
   (e: "toggleAddDialog"): void;
 }>();
 
-const count = ref(props.count);
+
+
 
 
 

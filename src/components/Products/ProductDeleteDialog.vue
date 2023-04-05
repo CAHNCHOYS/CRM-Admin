@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :model-value="isActive" :max-width="450" persistent>
+  <v-dialog :model-value="isActive" :max-width="450" persistent transition="dialog-bottom-transition">
     <v-card class="pa-4">
       <v-card-title class="pa-0 mb-3">
         <p class="font-weight-bold text-h5">Подтверждение удаления</p>

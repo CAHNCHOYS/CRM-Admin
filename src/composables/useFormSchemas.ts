@@ -103,11 +103,14 @@ export const useFormSchemas = () => {
       .max(999999, "Слишком  большое число")
   });
 
+  const userClientSchema = yup.object({
+    firstName: yup.string().required("Поле обязательное для ввода").min(2, "Миниум 2 символа!").max(50, "Слишком длинное Имя!"),
+    secondName: yup.string().required("Поле обязательное для ввода").min(2, "Миниум 2 символа!").max(50, "Слишком длинная Фамилия!"),
+    thirdName: yup.string().required("Поле обязательное для ввода").min(2, "Миниум 2 символа!").max(50, "Слишком длинное Отчество!"),
+    phone: yup.string().required("Поле обязательное для ввода").min(6, "Миниум 6 символов!").max(30, "Введите телефон покороче"),
+    premium: yup.number<0 | 1>().default(0),
+  });
 
-
-
-
- 
 
   return {
     loginSchema,
@@ -115,7 +118,6 @@ export const useFormSchemas = () => {
     updateInfoShchema,
     updatePasswordSchema,
     userProductSchema,
-
-  
+    userClientSchema,
   };
 };

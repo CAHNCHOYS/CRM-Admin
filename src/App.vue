@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-overlay :model-value="isLoading" class="align-center justify-center">
-      <v-progress-circular color="primary" indeterminate size="124" />
+      <v-progress-circular color="secondary" indeterminate size="124" />
     </v-overlay>
     <component :is="getCurrentLayout" v-if="!isLoading">
       <router-view v-slot="{Component}">
@@ -41,15 +41,16 @@ onMounted(async () => {
   //   });
   // }
   
-  setTimeout(()=>{
+
     isLoading.value = false;
-  },500)
+
 
 });
 </script>
 
 <style lang="scss">
 @import "@/assets/scss/nullstyle.scss";
+@import "@/assets/scss/global.scss";
 
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 

@@ -1,4 +1,4 @@
-import type { IUser, IUserNote, IUserProduct } from "./interfaces";
+import type { IUser, IUserClient, IUserNote, IUserProduct } from "./interfaces";
 
 
 export type ApiError = {
@@ -6,14 +6,12 @@ export type ApiError = {
 };
 
 
-//Ответы с backend если нет ошибки
 export type RegisterResponse =  {
   readonly isSuccess: true; // Если регистрация успешна
 };
 
 export type LoginResponse = {
   //Если авторизация удалась получаем токен и объекьт пользователя
-
     token: string;
     user: IUser;
 
@@ -37,12 +35,14 @@ export type GetProductsResponse = {
 export type GetProductCategoriseResponse = {
     categories: {name: string, id: number}[];
 }
-
+//При обновлении или добавлении товара
 export type NewProductResponse = {
-  product: IUserProduct;
+  id: number;
+  category: string;
 }
 //--------------------------------------------------
 
+//Заметки ---------------------------------------
 export type GetNotesResponse = {
      notes: IUserNote[];    
 }
@@ -53,6 +53,16 @@ export type UpdateNoteResponse = {
 
 export type AddNoteResponse = {
   noteId: number;
+}
+//---------------------------------------------
+
+//Клиенты -----------------------
+export type GetClientsResponse = {
+  clients: IUserClient[];
+}
+
+export type AddClientResponse = {
+  clientId: number;
 }
 
 

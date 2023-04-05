@@ -28,7 +28,6 @@ export const useNotesActions = () => {
     try {
       const { data } = await getUserNotes(userAuthStore.currentUser!.id);
       notes.value = data.notes;
-      console.log(notes.value);
     } catch (error) {
       if (isAxiosError(error)) {
         fetchNotesError.value = handleAxiosError(error);
@@ -40,11 +39,6 @@ export const useNotesActions = () => {
   const updateNoteAction = async (note: IUserNote) => {
     isActionLoading.value = true;
     try {
-      await new Promise(res=>{
-        setTimeout(()=>{
-            res("done");  
-        },3500)
-      });
       await updateNote(note);
     } catch (error) {
       if (isAxiosError(error)) {
@@ -55,15 +49,10 @@ export const useNotesActions = () => {
     isActionLoading.value = false;
   };
 
-  
   const addNoteAction = async (noteTitle: string, noteType: NoteType) => {
     if (noteTitle.length < 1) return;
     isActionLoading.value = true;
-    await new Promise(res=>{
-      setTimeout(()=>{
-          res("done");  
-      },3500)
-    });
+
     try {
       const { data } = await addNote({
         title: noteTitle,
@@ -83,11 +72,6 @@ export const useNotesActions = () => {
   const deleteNoteAction = async (id: number) => {
     isActionLoading.value = true;
     try {
-      await new Promise(res=>{
-        setTimeout(()=>{
-            res("done");  
-        },3500)
-      });
       await deleteNote(id);
 
       notes.value = notes.value.filter((note) => note.id != id);

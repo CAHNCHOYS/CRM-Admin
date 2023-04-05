@@ -62,7 +62,7 @@
                   color="black"
                   placeholder="Задача..."
                   v-model="column.addText"
-                  class="my-2"
+                  class="my-2 white-input"
                   :rules="[(v) => !!v || 'Поле обязательное для ввода']"
                 >
                 </v-text-field>
@@ -97,7 +97,7 @@
             indeterminate
             color="white"
             class="mb-0"
-          ></v-progress-linear>
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -107,10 +107,11 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import Note from "@/components/Note.vue";
 import gsap from "gsap";
+import Note from "@/components/Note.vue";
 import { useAlertStore } from "@/stores/alert";
 import { useNotesActions } from "@/composables/useNotesActions";
+
 import type { NoteType } from "@/types/interfaces";
 
 const alertStore = useAlertStore();
@@ -181,12 +182,12 @@ const noteLeave = (el: any, done: GSAPCallback) => {
 };
 </script>
 
-<style>
+<style >
 .dragging {
   opacity: 0.5 !important;
 }
 
-.v-messages__message {
+.white-input .v-messages__message {
   color: white !important;
 }
 </style>

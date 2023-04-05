@@ -2,11 +2,11 @@
   <div>
     <v-table density="comfortable">
       <thead class="h-auto">
-        <tr class="d-sm-table-row d-none">
+        <tr class="d-none d-sm-table-row">
           <th
             v-for="item in tableHeaders"
             :key="item.text"
-            class="text-h6 pa-0 pr-3 font-weight-bold text-black"
+            class="text-h6 pa-0 pr-3 pb-3 font-weight-bold text-black"
             @click="$emit('update:currentSortField', item.field)"
           >
             <v-hover v-slot="{ isHovering, props }">
@@ -21,41 +21,40 @@
                   "
                   v-show="currentSortField === item.field || isHovering"
                   :style="{ opacity: isHovering && currentSortField != item.field ? 0.6 : 1 }"
-                ></v-icon>
+                />
               </p>
             </v-hover>
           </th>
 
-          <th class="text-h6 pa-0 pb-3 font-weight-bold text-black">Действия</th>
+          <th class="text-h6 pb-3 font-weight-bold text-black">Действия</th>
         </tr>
-
         <div class="d-sm-none d-block mb-2">
           <v-select
             :model-value="currentSortField"
             @update:model-value="$emit('update:currentSortField', $event)"
             variant="underlined"
             label="Сортировать по"
+            :clearable="false"
             :items="tableHeaders"
             item-title="text"
             item-value="field"
           />
         </div>
       </thead>
-      <tbody v-if="productsToShow.length">
-        <transition-group appear @enter="elementEnter" @leave="elementLeave">
-          <UserProductRow
-            v-for="(item, index) in productsToShow"
-            :product="item"
-            :key="item.id"
+      <tbody v-if="clients.length">
+        <transition-group @enter="elementEnter" @leave="elementLeave">
+          <ClientsTableRow
+            v-for="client in clients"
+            :key="client.id"
+            :client="client"
             @open-dialog="openDialog"
-            :data-index="index"
-          />
-        </transition-group>
+        /></transition-group>
       </tbody>
+
       <tbody v-else>
         <tr>
           <td class="py-2 text-h6 text-center font-weight-bold" colspan="12">
-            Не удалось найти ни одного товара (
+            Не удалось найти ни одного клиента :(
           </td>
         </tr>
       </tbody>
@@ -65,52 +64,54 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import ClientsTableRow from "@/components/Clients/ClientsTableRow.vue";
 import { useListAnimations } from "@/composables/useListAnimtaions";
-import UserProductRow from "@/components/Products/UserProductRow.vue";
-import type { IUserProduct } from "@/types/interfaces";
+
+import type { IUserClient } from "@/types/interfaces";
 
 const props = defineProps<{
-  productsToShow: IUserProduct[];
+  clients: IUserClient[];
   isInverseSort: boolean;
-  currentSortField: keyof IUserProduct;
+  currentSortField: keyof IUserClient;
 }>();
-
 const emit = defineEmits<{
-  (e: "update:currentSortField", field: keyof IUserProduct): void;
-  (e: "openProductDialog", product: IUserProduct, type: "edit" | "delete"): void;
+  (e: "update:currentSortField", field: keyof IUserClient): void;
+  (e: "openDialog", client: IUserClient, dialog: "edit" | "delete"): void;
 }>();
 
 const tableHeaders = ref<
   {
     text: string;
-    field: keyof IUserProduct;
+    field: keyof IUserClient;
   }[]
 >([
   {
     text: "Имя",
-    field: "name"
+    field: "firstName"
   },
   {
-    text: "Цена(руб)",
-    field: "price"
+    text: "Фамилия",
+    field: "secondName"
   },
   {
-    text: "Кол-во",
-    field: "count"
+    text: "Отчество",
+    field: "thirdName"
   },
   {
-    text: "Категория",
-    field: "category"
+    text: "Телефон",
+    field: "phone"
+  },
+  {
+    text: "Премиум",
+    field: "premium"
   }
 ]);
 
-const openDialog = (product: IUserProduct, dialog: "edit" | "delete") => {
-  emit("openProductDialog", product, dialog);
+const openDialog = (product: IUserClient, dialog: "edit" | "delete") => {
+  emit("openDialog", product, dialog);
 };
 
 const { elementEnter, elementLeave } = useListAnimations();
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

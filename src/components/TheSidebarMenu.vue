@@ -11,7 +11,7 @@
     v-if="userAuthStore.currentUser"
   >
      <div v-if="smAndDown" style="position: absolute; right: 10px; top: 5px; " @click="$emit('closeMenu')">
-        <v-icon icon="mdi-arrow-left" class="text-white text-h4"></v-icon>
+        <v-icon icon="mdi-arrow-left" class="text-white text-h4" />
      </div>
     <v-list class="pa-0">
       <v-list-item class="text-center d-block link">
@@ -85,7 +85,7 @@ const menuItems = ref<MenuItem[]>([
   {
     title: "Статиститка",
     icon: "mdi-chart-areaspline",
-    link: "/workers"
+    link: "/stats"
   },
 
   {
@@ -114,8 +114,6 @@ const menuItems = ref<MenuItem[]>([
     icon: "mdi-alert-circle-outline",
     link: "/404"
   },
-
-
   {
     title: "Анимации",
     icon: "mdi-animation",
@@ -144,14 +142,14 @@ onMounted(()=>{
     x: 200,
     opacity: 0,
     stagger: 0.25,
-    duration: 0.5,
+    duration: 0.4,
     ease:"sine.out",
   });
   gsap.from(".btn",{
     scale: 0,
     opacity: 0,
     delay: 1.2,
-    duration: 0.5,
+    duration: 0.4,
   });
 });
 </script>

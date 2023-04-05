@@ -63,9 +63,9 @@ const router = createRouter({
       }
     },
     {
-      path:"/workers",
-      name:"workers",
-      component:()=> import('../views/WorkersView.vue'),
+      path:"/stats",
+      name:"stats-page",
+      component:()=> import('../views/StatiscticView.vue'),
       meta: {
         requireAuth: true,
       }
@@ -83,7 +83,7 @@ const router = createRouter({
       name:"clients-page",
       component:()=> import('../views/ClientsView.vue'),
       meta: {
-        requireAuth: false,
+        requireAuth: true,
       }
     },
     {
@@ -94,6 +94,7 @@ const router = createRouter({
         requireAuth: false,
       }
     },
+
     {
       path: "/:catchAll(.*)",
       name:"not-found-page",
@@ -112,13 +113,12 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
   const userAuthStore = useUserAuthStore();
-
   console.log(from.name);
  // Если зашли первый раз
   if(!from.name){
      await userAuthStore.fetchUser();
   }
- 
+     
   if(to.meta.requireAuth && !userAuthStore.isUserLoggedIn){
     return {
       name: "login-page",
@@ -127,9 +127,7 @@ router.beforeEach(async (to, from) => {
       }
     }
   }
-
-
-})
+});
 
 
 

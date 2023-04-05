@@ -37,6 +37,9 @@ export default {
   VAlertTitle:{
 
   },
+  VSwitch: {
+    hideDetails: "auto"
+  },
   VSnackbar:{
    location: "bottom right",
   },

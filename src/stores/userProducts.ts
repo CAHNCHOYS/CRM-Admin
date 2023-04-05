@@ -1,8 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-import { useUserAuthStore } from "@/stores/userAuth";
-
 import { isAxiosError } from "axios";
 import { handleAxiosError } from "@/services/axioxErrorHandle";
 import { getUserProducts, getCategories } from "@/services/ProductService";
@@ -11,19 +9,19 @@ import type { IUserProduct, IUserProductCategory } from "@/types/interfaces";
 
 export const useUserProductsStore = defineStore("userProducts", () => {
   const userProducts = ref<IUserProduct[]>([]);
-
-  const userAuthStore = useUserAuthStore();
+  
 
   const isProductsLoading = ref(false);
   const productsErrorMessage = ref<string | null>(null);
 
   const productsCategories = ref<IUserProductCategory[]>([]);
-  const categoriesErrorMessage = ref<string | null >(null);
+  const categoriesErrorMessage = ref<string | null>(null);
 
-  async function fetchUserProducts() {
+  async function getAllProducts(userId: number) {
+
     isProductsLoading.value = true;
     try {
-      const { data } = await getUserProducts(userAuthStore.currentUser!.id);
+      const { data } = await getUserProducts(userId);
       userProducts.value = data.products;
     } catch (error) {
       if (isAxiosError(error)) {
@@ -44,16 +42,17 @@ export const useUserProductsStore = defineStore("userProducts", () => {
     }
   }
 
-  async function deleteUserProduct(productId: number): Promise<void> {
+  function deleteUserProduct(productId: number) {
     userProducts.value = userProducts.value.filter((product) => product.id != productId);
   }
 
-  async function updateUserProduct(newProduct: IUserProduct) {
+  function updateUserProduct(newProduct: IUserProduct) {
     let index = userProducts.value.findIndex((product) => product.id === newProduct.id);
     userProducts.value[index] = newProduct;
   }
 
-  async function addUserProduct(newProduct: IUserProduct): Promise<void> {
+  function addUserProduct(newProduct: IUserProduct) {
+    console.log(newProduct);
     userProducts.value.push(newProduct);
   }
 
@@ -69,7 +68,7 @@ export const useUserProductsStore = defineStore("userProducts", () => {
     categoriesErrorMessage,
 
     clearUserProducts,
-    fetchUserProducts,
+    getAllProducts,
     deleteUserProduct,
     updateUserProduct,
     addUserProduct,

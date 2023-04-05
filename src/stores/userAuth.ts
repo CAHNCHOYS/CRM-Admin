@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 import { useUserProductsStore } from "./userProducts";
+import { useUserClientsStore } from "./userClients";
 import { useAlertStore } from "./alert";
 
 import { login, register, getUserByToken } from "@/services/UserService";
@@ -10,6 +11,7 @@ import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 import type { IUser } from "@/types/interfaces";
 import type { LoginFields, RegisterFields } from "@/types/Forms";
+
 
 export const useUserAuthStore = defineStore("userAuth", () => {
   
@@ -55,10 +57,14 @@ export const useUserAuthStore = defineStore("userAuth", () => {
 
   function logOutUser(): void {
     const userProductsStore = useUserProductsStore();
+    const userClientsStore = useUserClientsStore();
+ 
+    userProductsStore.clearUserProducts();
+    userClientsStore.clearUserClients();
+
     currentUser.value = null;
     localStorage.removeItem("token");
     isUserLoggedIn.value = false;
-    userProductsStore.clearUserProducts();
   }
 
   async function fetchUser(): Promise<void> {
@@ -67,6 +73,7 @@ export const useUserAuthStore = defineStore("userAuth", () => {
       try {
         const { data } = await getUserByToken(token);
         setUser(data.user);
+       
         isUserLoggedIn.value = true;
       } catch (error) {
         logOutUser();

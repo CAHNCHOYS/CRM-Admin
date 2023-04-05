@@ -12,15 +12,18 @@
 
     <v-card color="white" elevation="3" class="pa-5 mb-6 rounded-lg mx-sm-0 mx-n5">
       <TableActions
-        v-model:count="productsByPage"
-        @update:count="productsByPage = $event"
+        v-model:count="elementsByPage"
+        @update:count="elementsByPage = $event"
         @toggle-add-dialog="isAddDialogActive = true"
         @toggle-search="isSearchFormActive = !isSearchFormActive"
       >
-        Все товары({{ filteredProducts.length }})
+        Все товары
       </TableActions>
 
-      
+      <div v-if="isProductsLoading">
+        <div class="mb-3 text-h6">Идет загрузка...</div>
+        <v-progress-linear color="green" height="4" indeterminate />
+      </div>
 
       <!------------- Форма поиска -------------->
       <v-expand-transition>
@@ -61,29 +64,20 @@
         </v-form>
       </v-expand-transition>
 
-      <div v-if="isProductsLoading">
-        <div class="mb-3 text-h6">Идет загрузка...</div>
-        <v-progress-linear color="green" height="4" indeterminate />
-      </div>
-      
       <!-------------  Таблица с товарами -------------->
       <ProductsTable
-        :products-to-show="paginatedProducts"
+        :products-to-show="paginatedElements"
         :is-inverse-sort="isInverseSort"
-        v-model:current-sort-value="currentSortValue"
-        @update:current-sort-value="setSortField($event)"
+        v-model:current-sort-field="currentSortValue"
+        @update:current-sort-field="setSortField($event)"
         @open-product-dialog="openProductDialog"
-        v-if="userProducts.length"
+        v-if="!productsErrorMessage"
       />
 
       <v-alert type="error" border="end" variant="tonal" v-if="productsErrorMessage">
-        <v-alert-title class="mb-2"> Ошибка при загрузке товаров </v-alert-title>
-        <p>{{ productsErrorMessage }}</p>
+        <v-alert-title class="mb-2 text-h5"> Ошибка при загрузке товаров </v-alert-title>
+        <p class="text-h6">{{ productsErrorMessage }}</p>
       </v-alert>
-
-      <p class="text-h6" v-else-if="userProducts.length === 0 && !isProductsLoading">
-        Пока в таблице нет товаров, добавьте хоть один
-      </p>
 
       <v-pagination
         :length="totalPages"
@@ -112,14 +106,15 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
+import { useUserAuthStore } from "@/stores/userAuth";
 
 import { useTablePagination } from "@/composables/useTablePagination";
-import { useProductsFilter } from "@/composables/useProductsFilter";
 
 import ProductsTable from "@/components/Products/ProductsTable.vue";
 import ProductEditDialog from "@/components/Products/ProductEditDialog.vue";
@@ -129,16 +124,19 @@ import ProductAddDialog from "@/components/Products/ProductAddDialog.vue";
 import type { IUserProduct } from "@/types/interfaces";
 
 const userProductsStore = useUserProductsStore();
+const userAuthStore = useUserAuthStore();
 const alertStore = useAlertStore();
 
-const { userProducts,  isProductsLoading, productsErrorMessage } =
+const { userProducts, isProductsLoading, productsErrorMessage, productsCategories } =
   storeToRefs(userProductsStore);
 
 onMounted(async () => {
   if (!userProducts.value.length) {
-    await userProductsStore.fetchUserProducts();
+    await userProductsStore.getAllProducts(userAuthStore.currentUser!.id);
   }
-  await userProductsStore.fetchProductsCategories();
+  if (!productsCategories.value.length) {
+    await userProductsStore.fetchProductsCategories();
+  }
 });
 
 //Поле по которому сортируется по умолчанию
@@ -160,17 +158,63 @@ const openProductDialog = (product: IUserProduct, dialogName: "edit" | "delete")
     isEditDialogActive.value = true;
   }
 };
+const route = useRoute();
+const router = useRouter();
 
-//Фильтрованые товары
-const { filteredProducts, searchName, searchPrices, resetSearch } = useProductsFilter(userProducts);
+//Поиск ------------------------------------------
+
+const searchPrices = ref<[number, number]>([
+  +(route.query.startPrice as string) || 1,
+  +(route.query.endPrice as string) || 999999
+]);
+const searchName = ref((route.query.name as string) || "");
+
+const filteredProducts = computed(() => {
+  return userProducts.value.filter(
+    (product) =>
+      product.price > searchPrices.value[0] &&
+      product.price < searchPrices.value[1] &&
+      product.name.toLowerCase().includes(searchName.value.toLowerCase())
+  );
+});
+
+const resetSearch = () => {
+  searchName.value = "";
+  searchPrices.value = [1, 999999];
+};
+
+watchEffect((onIvalidate) => {
+  const name = searchName.value;
+  const startPrice = searchPrices.value[0];
+  const endPrice = searchPrices.value[1];
+
+  const timeout = setTimeout(() => {
+    router.push({
+      name: "products-page",
+      query: {
+        ...route.query,
+        name,
+        startPrice,
+        endPrice
+      }
+    });
+  }, 800);
+
+  onIvalidate(() => {
+    clearInterval(timeout);
+  });
+});
+//-----------------------------------------------------
 
 //Пагинация и сортировка по выбранному полю фильтрованых товаров
-const { currentPage, paginatedProducts, totalPages, isInverseSort, productsByPage, setSortField } =
-  useTablePagination<IUserProduct>(filteredProducts, currentSortValue);
-
-
+const { currentPage, paginatedElements, totalPages, isInverseSort, elementsByPage, setSortField } =
+  useTablePagination<IUserProduct>({
+    tableElements: filteredProducts,
+    pageName: "products-page",
+    sortField: currentSortValue,
+    route,
+    router
+  });
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

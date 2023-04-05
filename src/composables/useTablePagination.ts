@@ -1,18 +1,28 @@
 import { computed, ref, watch, type Ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import type { Router, RouteLocationNormalizedLoaded } from "vue-router";
 
-export const useTablePagination = <T extends {}>(
-  tableElements: Ref<T[]> = ref([]),
-  sortField: Ref<keyof T>
-) => {
-  const route = useRoute();
-  const router = useRouter();
+type Params<T> = {
+  tableElements: Ref<T[]>;
+  sortField: Ref<keyof T>;
+  pageName: string;
+  router: Router;
+  route: RouteLocationNormalizedLoaded;
+};
+
+export const useTablePagination = <T extends {}>({
+  tableElements,
+  sortField,
+  pageName,
+  route,
+  router
+}: Params<T>) => {
 
   const currentPage = ref(+(route.query.currentPage as string) || 1);
-  const productsByPage = ref(10);
-  const totalPages = computed(() => Math.ceil(tableElements.value.length / productsByPage.value));
+  const elementsByPage = ref(10);
+  const totalPages = computed(() => Math.ceil(tableElements.value.length / elementsByPage.value));
 
   const isInverseSort = ref(false);
+
 
   const setSortField = (field: keyof T) => {
     if (sortField.value === field) {
@@ -25,26 +35,26 @@ export const useTablePagination = <T extends {}>(
     currentPage.value = page;
   };
 
-  const paginatedProducts = computed(() => {
+  const paginatedElements = computed(() => {
     const elementsCount = tableElements.value.length;
-    let start = (currentPage.value - 1) * productsByPage.value;
+    let start = (currentPage.value - 1) * elementsByPage.value;
 
-    if (start >= elementsCount) {
-      setCurrentPage(Math.ceil(elementsCount / productsByPage.value));
-      start = (currentPage.value - 1) * productsByPage.value;
+    if (start >= elementsCount && elementsCount) {
+      setCurrentPage(Math.ceil(elementsCount / elementsByPage.value));
+      start = (currentPage.value - 1) * elementsByPage.value;
     }
-    let end = start + productsByPage.value;
+    let end = start + elementsByPage.value;
 
     const paginated = tableElements.value.slice(start, end);
 
     if (!isInverseSort.value)
-      return [...paginated].sort((a, b) => (a[sortField.value] > b[sortField.value] ? 1 : -1));
-    else return [...paginated].sort((a, b) => (a[sortField.value] > b[sortField.value] ? -1 : 1));
+      return paginated.sort((a, b) => (a[sortField.value] > b[sortField.value] ? 1 : -1));
+    else return paginated.sort((a, b) => (a[sortField.value] > b[sortField.value] ? -1 : 1));
   });
 
   watch(currentPage, () => {
     router.push({
-      name: "products-page",
+      name: pageName,
       query: {
         ...route.query,
         currentPage: currentPage.value
@@ -54,10 +64,10 @@ export const useTablePagination = <T extends {}>(
 
   return {
     currentPage,
-    paginatedProducts,
+    paginatedElements,
     totalPages,
     isInverseSort,
-    productsByPage,
+    elementsByPage,
     setSortField
   };
 };

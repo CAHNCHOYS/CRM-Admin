@@ -74,13 +74,13 @@ import { isAxiosError } from "axios";
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useUserProductsStore } from "@/stores/userProducts";
+import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
 import { updateProduct } from "@/services/ProductService";
 import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UserProductFields } from "@/types/Forms";
 import type { IUserProduct } from "@/types/interfaces";
-import { useUserAuthStore } from "@/stores/userAuth";
 
 const props = defineProps<{
   isActive: boolean;
@@ -115,21 +115,19 @@ const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
 const userUserAuthStore = useUserAuthStore();
 
-const { productsCategories, categoriesErrorMessage } =
-  storeToRefs(userProductsStore);
+const { productsCategories, categoriesErrorMessage } = storeToRefs(userProductsStore);
 
-const updateProductSubmit = handleSubmit(async (formValues: UserProductFields) => {
+const updateProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
     const { data } = await updateProduct(
-      formValues,
+      values,
       userUserAuthStore.currentUser!.id,
       props.product.id
     );
-
-    userProductsStore.updateUserProduct(data.product);
+    
+    userProductsStore.updateUserProduct({ ...values, ...data });
     alertStore.showMessage("success", "Товар был изменен");
   } catch (error) {
-    console.log("error");
     if (isAxiosError(error)) {
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при обновлении товара!");
