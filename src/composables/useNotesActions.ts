@@ -2,8 +2,7 @@ import { onMounted, ref, computed } from "vue";
 import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
 
-import { isAxiosError } from "axios";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 import { getUserNotes, updateNote, deleteNote, addNote } from "@/services/NotesService";
 import type { IUserNote, NoteType } from "@/types/interfaces";
 

@@ -31,11 +31,11 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { useAlertStore } from "@/stores/alert";
 import { useUserClientsStore } from "@/stores/userClients";
 
-import { handleAxiosError } from "@/services/axioxErrorHandle";
-import { isAxiosError } from "axios";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 import { deleteClient } from "@/services/ClientsService";
 
 import type { IUserClient } from "@/types/interfaces";
@@ -49,11 +49,13 @@ const emit = defineEmits<{
   (e: "closeModal"): void;
 }>();
 
-
 const alertStore = useAlertStore();
 const userClientsStore = useUserClientsStore();
 
+const router = useRouter();
+
 const isDeleting = ref(false);
+
 const deleteSubmit = async () => {
   try {
     isDeleting.value = true;
@@ -62,6 +64,14 @@ const deleteSubmit = async () => {
     alertStore.showMessage("success", "Клиент был успешно удален!");
   } catch (error) {
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        router.push({
+          name: "login-page",
+          query: {
+            isExpiredToken: "true"
+          }
+        });
+      }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при удалении клиента!");
   } finally {

@@ -148,7 +148,7 @@ onMounted(()=>{
   gsap.from(".btn",{
     scale: 0,
     opacity: 0,
-    delay: 1.2,
+    delay: 1.8,
     duration: 0.4,
   });
 });

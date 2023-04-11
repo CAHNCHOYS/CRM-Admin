@@ -8,8 +8,8 @@ import { getUserProducts, getCategories } from "@/services/ProductService";
 import type { IUserProduct, IUserProductCategory } from "@/types/interfaces";
 
 export const useUserProductsStore = defineStore("userProducts", () => {
-  const userProducts = ref<IUserProduct[]>([]);
   
+  const userProducts = ref<IUserProduct[]>([]);
 
   const isProductsLoading = ref(false);
   const productsErrorMessage = ref<string | null>(null);
@@ -18,17 +18,19 @@ export const useUserProductsStore = defineStore("userProducts", () => {
   const categoriesErrorMessage = ref<string | null>(null);
 
   async function getAllProducts(userId: number) {
-
-    isProductsLoading.value = true;
     try {
+      isProductsLoading.value = true;
       const { data } = await getUserProducts(userId);
       userProducts.value = data.products;
     } catch (error) {
+      console.log(error);
       if (isAxiosError(error)) {
         productsErrorMessage.value = handleAxiosError(error);
-      } else productsErrorMessage.value = "Ошибка при загрузке товаров";
+      } else productsErrorMessage.value = "Произошла ошибка при загрузке товаров";
+    }finally{
+      isProductsLoading.value = false;
     }
-    isProductsLoading.value = false;
+  
   }
 
   async function fetchProductsCategories() {

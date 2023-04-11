@@ -12,7 +12,6 @@
       </v-alert>
     </v-dialog-transition>
 
-
     <v-card class="form-card flex-grow-1 pb-2 rounded-lg" :max-width="486" :elevation="0">
       <div class="form-title text-center text-h4 py-4">Регистрация</div>
 
@@ -147,12 +146,14 @@ import { ref } from "vue";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";
 
-import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
 import { storeToRefs } from "pinia";
 
 import pageBackground from "@/assets/Images/LoginRegister/bg2.jpg";
 import type { RegisterFields } from "@/types/Forms";
+
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
+import { register } from "@/services/AuthService";
 
 //Валидация формы----------------------------------------------
 const { registerSchema } = useFormSchemas();
@@ -173,18 +174,23 @@ const { value: agreement, errorMessage: agreementErrors } = useField<boolean>("a
 
 const userCanGoToLogin = ref(false);
 
-const userAuthStore = useUserAuthStore();
 const alertStore = useAlertStore();
 const { isMessageShown, messageText, messageType } = storeToRefs(alertStore);
 
-
 const registerSubmit = handleSubmit(async (values: RegisterFields) => {
-  if (await userAuthStore.registerUser(values)) {
+  try {
+    await register(values);
+    alertStore.showMessage(
+      "success",
+      "Вы успешно зарегистрировались, можете переходить к авторизации"
+    );
     userCanGoToLogin.value = true;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      alertStore.showMessage("error", handleAxiosError(error));
+    } else alertStore.showMessage("error", "Ошибка при регистрации, попробуйте позже");
   }
-
 });
-
 </script>
 
 <style lang="scss" scoped>

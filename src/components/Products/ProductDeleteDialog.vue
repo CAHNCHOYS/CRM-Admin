@@ -1,5 +1,10 @@
 <template>
-  <v-dialog :model-value="isActive" :max-width="450" persistent transition="dialog-bottom-transition">
+  <v-dialog
+    :model-value="isActive"
+    :max-width="450"
+    persistent
+    transition="dialog-bottom-transition"
+  >
     <v-card class="pa-4">
       <v-card-title class="pa-0 mb-3">
         <p class="font-weight-bold text-h5">Подтверждение удаления</p>
@@ -28,12 +33,13 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
-import { isAxiosError } from "axios";
 import { deleteProduct } from "@/services/ProductService";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { IUserProduct } from "@/types/interfaces";
 
@@ -51,16 +57,26 @@ const isDeleting = ref(false);
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
 
+const router = useRouter();
+
 const deletUserProduct = async () => {
   try {
     isDeleting.value = true;
     await deleteProduct(props.product.id);
-  
+
     userProductsStore.deleteUserProduct(props.product.id);
 
     alertStore.showMessage("success", "Товар был успешно удален");
   } catch (error) {
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        router.push({
+          name: "login-page",
+          query: {
+            isExpiredToken: "true"
+          }
+        });
+      }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при удалении товара!");
   } finally {

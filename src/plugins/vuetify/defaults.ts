@@ -40,6 +40,11 @@ export default {
   VSwitch: {
     hideDetails: "auto"
   },
+  VRangeSlider: {
+    hideDetails: "auto",
+    strict: true,
+    thumbLabel: "always",
+  },
   VSnackbar:{
    location: "bottom right",
   },

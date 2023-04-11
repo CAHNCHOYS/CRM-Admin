@@ -2,7 +2,7 @@ import axios from "./axios";
 
 import type { LoginFields, RegisterFields, UpdatePasswordFields } from "@/types/Forms";
 import type {
- DeleteResponse,
+  DeleteResponse,
   GetUserResponse,
   LoginResponse,
   RegisterResponse,
@@ -33,10 +33,9 @@ export const getUserByToken = async (token: string): Promise<AxiosResponse<GetUs
 };
 
 export const updatePassword = async (
-  updatePasswordPayload: UpdatePasswordFields,
-  id: number
+  updatePasswordPayload: UpdatePasswordFields
 ): Promise<AxiosResponse<UpdateUserResponse>> => {
-  return await axios.patch("/UpdateUserPassword", { ...updatePasswordPayload, id });
+  return await axios.patch("/UpdateUserPassword", updatePasswordPayload);
 };
 
 export const updateInfo = async (
@@ -48,5 +47,3 @@ export const updateInfo = async (
     }
   });
 };
-
-

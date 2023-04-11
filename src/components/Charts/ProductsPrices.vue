@@ -1,43 +1,42 @@
 <template>
   <v-card :max-width="'100%'" elevation="10">
-    <Doughnut :data="data" :options="options"></Doughnut>
+    <Doughnut :data="data" :options="options" />
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { Doughnut } from "vue-chartjs";
-
 import type { ChartData, ChartOptions } from "chart.js";
-
-
-
-
+import { Doughnut, Bar } from "vue-chartjs";
 
 const props = defineProps<{
   data: ChartData<"doughnut">;
 }>();
 
 const options: ChartOptions<"doughnut"> = {
- responsive: true,
- maintainAspectRatio: true,
+  responsive: true,
+  maintainAspectRatio: true,
+  
   layout: {
     padding: 25
   },
   plugins: {
     legend: {
-      display: false,
+      display: false
     },
     title: {
       display: true,
       color: "black",
-      text: "Количество каждого товара",
+      text: "Цены товаров",
       padding: {
-         bottom: 10,
+        bottom: 20
       },
       font: {
         size: 26,
         weight: "normal"
       }
+    },
+    tooltip: {
+      
     }
   }
 };

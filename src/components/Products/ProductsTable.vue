@@ -55,7 +55,7 @@
       <tbody v-else>
         <tr>
           <td class="py-2 text-h6 text-center font-weight-bold" colspan="12">
-            Не удалось найти ни одного товара (
+            Товары не найдены ( 
           </td>
         </tr>
       </tbody>

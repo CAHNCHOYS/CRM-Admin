@@ -17,10 +17,9 @@ export const deleteClient = async (clientId: number): Promise<AxiosResponse<Dele
 };
 
 export const addClient = async (
-  addClientPayload: UserClientFields,
-  userId: number
+  addClientPayload: UserClientFields
 ): Promise<AxiosResponse<AddClientResponse>> => {
-  return axios.post("/Clients", { ...addClientPayload, userId });
+  return axios.post("/Clients", { ...addClientPayload });
 };
 
 export const updateClient = async (
@@ -28,4 +27,22 @@ export const updateClient = async (
   clientId: number
 ): Promise<AxiosResponse<UpdateResponse>> => {
   return await axios.patch("/Clients", { ...updatePayload, clientId });
+};
+
+type SeachPayload = {
+  userId: number;
+  secondName: string;
+  searchWithPremium: string;
+  premium: 0 | 1;
+};
+
+export const getSearchedClients = async ({
+  secondName,
+  userId,
+  searchWithPremium,
+  premium
+}: SeachPayload): Promise<AxiosResponse<GetClientsResponse>> => {
+  return await axios.get(
+    `/SearchClients/${userId}?secondName=${secondName}&searchWithPremium=${searchWithPremium}&premium=${premium}`
+  );
 };

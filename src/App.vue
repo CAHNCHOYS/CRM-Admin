@@ -1,10 +1,10 @@
 <template>
   <v-app>
-    <v-overlay :model-value="isLoading" class="align-center justify-center">
-      <v-progress-circular color="secondary" indeterminate size="124" />
+    <v-overlay :model-value="userAuthStore.isUserFetching" class="align-center justify-center">
+      <v-progress-circular color="indigo" indeterminate size="164" />
     </v-overlay>
-    <component :is="getCurrentLayout" v-if="!isLoading">
-      <router-view v-slot="{Component}">
+    <component :is="getCurrentLayout" v-if="!userAuthStore.isUserFetching">
+      <router-view v-slot="{ Component }">
         <transition name="slide" mode="out-in">
           <component :is="Component"> </component>
         </transition>
@@ -14,37 +14,29 @@
 </template>
 
 <script setup lang="ts">
-import { useLayouts } from "@/composables/useLayouts";
-import { onMounted, ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { computed } from "vue";
+
+import LoginLayout from "@/layouts/LoginLayout.vue";
+import MainLayout from "@/layouts/MainLayout.vue";
+
+import { useRoute } from "vue-router";
 
 import { useUserAuthStore } from "./stores/userAuth";
+import type { Component } from "vue";
 
 const userAuthStore = useUserAuthStore();
 
-const isLoading = ref(true);
 const route = useRoute();
-const router = useRouter();
 
-const { getCurrentLayout } = useLayouts(route);
+const obj: {
+  [index: string]: Component;
+} = {
+  main: MainLayout,
+  login: LoginLayout
+};
 
-onMounted(async () => {
-  console.log("mounted");
-
-
-  // if (route.meta.requireAuth && !userAuthStore.isUserLoggedIn) {
-  //   router.push({
-  //     name: "login-page",
-  //     query: {
-  //       redirectedFrom: route.name?.toString() || route.fullPath
-  //     }
-  //   });
-  // }
-  
-
-    isLoading.value = false;
-
-
+const getCurrentLayout = computed(() => {
+  return obj[route.meta.layout || "main"];
 });
 </script>
 

@@ -37,7 +37,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserAuthStore } from "@/stores/userAuth";
-import { deleteAccount } from "@/services/UserService";
+import { deleteAccount } from "@/services/AuthService";
 
 import { isAxiosError } from "axios";
 import { handleAxiosError } from "@/services/axioxErrorHandle";

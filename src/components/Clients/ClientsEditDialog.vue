@@ -45,7 +45,7 @@
 
             <v-col cols="12">
               <v-btn color="green-darken-4" variant="flat" type="submit" :loading="isSubmitting">
-                Обновить 
+                Обновить
               </v-btn>
               <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')">
                 Отмена
@@ -59,18 +59,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "@vue/reactivity";
 import { useField, useForm } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { updateClient } from "@/services/ClientsService";
 import { useUserClientsStore } from "@/stores/userClients";
 import { useAlertStore } from "@/stores/alert";
+import { useRouter } from "vue-router";
 
-import { isAxiosError } from "axios";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UserClientFields } from "@/types/Forms";
 import type { IUserClient } from "@/types/interfaces";
-import { computed } from "@vue/reactivity";
 
 const props = defineProps<{
   isOpened: boolean;
@@ -105,6 +105,8 @@ const { value: premium } = useField<0 | 1>("premium");
 const alertStore = useAlertStore();
 const userClientsStore = useUserClientsStore();
 
+const router = useRouter();
+
 const updateClientSubmit = handleSubmit(async (values: UserClientFields) => {
   console.log(values);
   try {
@@ -113,6 +115,12 @@ const updateClientSubmit = handleSubmit(async (values: UserClientFields) => {
     alertStore.showMessage("success", "Клиент был успешно изменен");
   } catch (error) {
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        router.push({
+          name: "login-page",
+          query: { isExpiredToken: "true" }
+        });
+      }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при изменении клиента");
   } finally {

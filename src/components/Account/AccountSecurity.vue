@@ -55,21 +55,21 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { useUserAuthStore } from "@/stores/userAuth";
 
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useForm, useField } from "vee-validate";
 
-import { updatePassword } from "@/services/UserService";
-import { isAxiosError } from "axios";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+import { updatePassword, getUserByToken } from "@/services/AuthService";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UpdatePasswordFields } from "@/types/Forms";
 
 //---------------- Валидация формы -------------------------------------------------------------
 const { updatePasswordSchema } = useFormSchemas();
 
-const { handleSubmit, isSubmitting } = useForm<UpdatePasswordFields>({
+const { handleSubmit, isSubmitting, resetForm } = useForm<UpdatePasswordFields>({
   validationSchema: updatePasswordSchema
 });
 
@@ -88,22 +88,29 @@ const isOldPasswordSeen = ref(false);
 
 const userAuthStore = useUserAuthStore();
 
+const router = useRouter();
+
 const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) => {
-  const userId = userAuthStore.currentUser!.id;
   try {
-    await updatePassword(values, userId);
-    await userAuthStore.fetchUser();
+    await updatePassword(values);
+    const { data } = await getUserByToken(localStorage.getItem("token") as string);
+    userAuthStore.setUser(data.user);
 
     isUpdateSuccess.value = true;
     setTimeout(() => (isUpdateSuccess.value = false), 3500);
+    resetForm();
   } catch (error) {
     isUpdateError.value = true;
     setTimeout(() => (isUpdateError.value = false), 3500);
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        router.push({
+          name: "login-page",
+          query: { isExpiredToken: "true" }
+        });
+      }
       updatePassErrorMessage.value = handleAxiosError(error);
     } else updatePassErrorMessage.value = "Ошибка при обновлении пароля";
-
-    console.log(error);
   }
 });
 </script>

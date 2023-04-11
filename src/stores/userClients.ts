@@ -8,20 +8,22 @@ import type { IUserClient } from "@/types/interfaces";
 
 export const useUserClientsStore = defineStore("userClients", () => {
   const clients = ref<IUserClient[]>([]);
-  const isClientsLoading = ref(false);
+
   const clientsErrorMessage = ref<string | null>(null);
+  const isClientsLoading = ref(false);
 
   async function getAllClients(userId: number) {
-    isClientsLoading.value = true;
     try {
+      isClientsLoading.value = true;
       const { data } = await getClients(userId);
       clients.value = data.clients;
     } catch (error) {
       if (isAxiosError(error)) {
         clientsErrorMessage.value = handleAxiosError(error);
       } else clientsErrorMessage.value = "Ошибка при загрзке клиентов";
+    }finally{
+      isClientsLoading.value = false;
     }
-    isClientsLoading.value = false;
   }
 
   function deleteClient(clientId: number) {
@@ -44,8 +46,8 @@ export const useUserClientsStore = defineStore("userClients", () => {
 
   return {
     clients,
-    isClientsLoading,
     clientsErrorMessage,
+    isClientsLoading,
     getAllClients,
     deleteClient,
     addClient,

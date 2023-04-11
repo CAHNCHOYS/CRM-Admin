@@ -1,7 +1,7 @@
 import { computed, ref, watch, type Ref } from "vue";
 import type { Router, RouteLocationNormalizedLoaded } from "vue-router";
 
-type Params<T> = {
+type Data<T> = {
   tableElements: Ref<T[]>;
   sortField: Ref<keyof T>;
   pageName: string;
@@ -15,7 +15,7 @@ export const useTablePagination = <T extends {}>({
   pageName,
   route,
   router
-}: Params<T>) => {
+}: Data<T>) => {
 
   const currentPage = ref(+(route.query.currentPage as string) || 1);
   const elementsByPage = ref(10);

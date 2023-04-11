@@ -3,12 +3,17 @@
     <!----- Уведомления после авторизации ----------->
 
     <v-dialog-transition>
-      <v-alert class="alert" :type="messageType" :max-width="400" v-model="isMessageShown">
+      <v-alert
+        class="alert"
+        :type="alertStore.messageType"
+        :max-width="400"
+        v-model="alertStore.isMessageShown"
+      >
         <v-alert-title class="text-h4 mb-2">
-          {{ messageType === "error" ? "Ошибка" : "Уведомление" }}
+          {{ alertStore.messageType === "error" ? "Ошибка" : "Уведомление" }}
         </v-alert-title>
         <div class="text-white text-h6">
-          {{ messageText }}
+          {{ alertStore.messageText }}
         </div>
       </v-alert>
     </v-dialog-transition>
@@ -64,7 +69,7 @@
               <v-btn
                 type="submit"
                 :loading="isSubmitting"
-                :disabled="isSubmitting || isMessageShown"
+                :disabled="isSubmitting || alertStore.isMessageShown"
                 block
                 color="dark-blue"
                 variant="flat"
@@ -91,7 +96,6 @@
 import { ref, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { storeToRefs } from "pinia";
 import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
 
@@ -99,6 +103,10 @@ import pageBackground from "@/assets/Images/LoginRegister/bg.png";
 
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
+
+import { login } from "@/services/AuthService";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
+import axiosInstance from "@/services/axios";
 
 import type { LoginFields } from "@/types/Forms";
 
@@ -117,32 +125,43 @@ const isPasswordSeen = ref(false);
 
 const userAuthStore = useUserAuthStore();
 const alertStore = useAlertStore();
-const { isMessageShown, messageText, messageType } = storeToRefs(alertStore);
 
 const route = useRoute();
 const router = useRouter();
 
 //Авторизация
 const loginSubmit = handleSubmit(async (values: LoginFields) => {
-  await userAuthStore.loginUser(values);
-
-  //Если вошли в аккаунт
-  if (userAuthStore.isUserLoggedIn) {
+  try {
+    const { data } = await login(values);
+    userAuthStore.setToken(data.token);
+    userAuthStore.setUser(data.user);
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+    alertStore.showMessage("success", "Авторизация успешна, вскоре вы будете переведены на сайт");
     setTimeout(() => {
       if (route.query.redirectedFrom) {
         router.push({ name: route.query.redirectedFrom as string });
       } else router.push("/");
     }, 3500);
-  } else resetForm();
+  } catch (error) {
+    if (isAxiosError(error)) {
+      alertStore.showMessage("error", handleAxiosError(error));
+    } else alertStore.showMessage("error", "Ошибка при авторизации, попробуйте позже");
+  } finally {
+    resetForm();
+  }
 });
 
-//Если зашли на страницу, которая требует авторизации, то перекидываем на эту странциу и показываем сообщение
+
 watchEffect(() => {
   if (route.query.redirectedFrom) {
     alertStore.showMessage(
       "error",
       `Для доступа к странице ${route.query.redirectedFrom} необходимо авторизироваться`
     );
+  }
+  if (route.query.isExpiredToken) {
+    alertStore.showMessage("error", "Сеанс авторизации истек, войдите в аккаунт снова!");
+    userAuthStore.logOutUser();
   }
 });
 </script>

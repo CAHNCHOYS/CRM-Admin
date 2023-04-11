@@ -67,20 +67,23 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from "vue-router";
 import { computed } from "vue";
 import { storeToRefs } from "pinia";
-import { isAxiosError } from "axios";
 
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
+
 import { useUserProductsStore } from "@/stores/userProducts";
-import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
+
 import { updateProduct } from "@/services/ProductService";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UserProductFields } from "@/types/Forms";
 import type { IUserProduct } from "@/types/interfaces";
+
+
 
 const props = defineProps<{
   isActive: boolean;
@@ -113,22 +116,26 @@ const { value: categoryId, errorMessage: categoryIdErrors } = useField("category
 
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
-const userUserAuthStore = useUserAuthStore();
 
 const { productsCategories, categoriesErrorMessage } = storeToRefs(userProductsStore);
+const router = useRouter();
 
 const updateProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
-    const { data } = await updateProduct(
-      values,
-      userUserAuthStore.currentUser!.id,
-      props.product.id
-    );
-    
+    const { data } = await updateProduct(values, props.product.id);
+
     userProductsStore.updateUserProduct({ ...values, ...data });
     alertStore.showMessage("success", "Товар был изменен");
   } catch (error) {
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        router.push({
+          name: "login-page",
+          query: {
+            isExpiredToken: "true"
+          }
+        });
+      }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при обновлении товара!");
   } finally {

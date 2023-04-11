@@ -64,15 +64,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { isAxiosError } from "axios";
+import { useRouter } from "vue-router";
 
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 
-import { updateInfo } from "@/services/UserService";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+import { getUserByToken, updateInfo } from "@/services/AuthService";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UpdateInfoFields } from "@/types/Forms";
 
@@ -101,6 +101,8 @@ const isUpdateSuccess = ref(false);
 const isUpdateError = ref(false);
 const updateErrorMessage = ref("");
 
+const router = useRouter();
+
 const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   try {
     let formData = new FormData();
@@ -109,17 +111,27 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
     formData.append("email", values.email);
     formData.append("country", values.country);
     formData.append("avatar", values.avatar[0], avatar.value[0].name);
-    formData.append("id", String(userAuthStore.currentUser!.id));
 
     await updateInfo(formData);
-    await userAuthStore.fetchUser();
+    
+    const { data } = await getUserByToken(localStorage.getItem("token") as string);
+
+    userAuthStore.setUser(data.user);
 
     isUpdateSuccess.value = true;
     setTimeout(() => (isUpdateSuccess.value = false), 3500);
   } catch (error) {
-    isUpdateError.value = true;
-    setTimeout(() => (isUpdateError.value = false), 3500);
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        router.push({
+          name: "login-page",
+          query: {
+            isExpiredToken: "true"
+          }
+        });
+      }
+      isUpdateError.value = true;
+      setTimeout(() => (isUpdateError.value = false), 3500);
       updateErrorMessage.value = handleAxiosError(error);
     } else updateErrorMessage.value = "Ошибка при обновлении информации";
   }

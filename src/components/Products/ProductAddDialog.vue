@@ -57,7 +57,9 @@
               <v-btn color="green-darken-4" variant="flat" :loading="isSubmitting" type="submit">
                 Добавить
               </v-btn>
-              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')"> Отмена </v-btn>
+              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')">
+                Отмена
+              </v-btn>
             </v-col>
           </v-row>
         </v-form>
@@ -70,13 +72,13 @@
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { storeToRefs } from "pinia";
+
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
-import { useUserAuthStore } from "@/stores/userAuth";
 
 import { addProduct } from "@/services/ProductService";
-import { isAxiosError } from "axios";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
+import { useRouter } from "vue-router";
 
 import type { UserProductFields } from "@/types/Forms";
 
@@ -101,21 +103,26 @@ const { value: price, errorMessage: priceErrors } = useField("price");
 
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
-const userAuthStore = useUserAuthStore();
 
-const { productsCategories, categoriesErrorMessage } =
-  storeToRefs(userProductsStore);
+const { productsCategories, categoriesErrorMessage } = storeToRefs(userProductsStore);
+
+const router = useRouter();
 
 const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
-    const { data } = await addProduct(values, userAuthStore.currentUser!.id);
-    
-    console.log(data);
-    userProductsStore.addUserProduct({...values, ...data});
+    const { data } = await addProduct(values);
+    userProductsStore.addUserProduct({ ...values, ...data });
     alertStore.showMessage("success", `Товар ${values.name} был успешно добавлен!`);
-    
   } catch (error) {
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        router.push({
+          name: "login-page",
+          query: {
+            isExpiredToken: "true"
+          }
+        });
+      }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при добавлении товара !");
   } finally {

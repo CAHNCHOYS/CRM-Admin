@@ -19,20 +19,36 @@ export const deleteProduct = async (productId: number): Promise<AxiosResponse<De
 };
 
 export const addProduct = async (
-  productInfo: UserProductFields,
-  userId: number
+  productInfo: UserProductFields
 ): Promise<AxiosResponse<NewProductResponse>> => {
-  return await axios.post("/Products", { ...productInfo, userId });
+  return await axios.post("/Products", productInfo);
 };
 
 export const updateProduct = async (
   productNewInfo: UserProductFields,
-  userId: number,
   productId: number
 ): Promise<AxiosResponse<NewProductResponse>> => {
-  return await axios.patch("/Products", { ...productNewInfo, userId, productId });
+  return await axios.patch("/Products", { ...productNewInfo, productId });
 };
 
 export const getCategories = async (): Promise<AxiosResponse<GetProductCategoriseResponse>> => {
   return await axios.get("/ProductCategories");
+};
+
+type SearchPayload = {
+  productName: string;
+  startPrice: number;
+  endPrice: number;
+  userId: number;
+};
+
+export const getSearchedProducts = async ({
+  productName,
+  startPrice,
+  endPrice,
+  userId
+}: SearchPayload): Promise<AxiosResponse<GetProductsResponse>> => {
+  return await axios.get(
+    `/SearchProducts/${userId}?name=${productName}&startPrice=${startPrice}&endPrice=${endPrice}`
+  );
 };

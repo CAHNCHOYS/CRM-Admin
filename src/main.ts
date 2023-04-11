@@ -1,20 +1,25 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createApp } from "vue";
+import { createPinia } from "pinia";
 
-import App from './App.vue'
-import router from './router'
+import App from "./App.vue";
+import router from "./router";
 
 // Vuetify
-import { vuetify } from './plugins/vuetify'
+import { vuetify } from "./plugins/vuetify";
 
-import TableActions from './components/TableActions.vue'
+import { Chart, registerables, ArcElement } from "chart.js";
 
-const app = createApp(App)
+Chart.register(...registerables);
+Chart.register(ArcElement);
 
-app.use(createPinia())
-app.use(router)
-app.use(vuetify)
+import TableActions from "./components/TableActions.vue";
 
-app.component("TableActions",TableActions);
+const app = createApp(App);
 
-app.mount('#app')
+app.use(createPinia());
+app.use(router);
+app.use(vuetify);
+
+app.component("TableActions", TableActions);
+
+app.mount("#app");

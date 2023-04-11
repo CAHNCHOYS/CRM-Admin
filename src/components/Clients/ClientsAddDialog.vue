@@ -13,21 +13,25 @@
         <v-form @submit="addClientSubmit">
           <v-row>
             <v-col cols="12">
-              <v-text-field v-model="firstName" :error-messages="firstNameErrors" label="Имя">
-              </v-text-field>
+              <v-text-field v-model="firstName" :error-messages="firstNameErrors" label="Имя" />
             </v-col>
             <v-col cols="12">
-              <v-text-field v-model="secondName" :error-messages="secondNameErrors" label="Фамилия">
-              </v-text-field>
+              <v-text-field
+                v-model="secondName"
+                :error-messages="secondNameErrors"
+                label="Фамилия"
+              />
             </v-col>
             <v-col cols="12">
-              <v-text-field v-model="thirdName" :error-messages="thirdNameErrors" label="Отчество">
-              </v-text-field>
+              <v-text-field
+                v-model="thirdName"
+                :error-messages="thirdNameErrors"
+                label="Отчество"
+              />
             </v-col>
 
             <v-col cols="12">
-              <v-text-field label="Номер телефона" v-model="phone" :error-messages="phoneErrors">
-              </v-text-field>
+              <v-text-field label="Номер телефона" v-model="phone" :error-messages="phoneErrors" />
             </v-col>
             <v-col cols="12">
               <p class="text-h6">Премиум клиент ?</p>
@@ -39,7 +43,6 @@
                 :label="premium ? 'Да' : 'Нет'"
                 color="indigo"
               />
-            
             </v-col>
 
             <v-col cols="12">
@@ -63,10 +66,11 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 import { addClient } from "@/services/ClientsService";
 import { useUserClientsStore } from "@/stores/userClients";
 import { useAlertStore } from "@/stores/alert";
-import { useUserAuthStore } from "@/stores/userAuth";
+
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
+import { useRouter } from "vue-router";
+
 import type { UserClientFields } from "@/types/Forms";
-import { isAxiosError } from "axios";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
 
 const props = defineProps<{
   isOpened: boolean;
@@ -76,6 +80,7 @@ const emit = defineEmits<{
   (e: "closeModal"): void;
 }>();
 
+//Работа с формой-------------------------------------------------------------------------
 const { userClientSchema } = useFormSchemas();
 const { resetForm, handleSubmit, isSubmitting } = useForm<UserClientFields>({
   validationSchema: userClientSchema
@@ -85,22 +90,28 @@ const { value: secondName, errorMessage: secondNameErrors } = useField<string>("
 const { value: thirdName, errorMessage: thirdNameErrors } = useField<string>("thirdName");
 const { value: phone, errorMessage: phoneErrors } = useField<string>("phone");
 const { value: premium } = useField<0 | 1>("premium");
+//-----------------------------------------------------------------------------------------
 
 const alertStore = useAlertStore();
-const userAuthStore = useUserAuthStore();
 const userClientsStore = useUserClientsStore();
 
-const addClientSubmit = handleSubmit(async (values: UserClientFields) => {
-  console.log(values);
+const router = useRouter();
 
+const addClientSubmit = handleSubmit(async (values: UserClientFields) => {
   try {
-    const { data } = await addClient(values, userAuthStore.currentUser!.id);
+    const { data } = await addClient(values);
 
     userClientsStore.addClient({ ...values, id: data.clientId });
 
     alertStore.showMessage("success", "Клиент " + values.secondName + " был успешно добавлен!");
   } catch (error) {
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        router.push({
+          name: "login-page",
+          query: { isExpiredToken: "true" }
+        });
+      }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при добавлении клиента");
   } finally {
