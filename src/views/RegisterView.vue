@@ -153,7 +153,7 @@ import pageBackground from "@/assets/Images/LoginRegister/bg2.jpg";
 import type { RegisterFields } from "@/types/Forms";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
-import { register } from "@/services/AuthService";
+import AuthService from "@/services/AuthService";
 
 //Валидация формы----------------------------------------------
 const { registerSchema } = useFormSchemas();
@@ -179,7 +179,7 @@ const { isMessageShown, messageText, messageType } = storeToRefs(alertStore);
 
 const registerSubmit = handleSubmit(async (values: RegisterFields) => {
   try {
-    await register(values);
+    await AuthService.register(values);
     alertStore.showMessage(
       "success",
       "Вы успешно зарегистрировались, можете переходить к авторизации"

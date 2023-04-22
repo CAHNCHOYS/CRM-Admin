@@ -2,7 +2,7 @@
   <div class="content pt-10">
     <div class="text-h2 top-title mb-7">Примеры анимация на gsap</div>
 
-    <div class="container d-flex flex-row mx-n15 mb-10" style="width: 400vw; overflow: hidden">
+    <div class="container d-flex flex-row  mb-10" style="width: 400vw; overflow: hidden">
       <section
         class="one bg-orange d-flex flex-grow-1 align-center justify-center h-screen"
         style="width: 100vw"
@@ -76,7 +76,19 @@
     <div class="end text-subtitle-1">
       Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nam vitae reiciendis facere placeat
       delectus. Pariatur odit deleniti ullam! Sed nostrum deserunt amet totam quaerat delectus
-      voluptate numquam temporibus neque quo?
+      voluptate numquam temporibus neque quo? Lorem ipsum dolor sit amet consectetur adipisicing
+      elit. Adipisci veritatis enim optio cum, aperiam modi iste magni, velit facere eos ad sed
+      quam, tempora atque. Ad animi non ex nobis consequatur iusto ipsa ipsam, consectetur cumque
+      necessitatibus nisi facilis dolores numquam soluta velit! Expedita, eligendi vero eos sunt,
+      quam quaerat ipsa corporis incidunt mollitia quisquam voluptate ea ipsum odio animi! Minus
+      quod velit, cum magni vero deleniti illo exercitationem, voluptas soluta et laborum, dolore
+      ipsa! Et blanditiis praesentium eaque, commodi, dolorem libero aspernatur nemo quaerat autem
+      fuga earum, veritatis illum nisi at. Itaque enim eveniet praesentium vero natus! Saepe
+      tempora, nesciunt tempore odit sint veniam quod, accusamus illum similique commodi sunt,
+      reiciendis temporibus nostrum error impedit aliquid libero? Repellat provident quas veniam
+      necessitatibus vitae qui amet quae officiis perferendis eum dolores beatae dolore autem
+      nesciunt, molestiae iusto laboriosam sint, dicta doloremque excepturi reprehenderit cumque.
+      Eius porro quae ex blanditiis sapiente.
     </div>
   </div>
 </template>
@@ -107,7 +119,8 @@ onMounted(() => {
         duration: { min: 0.1, max: 0.1 }
       },
       end: () =>
-        "+=" + ((document.querySelector(".container") as HTMLElement).offsetWidth - innerWidth)
+        "+=" +
+        (((document.querySelector(".container") as HTMLElement)?.offsetWidth || 4000) - innerWidth)
     },
     ease: "none"
   });
@@ -169,11 +182,8 @@ onMounted(() => {
     scrollTrigger: {
       trigger: ".gallery",
       start: "top 60%",
-      // end: `+=${
-      //   document.querySelector(".gallery")!.getBoundingClientRect().height * galleryLeft.length + 200
-      // }`,
 
-      end: "+=700",
+      end: "+=800",
       scrub: 1
     }
   });
@@ -187,7 +197,7 @@ onMounted(() => {
       trigger: ".gallery",
       start: "top 60%",
 
-      end: "+=700",
+      end: "+=800",
 
       scrub: 1
     }

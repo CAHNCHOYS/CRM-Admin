@@ -5,4 +5,16 @@
   tr {
     border-bottom: 1px solid lightgray !important;
   }
+
+  tr, th{
+    position: relative !important;
+  }
+}
+
+
+
+
+.tooltip{
+  background-color: gray !important;
+  color:white !important;
 }

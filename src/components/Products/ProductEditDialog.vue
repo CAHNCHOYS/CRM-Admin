@@ -18,23 +18,31 @@
             </v-col>
 
             <v-col cols="12">
-              <v-select
+              <v-sheet v-if="isCategoriesLoading">
+                <p class="text-h6 mb-2">Загрузка категорий....</p>
+                <v-progress-linear indeterminate height="6" color="green" />
+              </v-sheet>
+              <v-autocomplete
                 v-model="categoryId"
                 label="Категория товара"
                 :error-messages="categoryIdErrors"
                 :items="productsCategories"
                 item-title="name"
+                :clearable="false"
                 item-value="id"
-                v-if="productsCategories.length"
+                no-data-text="Нет категорий"
+                v-else-if="!categoriesErrorMessage"
               />
-              <p v-if="categoriesErrorMessage" class="text-h6 text-red">
-                {{ categoriesErrorMessage }}
-              </p>
+              <v-sheet v-else>
+                <v-alert type="error" border="end" variant="outlined" class="pa-2">
+                  <v-alert-title class="text-h6"> {{ categoriesErrorMessage }}</v-alert-title>
+                </v-alert>
+              </v-sheet>
             </v-col>
 
             <v-col sm="6" cols="12">
               <v-text-field
-                v-model="count"
+                v-model.number="count"
                 :error-messages="countErrors"
                 label="Количество"
                 type="number"
@@ -43,7 +51,7 @@
 
             <v-col sm="6" cols="12">
               <v-text-field
-                v-model="price"
+                v-model.number="price"
                 :error-messages="priceErrors"
                 label="Цена"
                 type="number"
@@ -77,21 +85,21 @@ import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
 
-import { updateProduct } from "@/services/ProductService";
+import ProductService from "@/services/ProductService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UserProductFields } from "@/types/Forms";
 import type { IUserProduct } from "@/types/interfaces";
 
-
-
 const props = defineProps<{
   isActive: boolean;
   product: IUserProduct;
+  isSearchActive: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: "closeModal"): void;
+  (e: "updateSearchProducts"): Promise<void>;
 }>();
 
 //------------Работа с формой-------------------------------
@@ -117,24 +125,36 @@ const { value: categoryId, errorMessage: categoryIdErrors } = useField("category
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
 
-const { productsCategories, categoriesErrorMessage } = storeToRefs(userProductsStore);
+const { productsCategories, categoriesErrorMessage, isCategoriesLoading } =
+  storeToRefs(userProductsStore);
+
 const router = useRouter();
 
 const updateProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
-    const { data } = await updateProduct(values, props.product.id);
+    await ProductService.updateProduct(values, props.product.id);
 
-    userProductsStore.updateUserProduct({ ...values, ...data });
+    const category = productsCategories.value.find(
+      (category) => category.id === values.categoryId
+    )!.name;
+
+    userProductsStore.updateUserProduct({
+      ...values,
+      category,
+      id: props.product.id
+    });
+
+    if (props.isSearchActive) emit("updateSearchProducts");
+
     alertStore.showMessage("success", "Товар был изменен");
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
         router.push({
           name: "login-page",
-          query: {
-            isExpiredToken: "true"
-          }
+          query: { isExpiredToken: "true", redirectedFrom: "products-page" }
         });
+        return;
       }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при обновлении товара!");

@@ -1,6 +1,7 @@
+
+import { isAxiosError } from "axios";
 import type { ApiError } from "@/types/BackendResponses";
 import type { AxiosError} from "axios";
-import { isAxiosError } from "axios";
 
 export const handleAxiosError = (error: AxiosError<ApiError>) => {
   if (error.response) {

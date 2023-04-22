@@ -103,14 +103,46 @@ export const useFormSchemas = () => {
       .max(999999, "Слишком  большое число")
   });
 
-  const userClientSchema = yup.object({
-    firstName: yup.string().required("Поле обязательное для ввода").min(2, "Миниум 2 символа!").max(50, "Слишком длинное Имя!"),
-    secondName: yup.string().required("Поле обязательное для ввода").min(2, "Миниум 2 символа!").max(50, "Слишком длинная Фамилия!"),
-    thirdName: yup.string().required("Поле обязательное для ввода").min(2, "Миниум 2 символа!").max(50, "Слишком длинное Отчество!"),
-    phone: yup.string().required("Поле обязательное для ввода").min(6, "Миниум 6 символов!").max(30, "Введите телефон покороче"),
-    premium: yup.number<0 | 1>().default(0),
+  const userCustomerSchema = yup.object({
+    firstName: yup
+      .string()
+      .required("Поле обязательное для ввода")
+      .min(2, "Миниум 2 символа!")
+      .max(50, "Слишком длинное Имя!"),
+    secondName: yup
+      .string()
+      .required("Поле обязательное для ввода")
+      .min(2, "Миниум 2 символа!")
+      .max(50, "Слишком длинная Фамилия!"),
+    thirdName: yup
+      .string()
+      .required("Поле обязательное для ввода")
+      .min(2, "Миниум 2 символа!")
+      .max(50, "Слишком длинное Отчество!"),
+    phone: yup
+      .string()
+      .required("Поле обязательное для ввода")
+      .min(6, "Миниум 6 символов!")
+      .max(30, "Введите телефон покороче"),
+    premium: yup.string<"Да" | "Нет">().required("Есть ли премиум").default("Да")
   });
 
+  const userOrderSchema = yup.object({
+    productCount: yup
+      .number()
+      .typeError("Введите число")
+      .required("Введите количество товара")
+      .min(1, "Минимум 1 товар")
+      .max(999999, "Слишком большое число"),
+    customerId: yup.number().typeError("Выберете клиента").required("Выберете клиента"),
+    productId: yup.number().typeError("Выберете клиента").required("Выберете товар"),
+    date: yup
+      .date()
+      .typeError("Введите дату")
+      .required("Введите дату")
+      .min("2023-00-00", "Минимум 23 год")
+      .max("2027-00-00", "СМаксимум 2026 год")
+  });
 
   return {
     loginSchema,
@@ -118,6 +150,7 @@ export const useFormSchemas = () => {
     updateInfoShchema,
     updatePasswordSchema,
     userProductSchema,
-    userClientSchema,
+    userCustomerSchema,
+    userOrderSchema
   };
 };

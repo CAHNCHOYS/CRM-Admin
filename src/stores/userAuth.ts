@@ -2,9 +2,10 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 import { useUserProductsStore } from "./userProducts";
-import { useUserClientsStore } from "./userClients";
+import {useUserCustomersStore } from "./userCustomers";
+import { useUserOrdersStore } from "./userOrders";
 
-import { getUserByToken } from "@/services/AuthService";
+import AuthService from "@/services/AuthService";
 import axiosInstance from "@/services/axios";
 
 import type { IUser } from "@/types/interfaces";
@@ -13,13 +14,15 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   const currentUser = ref<IUser | null>(null);
   const isUserLoggedIn = ref(false);
 
-  const isUserFetching = ref(false);
+  const isUserDataFetching = ref(false);
 
-  function setToken(token: string) {
+  function setToken(token: string): void {
     localStorage.setItem("token", token);
   }
-  function removeToken() {
+
+  function removeToken(): void {
     localStorage.removeItem("token");
+    delete axiosInstance.defaults.headers.common["Authorization"];
   }
 
   function setUser(user: IUser) {
@@ -28,40 +31,48 @@ export const useUserAuthStore = defineStore("userAuth", () => {
   }
 
   function logOutUser(): void {
-    const { clearUserClients } = useUserClientsStore();
-    const { clearUserProducts } = useUserProductsStore();
-    clearUserClients();
-    clearUserProducts();
+    removeToken();
     currentUser.value = null;
-    localStorage.removeItem("token");
     isUserLoggedIn.value = false;
-    
-    delete axiosInstance.defaults.headers.common["Authorization"];
   }
 
-  async function fetchUser(): Promise<void> {
-    isUserFetching.value = true;
-    const token = localStorage.getItem("token");
+  async function fetchData(): Promise<void> {
+ 
+    const { getAllUserCustomers } = useUserCustomersStore();
+    const { getAllUserProducts } = useUserProductsStore();
+    const { getAllUserOrders } = useUserOrdersStore();
 
+    await getAllUserCustomers(currentUser.value!.id);
+    await getAllUserProducts(currentUser.value!.id);
+    await getAllUserOrders(currentUser.value!.id);
+
+  }
+
+  async function getUserData(): Promise<void> {
+    isUserDataFetching.value = true;
+    const token = localStorage.getItem("token");
     if (token) {
       try {
-        const { data } = await getUserByToken(token);
+        const { data } = await AuthService.getUser();
         setUser(data.user);
-        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        await  fetchData();
+
       } catch (error) {
         removeToken();
       }
     }
-    isUserFetching.value = false;
+    isUserDataFetching.value = false;
   }
 
   return {
     currentUser,
     isUserLoggedIn,
-    isUserFetching,
+    isUserDataFetching,
 
     logOutUser,
-    fetchUser,
+    fetchData,
+    getUserData,
     setUser,
     setToken
   };

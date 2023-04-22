@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     :model-value="isOpened"
-    @update:model-value="$emit('closeModal')"
+    @update:model-value="$emit('closeDialog')"
     scrollable
     width="auto"
   >
@@ -35,10 +35,10 @@
               <p class="text-h6">Премиум клиент ?</p>
               <v-switch
                 v-model="premium"
-                :true-value="1"
-                :false-value="0"
+                true-value="Да"
+                false-value="Нет"
                 hide-details
-                :label="premium ? 'Да' : 'Нет'"
+                :label="premium"
                 color="indigo"
               />
             </v-col>
@@ -47,7 +47,7 @@
               <v-btn color="green-darken-4" variant="flat" type="submit" :loading="isSubmitting">
                 Обновить
               </v-btn>
-              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')">
+              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeDialog')">
                 Отмена
               </v-btn>
             </v-col>
@@ -62,70 +62,82 @@
 import { computed } from "@vue/reactivity";
 import { useField, useForm } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
-import { updateClient } from "@/services/ClientsService";
-import { useUserClientsStore } from "@/stores/userClients";
+
+import { useUserCustomersStore } from "@/stores/userCustomers";
 import { useAlertStore } from "@/stores/alert";
 import { useRouter } from "vue-router";
 
+import CustomerService from "@/services/CustomersService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
-import type { UserClientFields } from "@/types/Forms";
-import type { IUserClient } from "@/types/interfaces";
+import type { UserCustomerFields } from "@/types/Forms";
+import type { IUserCustomer } from "@/types/interfaces";
 
 const props = defineProps<{
   isOpened: boolean;
-  client: IUserClient;
+  customer: IUserCustomer;
+  isSearchActive: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: "closeModal"): void;
+  (e: "closeDialog"): void;
+  (e: "updateSearchCustomers"): Promise<void>;
 }>();
 
 //Работа с формой--------------------------------------------------------------
 const initialFormValues = computed(() => ({
-  firstName: props.client.firstName,
-  secondName: props.client.secondName,
-  thirdName: props.client.thirdName,
-  phone: props.client.phone,
-  premium: props.client.premium
+  firstName: props.customer.firstName,
+  secondName: props.customer.secondName,
+  thirdName: props.customer.thirdName,
+  phone: props.customer.phone,
+  premium: props.customer.premium
 }));
 
-const { userClientSchema } = useFormSchemas();
-const { resetForm, handleSubmit, isSubmitting } = useForm<UserClientFields>({
-  validationSchema: userClientSchema,
+const { userCustomerSchema } = useFormSchemas();
+const { resetForm, handleSubmit, isSubmitting } = useForm<UserCustomerFields>({
+  validationSchema: userCustomerSchema,
   initialValues: initialFormValues
 });
 const { value: firstName, errorMessage: firstNameErrors } = useField<string>("firstName");
 const { value: secondName, errorMessage: secondNameErrors } = useField<string>("secondName");
 const { value: thirdName, errorMessage: thirdNameErrors } = useField<string>("thirdName");
 const { value: phone, errorMessage: phoneErrors } = useField<string>("phone");
-const { value: premium } = useField<0 | 1>("premium");
+const { value: premium } = useField<"Да" | "Нет">("premium");
 //-------------------------------------------------------------------------------
 
 const alertStore = useAlertStore();
-const userClientsStore = useUserClientsStore();
+const userCustomersStore = useUserCustomersStore();
 
 const router = useRouter();
 
-const updateClientSubmit = handleSubmit(async (values: UserClientFields) => {
+const updateClientSubmit = handleSubmit(async (values: UserCustomerFields) => {
   console.log(values);
   try {
-    await updateClient(values, props.client.id);
-    userClientsStore.updateClient({ ...values, id: props.client.id });
+    await CustomerService.updateCustomer(values, props.customer.id);
+
+    userCustomersStore.updateCustomer({
+      ...values,
+      id: props.customer.id,
+      fullName: values.secondName + " " + values.firstName + " " + values.thirdName
+    });
+
+    if (props.isSearchActive) emit("updateSearchCustomers");
+
     alertStore.showMessage("success", "Клиент был успешно изменен");
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
         router.push({
           name: "login-page",
-          query: { isExpiredToken: "true" }
+          query: { isExpiredToken: "true", redirectedFrom: "customers-page" }
         });
+        return;
       }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при изменении клиента");
   } finally {
     resetForm();
-    emit("closeModal");
+    emit("closeDialog");
   }
 });
 </script>

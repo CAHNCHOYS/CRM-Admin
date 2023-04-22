@@ -2,15 +2,6 @@
   <div>
     <div class="text-h5 mb-4">Общая информация об аккаунте</div>
 
-    <v-snackbar location="right bottom" :max-width="400" color="success" v-model="isUpdateSuccess">
-      <div class="text-h6">Данные были успешно обновлены!</div>
-    </v-snackbar>
-
-    <v-snackbar location="right bottom" color="error" :max-width="400" v-model="isUpdateError">
-      <p class="text-h6">Ошибка:</p>
-      <p>{{ updateErrorMessage }}</p>
-    </v-snackbar>
-
     <v-form @submit.prevent="updateInfoSubmit" enctype="multipart/form-data">
       <v-row align="center">
         <v-col md="6" cols="12">
@@ -63,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+//СДелатьь алерт вверх  и шапку таблиц как generic
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -71,10 +63,14 @@ import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
 
-import { getUserByToken, updateInfo } from "@/services/AuthService";
+import AuthService from "@/services/AuthService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UpdateInfoFields } from "@/types/Forms";
+
+const emit = defineEmits<{
+  (e: "showMessage", type: "error" | "success", message: string): void;
+}>();
 
 const userAuthStore = useUserAuthStore();
 
@@ -97,10 +93,6 @@ const { value: country, errorMessage: countryErrors } = useField<string>("countr
 const { value: avatar, errorMessage: avatarErrorMessages } = useField<File[]>("avatar");
 //--------------------------------------------------------------------------------------------
 
-const isUpdateSuccess = ref(false);
-const isUpdateError = ref(false);
-const updateErrorMessage = ref("");
-
 const router = useRouter();
 
 const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
@@ -112,40 +104,36 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
     formData.append("country", values.country);
     formData.append("avatar", values.avatar[0], avatar.value[0].name);
 
-    await updateInfo(formData);
-    
-    const { data } = await getUserByToken(localStorage.getItem("token") as string);
+    await AuthService.updateInfo(formData);
+
+    const { data } = await AuthService.getUser();
 
     userAuthStore.setUser(data.user);
+  
 
-    isUpdateSuccess.value = true;
-    setTimeout(() => (isUpdateSuccess.value = false), 3500);
+    emit("showMessage", "success", "Данные были обновлены!");
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
         router.push({
           name: "login-page",
-          query: {
-            isExpiredToken: "true"
-          }
+          query: { isExpiredToken: "true", redirectedFrom: "account-page" }
         });
       }
-      isUpdateError.value = true;
-      setTimeout(() => (isUpdateError.value = false), 3500);
-      updateErrorMessage.value = handleAxiosError(error);
-    } else updateErrorMessage.value = "Ошибка при обновлении информации";
+      emit("showMessage", "error", handleAxiosError(error));
+    } else emit("showMessage", "error", "Ошибка при изменении данных!");
   }
 });
 
 //Предпросмотр аватара  пользователя---
 const previewAvatarImage = ref("");
 
-async function setImagePreview(e: Event): Promise<void> {
-  const file: any = (e.target as any).files[0];
+function setImagePreview(e: Event): void {
+  const file: File = (<HTMLInputElement>e.target).files![0];
   previewAvatarImage.value = URL.createObjectURL(file);
   console.log(URL.createObjectURL(file));
 }
-function clearPreviewImage() {
+function clearPreviewImage(): void {
   previewAvatarImage.value = "";
 }
 //-------------------------------------

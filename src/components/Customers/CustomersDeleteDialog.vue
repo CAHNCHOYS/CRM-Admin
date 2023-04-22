@@ -7,18 +7,17 @@
   >
     <v-card color="white" class="pa-4" :max-width="450">
       <v-card-title class="text-h5 mb-4 pa-0 font-weight-bold"
-        >Подтвердите удаление клиента</v-card-title
-      >
+        >Подтвердите удаление клиента</v-card-title>
 
-      <v-card-text class="text-h6 mb-3 pa-0">
+      <v-card-text class="text-h6 mb-4 pa-0">
         Вы уверены что хотиет удалить клиента
         <span class="text-error">
-          {{ client.firstName + " " + client.secondName }}
+          {{ customer.firstName + " " + customer.secondName }}
         </span>
         ?
       </v-card-text>
       <v-card-actions class="justify-center pa-0">
-        <v-btn @click="$emit('closeModal')" height="40" color="blue-darken-4" variant="flat">
+        <v-btn @click="$emit('closeDialog')" height="40" color="blue-darken-4" variant="flat">
           Нет
         </v-btn>
         <v-btn height="40" color="error" variant="flat" :loading="isDeleting" @click="deleteSubmit"
@@ -33,49 +32,52 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAlertStore } from "@/stores/alert";
-import { useUserClientsStore } from "@/stores/userClients";
+import { useUserCustomersStore } from "@/stores/userCustomers";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
-import { deleteClient } from "@/services/ClientsService";
+import CustomerService from "@/services/CustomersService";
 
-import type { IUserClient } from "@/types/interfaces";
+import type { IUserCustomer } from "@/types/interfaces";
 
 const props = defineProps<{
   isOpened: boolean;
-  client: IUserClient;
+  customer: IUserCustomer;
+  isSearchActive: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: "closeModal"): void;
+  (e: "closeDialog"): void;
+  (e: "updateSearchCustomers"): Promise<void>;
 }>();
 
 const alertStore = useAlertStore();
-const userClientsStore = useUserClientsStore();
+const userCustomersStore = useUserCustomersStore();
+
 
 const router = useRouter();
-
 const isDeleting = ref(false);
 
 const deleteSubmit = async () => {
   try {
     isDeleting.value = true;
-    await deleteClient(props.client.id);
-    userClientsStore.deleteClient(props.client.id);
+    await CustomerService.deleteCustomer(props.customer.id);
+    userCustomersStore.deleteCustomer(props.customer.id);
+    if (props.isSearchActive) emit("updateSearchCustomers");
+
     alertStore.showMessage("success", "Клиент был успешно удален!");
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
         router.push({
           name: "login-page",
-          query: {
-            isExpiredToken: "true"
-          }
+          query: { isExpiredToken: "true", redirectedFrom: "customers-page" }
         });
+        return;
       }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при удалении клиента!");
   } finally {
-    emit("closeModal");
+    emit("closeDialog");
     isDeleting.value = false;
   }
 };

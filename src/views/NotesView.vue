@@ -6,7 +6,7 @@
     <div class="text-h2 mb-8 title">Ваши заметки</div>
 
     <div class="" v-if="isNotesFetching">
-      <p class="mb-3 text-h6">Идет загрузка...</p>
+      <p class="mb-3 text-h6">Загрузка заметок ...</p>
       <v-progress-linear color="green" height="4" indeterminate />
     </div>
 
@@ -66,9 +66,7 @@
                   :rules="[(v) => !!v || 'Поле обязательное для ввода']"
                 >
                 </v-text-field>
-                <v-btn type="submit" variant="flat" color="green" 
-                  >Добавить</v-btn
-                >
+                <v-btn type="submit" variant="flat" color="green">Добавить</v-btn>
               </v-form>
             </v-expand-transition>
           </v-card-actions>
@@ -81,27 +79,14 @@
       <p>{{ fetchNotesError }}</p>
     </v-alert>
 
-
-    <v-dialog
-      v-model="isActionLoading"
-      :scrim="false"
-      persistent
-      width="auto"
-    >
-      <v-card
-        color="indigo-darken-4"
-      >
+    <v-dialog v-model="isActionLoading" :scrim="false" persistent width="auto">
+      <v-card color="indigo-darken-4">
         <v-card-text>
-          <p class="mb-2">Загрузка...</p>  
-          <v-progress-linear
-            indeterminate
-            color="white"
-            class="mb-0"
-          />
+          <p class="mb-2">Загрузка...</p>
+          <v-progress-linear indeterminate color="white" class="mb-0" />
         </v-card-text>
       </v-card>
     </v-dialog>
-
   </div>
 </template>
 
@@ -139,7 +124,6 @@ const columns = ref<NotesColumn[]>([
   { title: "Сделано", isFormActive: false, addText: "" }
 ]);
 
-
 //Drag actions ----------------------------------------------------------------
 const handleDragStart = (e: DragEvent, id: number) => {
   (e.target as HTMLElement).classList.add("dragging");
@@ -171,7 +155,6 @@ const noteEnter = (el: any, done: GSAPCallback) => {
   });
 };
 const noteLeave = (el: any, done: GSAPCallback) => {
-  console.log("leaving");
   gsap.to(el, {
     duration: 0.6,
     ease: "sine.out",
@@ -182,7 +165,7 @@ const noteLeave = (el: any, done: GSAPCallback) => {
 };
 </script>
 
-<style >
+<style>
 .dragging {
   opacity: 0.5 !important;
 }

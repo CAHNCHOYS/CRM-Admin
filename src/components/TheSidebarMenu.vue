@@ -10,18 +10,22 @@
     :temporary="smAndDown"
     v-if="userAuthStore.currentUser"
   >
-     <div v-if="smAndDown" style="position: absolute; right: 10px; top: 5px; " @click="$emit('closeMenu')">
-        <v-icon icon="mdi-arrow-left" class="text-white text-h4" />
-     </div>
+    <div
+      v-if="smAndDown"
+      style="position: absolute; right: 10px; top: 5px"
+      @click="$emit('closeMenu')"
+    >
+      <v-icon icon="mdi-arrow-left" class="text-white text-h4" />
+    </div>
     <v-list class="pa-0">
       <v-list-item class="text-center d-block link">
         <v-list-item-title class="text-white text-h6"
-          >{{ userAuthStore.currentUser?.name }}
+          >{{ userAuthStore.currentUser.name }}
         </v-list-item-title>
         <template #prepend>
           <v-avatar class="mx-auto mb-2" size="60px">
             <v-img
-              :src="`http://localhost:3000/UserAvatars/${userAuthStore.currentUser.avatar}`"
+              :src="`https://crm-backend-mocha.vercel.app/UserAvatars/${userAuthStore.currentUser.avatar}`"
               alt="No avatar"
               cover
             />
@@ -29,14 +33,14 @@
         </template>
       </v-list-item>
 
-      <v-divider color="white" thickness="2" class="my-2" />
+      <v-divider color="white" thickness="2" class="mt-4" />
 
       <v-list-item
         v-for="item in menuItems"
         :key="item.link"
         :value="item.link"
         @click="navigateTo(item.link)"
-        active-class="active"
+        active-class="active-link"
         class="link"
       >
         <v-list-item-title>
@@ -63,7 +67,7 @@
 import { onMounted, ref } from "vue";
 import { useDisplay } from "vuetify/lib/framework.mjs";
 import { useUserAuthStore } from "@/stores/userAuth";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 import gsap from "gsap";
 
@@ -73,88 +77,99 @@ const props = defineProps<{
 
 const { smAndDown, mdAndUp } = useDisplay();
 
-const router = useRouter();
 type MenuItem = {
   title: string;
   icon: string;
   link: string;
 };
 
-
 const menuItems = ref<MenuItem[]>([
   {
     title: "Статиститка",
     icon: "mdi-chart-areaspline",
-    link: "/stats"
+    link: "stats-page"
   },
 
   {
     title: "Товары",
     icon: "mdi-cards-variant",
-    link: "/products"
+    link: "products-page"
   },
   {
     title: "Клиенты",
     icon: "mdi-account-group",
-    link: "/clients"
+    link: "customers-page"
   },
- 
+  {
+    title: "Заказы",
+    icon: "mdi-wallet",
+    link: "orders-page"
+  },
+
   {
     title: "Личный кабинет",
     icon: "mdi-account-circle",
-    link: "/account"
+    link: "account-page"
   },
- {
+  {
     title: "Заметки",
     icon: "mdi-note-multiple",
-    link: "/notes"
+    link: "notes-page"
   },
   {
-    title: "Страница 404",
-    icon: "mdi-alert-circle-outline",
-    link: "/404"
+    title: "О приложении",
+    icon: "mdi-information",
+    link: "info-page",
   },
-  {
-    title: "Анимации",
-    icon: "mdi-animation",
-    link: "/gsap"
-  }
-
+  // {
+  //   title: "Анимации",
+  //   icon: "mdi-animation",
+  //   link: "gsap-animations"
+  // }
 ]);
 
 const userAuthStore = useUserAuthStore();
 
-function logOut(): void {
+const router = useRouter();
+const route = useRoute();
+
+const logOut = (): void => {
   if (window.confirm("Вы уверены что хотите выйти с аккаунта ?")) {
     userAuthStore.logOutUser();
     router.push({ name: "login-page" });
   }
-}
-function navigateTo(link: string) {
-  router.push(`${link}`);
-}
+};
 
-
+const navigateTo = (link: string): void => {
+  if (link === (route.name as string)) {
+    router.push({ name: link, query: { ...route.query } });
+  } else router.push({ name: link });
+};
 
 //Анимация gsap
-onMounted(()=>{
+onMounted(() => {
   gsap.from(".link", {
-    x: 200,
+    xPercent: 100,
     opacity: 0,
     stagger: 0.25,
-    duration: 0.4,
-    ease:"sine.out",
+    transformOrigin: "top left",
+    duration: 0.25,
+    ease: "sine.out"
   });
-  gsap.from(".btn",{
+  gsap.from(".btn", {
     scale: 0,
     opacity: 0,
-    delay: 1.8,
-    duration: 0.4,
+    delay: 2,
+    duration: 0.35
   });
 });
 </script>
 
 <style lang="scss" scoped>
-.active {
+.active-link {
+  background-color: rgba($color: #9C27B0, $alpha: 1) !important;
+  color: white !important;
+  transition: all 0s ease 0s !important;
+
 }
 </style>

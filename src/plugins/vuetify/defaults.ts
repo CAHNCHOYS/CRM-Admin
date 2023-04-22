@@ -56,5 +56,12 @@ export default {
     density: "default",
     hideDetails: "auto",
     clearable: true,
+  },
+  VAutocomplete: {
+    variant: "outlined",
+    color:"indigo-darken-4",
+    density: "default",
+    hideDetails: "auto",
+    clearable: true,
   }
 };

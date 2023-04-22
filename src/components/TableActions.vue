@@ -9,17 +9,17 @@
         variant="underlined"
         :model-value="count"
         :clearable="false"
-        :items="[10, 15, 20, 30, 50]"
+        :items="[10, 15, 20, 30, 40]"
         @update:model-value="$emit('update:count', $event)"
       >
       </v-select>
     </v-col>
     <v-col cols="auto" class="order-sm-3 order-2 d-flex align-center" >
       <v-badge :dot="true" color="error" offset-x="10" :offset-y="3" :model-value="isBadgeActive">
-        <v-btn @click="$emit('toggleSearch')" icon="mdi-magnify" color="teal" class="mr-1"></v-btn>
+        <v-btn @click="$emit('toggleSearch')" icon="mdi-magnify" color="teal" class="mr-1" />
       </v-badge>
 
-      <v-btn @click="$emit('toggleAddDialog')" icon="mdi-plus" color="green"></v-btn>
+      <v-btn @click="$emit('toggleAddDialog')" icon="mdi-plus" color="green" />
     </v-col>
   </v-row>
 </template>

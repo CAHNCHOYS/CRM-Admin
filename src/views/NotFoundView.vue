@@ -1,5 +1,8 @@
 <template>
   <div class="h-screen bg-not-found d-flex align-center justify-center">
+    <v-overlay :model-value="xs" contained>
+
+    </v-overlay>
     <div class="decor-items h-screen w-100">
       <v-img
         v-for="n in 34"
@@ -19,14 +22,15 @@
       <div class="title font-weight-bold mb-2">404</div>
       <div class="mb-md-16 mb-8 text-md-h3 text-h4 flex-grow-1">Страница не найдена</div>
       <div>
-        <v-btn :height="80" variant="outlined" class="px-sm-10 px-4">
+        <v-btn :height="80" variant="outlined" class="px-sm-10 px-2">
           <router-link class="text-white text-md-h4 text-h5" to="/"
             >На главную страницу</router-link
           >
           <template #prepend>
-            <v-icon class="text-h3" icon="mdi-arrow-left-thin" size="large"></v-icon>
+            <v-icon class="text-h3" icon="mdi-arrow-left-thin" size="large" />
           </template>
         </v-btn>
+      
       </div>
     </v-sheet>
 
@@ -36,8 +40,8 @@
       cover
       :src="Moon"
       class="moon"
-    >
-    </v-img>
+    />
+  
     <v-img :src="Astranaut" class="astro" width="275" height="270" cover alt="Astranaut" />
 
     <v-img :src="Fog" width="32%" height="80%" class="fog"> </v-img>
@@ -48,8 +52,7 @@
 <script setup lang="ts">
 import { useDisplay } from "vuetify";
 import gsap from "gsap";
-import { onMounted } from "vue";
-
+import { onMounted, ref } from "vue";
 
 import Moon from "@/assets/Images/404/Moon.svg";
 import Star from "@/assets/Images/404/Star.svg";
@@ -57,78 +60,42 @@ import Astranaut from "@/assets/Images/404/Astronaut.svg";
 import Earth from "@/assets/Images/404/earth.svg";
 import Fog from "@/assets/Images/404/Fog1.png";
 
-const { mdAndDown } = useDisplay();
+const { mdAndDown, xs } = useDisplay();
+
+
 
 onMounted(() => {
-  gsap
-    .timeline()
+  gsap.from(".decor-items__item", {
+    opacity: 0,
+    stagger: 0.1,
+    duration: 0.5
+  });
 
-    .from(".decor-items__item", {
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.5
-    })
-    .from(".earth", {
-      scale: 0,
-      ease: "elastic.out"
-    })
-    .from(
-      ".moon",
-      {
-        xPercent: -100,
-        duration: 1.5,
-        ease: "power3.out"
-      },
-      "-=1.5"
-    )
+  gsap.to(".earth", {
+    rotate: 360,
+    duration: 2,
+    repeat: -1,
+    repeatDelay: 0,
+    ease: "none",
+  });
 
-    .from(
-      ".astro",
-      {
-        opacity: 0,
-        duration: 3.5,
-        x: -1000,
-        rotation: 20,
-        ease: "back.out(1.8)"
-      },
-      "-=2"
-    )
-    .from(".sheet > div", {
-      opacity: 0,
-      yPercent: -100,
-      duration: 1,
-      stagger: 0.5
-    })
-    .from(".fog", {
-      opacity: 0,
-      scale: 0,
-      rotateX: 20,
-      duration: 1
-    });
+
+
+
 });
 </script>
 
 <style lang="scss" scoped>
 .h-screen {
   position: relative;
-  @media (max-width: 600px) {
-    &::before {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      background-color: rgba($color: #000000, $alpha: 0.4);
-    }
-  }
+ 
 }
 
 .moon {
   position: absolute;
   left: 0;
   top: 0;
+
 }
 
 .astro {

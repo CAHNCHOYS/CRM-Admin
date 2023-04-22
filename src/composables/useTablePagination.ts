@@ -16,13 +16,12 @@ export const useTablePagination = <T extends {}>({
   route,
   router
 }: Data<T>) => {
-
+  
   const currentPage = ref(+(route.query.currentPage as string) || 1);
-  const elementsByPage = ref(10);
-  const totalPages = computed(() => Math.ceil(tableElements.value.length / elementsByPage.value));
+  const elemetsPerPage = ref(10);
+  const totalPages = computed(() => Math.ceil(tableElements.value.length / elemetsPerPage.value));
 
   const isInverseSort = ref(false);
-
 
   const setSortField = (field: keyof T) => {
     if (sortField.value === field) {
@@ -37,13 +36,14 @@ export const useTablePagination = <T extends {}>({
 
   const paginatedElements = computed(() => {
     const elementsCount = tableElements.value.length;
-    let start = (currentPage.value - 1) * elementsByPage.value;
+    
+    let start = (currentPage.value - 1) * elemetsPerPage.value;
 
     if (start >= elementsCount && elementsCount) {
-      setCurrentPage(Math.ceil(elementsCount / elementsByPage.value));
-      start = (currentPage.value - 1) * elementsByPage.value;
+      setCurrentPage(Math.ceil(elementsCount / elemetsPerPage.value));
+      start = (currentPage.value - 1) * elemetsPerPage.value;
     }
-    let end = start + elementsByPage.value;
+    let end = start + elemetsPerPage.value;
 
     const paginated = tableElements.value.slice(start, end);
 
@@ -67,7 +67,7 @@ export const useTablePagination = <T extends {}>({
     paginatedElements,
     totalPages,
     isInverseSort,
-    elementsByPage,
+    elemetsPerPage,
     setSortField
   };
 };

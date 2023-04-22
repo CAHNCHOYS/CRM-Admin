@@ -1,9 +1,9 @@
 <template>
   <v-app>
-    <v-overlay :model-value="userAuthStore.isUserFetching" class="align-center justify-center">
+    <v-overlay :model-value="userAuthStore.isUserDataFetching" class="align-center justify-center">
       <v-progress-circular color="indigo" indeterminate size="164" />
     </v-overlay>
-    <component :is="getCurrentLayout" v-if="!userAuthStore.isUserFetching">
+    <component :is="getCurrentLayout" v-if="!userAuthStore.isUserDataFetching">
       <router-view v-slot="{ Component }">
         <transition name="slide" mode="out-in">
           <component :is="Component"> </component>
@@ -38,6 +38,7 @@ const obj: {
 const getCurrentLayout = computed(() => {
   return obj[route.meta.layout || "main"];
 });
+
 </script>
 
 <style lang="scss">
@@ -58,13 +59,13 @@ body {
 
 .slide-enter-active,
 .slide-leave-active {
-  transition: all 0.6s ease 0s;
+  transition: all 0.55s ease 0s;
 }
 
 .slide-enter-from,
 .slide-leave-to {
   opacity: 0;
-  transform: translate(10%, 0);
+  transform: translate(15%, 0);
 }
 
 th {

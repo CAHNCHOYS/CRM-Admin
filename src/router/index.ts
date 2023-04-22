@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, createWebHashHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import InfoView from "../views/InfoView.vue";
 import { useUserAuthStore } from "@/stores/userAuth";
 
 import "vue-router";
@@ -18,8 +18,8 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home-page",
-      component: HomeView,
+      name: "info-page",
+      component: InfoView,
       meta: {
         requireAuth: true
       }
@@ -75,17 +75,25 @@ const router = createRouter({
       }
     },
     {
-      path: "/clients",
-      name: "clients-page",
-      component: () => import("../views/ClientsView.vue"),
+      path: "/customers",
+      name: "customers-page",
+      component: () => import("../views/CustomersView.vue"),
+      meta: {
+        requireAuth: true
+      }
+    },
+    {
+      path: "/orders",
+      name: "orders-page",
+      component: () => import("../views/OrdersView.vue"),
       meta: {
         requireAuth: true
       }
     },
     {
       path: "/gsap",
-      name: "gsap",
-      component: () => import("../views/LearGsap.vue"),
+      name: "gsap-animations",
+      component: () => import("../views/AnimationsView.vue"),
       meta: {
         requireAuth: false
       }
@@ -108,7 +116,8 @@ router.beforeEach(async (to, from) => {
 
   //Если зашли первый раз
   if (!from.name) {
-    await userAuthStore.fetchUser();
+    console.log("Yes");
+    await userAuthStore.getUserData();
   }
 
   if (to.meta.requireAuth && !userAuthStore.isUserLoggedIn) {

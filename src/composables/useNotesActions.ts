@@ -3,7 +3,7 @@ import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
-import { getUserNotes, updateNote, deleteNote, addNote } from "@/services/NotesService";
+import NoteService from "@/services/NotesService";
 import type { IUserNote, NoteType } from "@/types/interfaces";
 
 export const useNotesActions = () => {
@@ -24,8 +24,9 @@ export const useNotesActions = () => {
 
   onMounted(async () => {
     isNotesFetching.value = true;
+
     try {
-      const { data } = await getUserNotes(userAuthStore.currentUser!.id);
+      const { data } = await NoteService.getNotes(userAuthStore.currentUser!.id);
       notes.value = data.notes;
     } catch (error) {
       if (isAxiosError(error)) {
@@ -38,7 +39,7 @@ export const useNotesActions = () => {
   const updateNoteAction = async (note: IUserNote) => {
     isActionLoading.value = true;
     try {
-      await updateNote(note);
+      await NoteService.updateNote(note);
     } catch (error) {
       if (isAxiosError(error)) {
         alertStore.showMessage("error", handleAxiosError(error));
@@ -53,7 +54,7 @@ export const useNotesActions = () => {
     isActionLoading.value = true;
 
     try {
-      const { data } = await addNote({
+      const { data } = await NoteService.addNote({
         title: noteTitle,
         type: noteType,
         userId: userAuthStore.currentUser!.id
@@ -71,7 +72,7 @@ export const useNotesActions = () => {
   const deleteNoteAction = async (id: number) => {
     isActionLoading.value = true;
     try {
-      await deleteNote(id);
+      await NoteService.deleteNote(id);
 
       notes.value = notes.value.filter((note) => note.id != id);
     } catch (error) {

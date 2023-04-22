@@ -99,15 +99,14 @@ import { useRoute, useRouter } from "vue-router";
 import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
 
-import pageBackground from "@/assets/Images/LoginRegister/bg.png";
-
 import { useForm, useField } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 
-import { login } from "@/services/AuthService";
+import AuthService from "@/services/AuthService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 import axiosInstance from "@/services/axios";
 
+import pageBackground from "@/assets/Images/LoginRegister/bg.png";
 import type { LoginFields } from "@/types/Forms";
 
 //Form validation -----------------------------------------------------------
@@ -132,10 +131,13 @@ const router = useRouter();
 //Авторизация
 const loginSubmit = handleSubmit(async (values: LoginFields) => {
   try {
-    const { data } = await login(values);
+    const { data } = await AuthService.login(values);
     userAuthStore.setToken(data.token);
     userAuthStore.setUser(data.user);
+
+    await userAuthStore.fetchData();
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
     alertStore.showMessage("success", "Авторизация успешна, вскоре вы будете переведены на сайт");
     setTimeout(() => {
       if (route.query.redirectedFrom) {
@@ -151,9 +153,8 @@ const loginSubmit = handleSubmit(async (values: LoginFields) => {
   }
 });
 
-
 watchEffect(() => {
-  if (route.query.redirectedFrom) {
+  if (route.query.redirectedFrom && !route.query.isExpiredToken) {
     alertStore.showMessage(
       "error",
       `Для доступа к странице ${route.query.redirectedFrom} необходимо авторизироваться`

@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     :model-value="isOpened"
-    @update:model-value="emit('closeModal')"
+    @update:model-value="emit('closeDialog')"
     width="auto"
     scrollable
     transition="dialog-bottom-transition"
@@ -34,14 +34,15 @@
               <v-text-field label="Номер телефона" v-model="phone" :error-messages="phoneErrors" />
             </v-col>
             <v-col cols="12">
-              <p class="text-h6">Премиум клиент ?</p>
+              <p class="text-h6">Премиум клиент</p>
               <v-switch
                 v-model="premium"
-                :true-value="1"
-                :false-value="0"
+                :true-value="'Да'"
+                :false-value="'Нет'"
                 hide-details
-                :label="premium ? 'Да' : 'Нет'"
+                :label="premium"
                 color="indigo"
+                :error-messages="premiumErrors"
               />
             </v-col>
 
@@ -49,7 +50,7 @@
               <v-btn color="green-darken-4" variant="flat" type="submit" :loading="isSubmitting">
                 Добавить
               </v-btn>
-              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')">
+              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeDialog')">
                 Отмена
               </v-btn>
             </v-col>
@@ -63,45 +64,51 @@
 <script setup lang="ts">
 import { useField, useForm } from "vee-validate";
 import { useFormSchemas } from "@/composables/useFormSchemas";
-import { addClient } from "@/services/ClientsService";
-import { useUserClientsStore } from "@/stores/userClients";
+
+import CustomerService from "@/services/CustomersService";
+import { useUserCustomersStore } from "@/stores/userCustomers";
 import { useAlertStore } from "@/stores/alert";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 import { useRouter } from "vue-router";
 
-import type { UserClientFields } from "@/types/Forms";
+import type { UserCustomerFields } from "@/types/Forms";
 
 const props = defineProps<{
   isOpened: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: "closeModal"): void;
+  (e: "closeDialog"): void;
 }>();
 
 //Работа с формой-------------------------------------------------------------------------
-const { userClientSchema } = useFormSchemas();
-const { resetForm, handleSubmit, isSubmitting } = useForm<UserClientFields>({
-  validationSchema: userClientSchema
+const { userCustomerSchema } = useFormSchemas();
+const { resetForm, handleSubmit, isSubmitting } = useForm<UserCustomerFields>({
+  validationSchema: userCustomerSchema
 });
 const { value: firstName, errorMessage: firstNameErrors } = useField<string>("firstName");
 const { value: secondName, errorMessage: secondNameErrors } = useField<string>("secondName");
 const { value: thirdName, errorMessage: thirdNameErrors } = useField<string>("thirdName");
 const { value: phone, errorMessage: phoneErrors } = useField<string>("phone");
-const { value: premium } = useField<0 | 1>("premium");
+const { value: premium, errorMessage: premiumErrors } = useField<"Да" | "Нет">("premium");
+premium.value = "Нет";
 //-----------------------------------------------------------------------------------------
 
 const alertStore = useAlertStore();
-const userClientsStore = useUserClientsStore();
+const userCustomersStore = useUserCustomersStore();
 
 const router = useRouter();
 
-const addClientSubmit = handleSubmit(async (values: UserClientFields) => {
+const addClientSubmit = handleSubmit(async (values: UserCustomerFields) => {
   try {
-    const { data } = await addClient(values);
+    const { data } = await CustomerService.addCustomer(values);
 
-    userClientsStore.addClient({ ...values, id: data.clientId });
+    userCustomersStore.addCustomer({
+      ...values,
+      id: data.customerId,
+      fullName: values.secondName + " " + values.firstName + " " + values.thirdName
+    });
 
     alertStore.showMessage("success", "Клиент " + values.secondName + " был успешно добавлен!");
   } catch (error) {
@@ -109,13 +116,14 @@ const addClientSubmit = handleSubmit(async (values: UserClientFields) => {
       if (error.response?.status === 401) {
         router.push({
           name: "login-page",
-          query: { isExpiredToken: "true" }
+          query: { isExpiredToken: "true", redirectedFrom: "customers-page" }
         });
+        return;
       }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при добавлении клиента");
   } finally {
-    emit("closeModal");
+    emit("closeDialog");
     resetForm();
   }
 });

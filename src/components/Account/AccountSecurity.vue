@@ -2,15 +2,6 @@
   <div>
     <div class="text-h5 mb-3">Безопасность</div>
 
-    <v-snackbar v-model="isUpdateError" color="error" location="bottom right">
-      <p class="text-h6 mb-1">Ошибка:</p>
-      <p class="text-h6">{{ updatePassErrorMessage }}</p>
-    </v-snackbar>
-
-    <v-snackbar v-model="isUpdateSuccess" color="success" location="bottom right">
-      <p class="text-h6">Пароль был успешно обновлен !</p>
-    </v-snackbar>
-
     <v-form @submit.prevent="updatePasswordSubmit">
       <v-row>
         <v-col cols="12">
@@ -61,10 +52,14 @@ import { useUserAuthStore } from "@/stores/userAuth";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 import { useForm, useField } from "vee-validate";
 
-import { updatePassword, getUserByToken } from "@/services/AuthService";
+import AuthService from "@/services/AuthService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { UpdatePasswordFields } from "@/types/Forms";
+
+const emit = defineEmits<{
+  (e: "showMessage", type: "error" | "success", message: string): void;
+}>();
 
 //---------------- Валидация формы -------------------------------------------------------------
 const { updatePasswordSchema } = useFormSchemas();
@@ -79,10 +74,6 @@ const { value: newPasswordConfirm, errorMessage: newPasswordConfirmErrors } =
   useField<string>("newPasswordConfirm");
 //----------------------------------------------------------------------------------------------
 
-const isUpdateError = ref(false);
-const isUpdateSuccess = ref(false);
-const updatePassErrorMessage = ref("");
-
 const isNewPasswordSeen = ref(false);
 const isOldPasswordSeen = ref(false);
 
@@ -92,25 +83,25 @@ const router = useRouter();
 
 const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) => {
   try {
-    await updatePassword(values);
-    const { data } = await getUserByToken(localStorage.getItem("token") as string);
+    await AuthService.updatePassword(values);
+    const { data } = await AuthService.getUser();
     userAuthStore.setUser(data.user);
 
-    isUpdateSuccess.value = true;
-    setTimeout(() => (isUpdateSuccess.value = false), 3500);
+    emit("showMessage", "success", "Пароль был успешно имзенен");
     resetForm();
   } catch (error) {
-    isUpdateError.value = true;
-    setTimeout(() => (isUpdateError.value = false), 3500);
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
         router.push({
           name: "login-page",
-          query: { isExpiredToken: "true" }
+          query: { isExpiredToken: "true", redirectedFrom: "account-page" }
         });
+        return;
       }
-      updatePassErrorMessage.value = handleAxiosError(error);
-    } else updatePassErrorMessage.value = "Ошибка при обновлении пароля";
+      emit("showMessage", "error", handleAxiosError(error));
+    } else {
+      emit("showMessage", "error", "Ошибка при изменении пароля!");
+    }
   }
 });
 </script>

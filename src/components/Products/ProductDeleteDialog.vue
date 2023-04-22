@@ -9,7 +9,7 @@
       <v-card-title class="pa-0 mb-3">
         <p class="font-weight-bold text-h5">Подтверждение удаления</p>
       </v-card-title>
-      <v-card-text class="pa-0">
+      <v-card-text class="pa-0 mb-4">
         <p class="text-h6">
           Вы уверены что хотите удалить товар
           <span class="text-red">{{ props.product.name }} </span> из списка?
@@ -37,7 +37,7 @@ import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
-import { deleteProduct } from "@/services/ProductService";
+import ProductService from "@/services/ProductService";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
@@ -46,10 +46,12 @@ import type { IUserProduct } from "@/types/interfaces";
 const props = defineProps<{
   product: IUserProduct;
   isActive: boolean;
+  isSearchActive: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: "closeModal"): void;
+  (e: "updateSearchProducts"): Promise<void>;
 }>();
 
 const isDeleting = ref(false);
@@ -62,9 +64,10 @@ const router = useRouter();
 const deletUserProduct = async () => {
   try {
     isDeleting.value = true;
-    await deleteProduct(props.product.id);
+    await ProductService.deleteProduct(props.product.id);
 
     userProductsStore.deleteUserProduct(props.product.id);
+    if (props.isSearchActive) emit("updateSearchProducts");
 
     alertStore.showMessage("success", "Товар был успешно удален");
   } catch (error) {
@@ -72,10 +75,9 @@ const deletUserProduct = async () => {
       if (error.response?.status === 401) {
         router.push({
           name: "login-page",
-          query: {
-            isExpiredToken: "true"
-          }
+          query: { isExpiredToken: "true", redirectedFrom: "products-page" }
         });
+        return;
       }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при удалении товара!");

@@ -18,8 +18,8 @@ export interface IUserProduct {
 }
 
 export interface IUserProductCategory {
-  id: number;
-  name: string;
+  readonly id: number;
+  readonly name: string;
 }
 
 export type NoteType = "В процессе" | "Сделать потом" | "Сделано";
@@ -30,11 +30,22 @@ export interface IUserNote {
   type: NoteType;
 }
 
-export interface IUserClient {
+export interface IUserCustomer {
   readonly id: number;
   firstName: string;
   secondName: string;
   thirdName: string;
+  fullName: string;
   phone: string;
-  premium: 0 | 1;
+  premium: "Да" | "Нет";
+}
+
+export interface IUserOrder {
+  readonly id: number;
+  productName: string;
+  productId: number;
+  productCount: number;
+  customerFullName: string;
+  customerId: number;
+  date: string;
 }

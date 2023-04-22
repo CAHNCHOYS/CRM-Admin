@@ -19,7 +19,11 @@
             </v-col>
 
             <v-col cols="12">
-              <v-select
+              <v-sheet v-if="isCategoriesLoading">
+                <p class="text-h6 mb-2">Загрузка категорий....</p>
+                <v-progress-linear indeterminate height="6" color="green" />
+              </v-sheet>
+              <v-autocomplete
                 v-model="categoryId"
                 label="Категория товара"
                 :error-messages="categoryIdErrors"
@@ -27,16 +31,19 @@
                 item-title="name"
                 :clearable="false"
                 item-value="id"
-                v-if="productsCategories.length"
+                no-data-text="Нет категорий"
+                v-else-if="!categoriesErrorMessage"
               />
-              <p v-if="categoriesErrorMessage" class="text-h6 text-red">
-                {{ categoriesErrorMessage }}
-              </p>
+              <v-sheet v-else>
+                <v-alert type="error" border="end" variant="outlined" class="pa-2">
+                  <v-alert-title class="text-h6"> {{ categoriesErrorMessage }}</v-alert-title>
+                </v-alert>
+              </v-sheet>
             </v-col>
 
             <v-col sm="6" cols="12">
               <v-text-field
-                v-model="count"
+                v-model.number="count"
                 :error-messages="countErrors"
                 label="Количество"
                 type="number"
@@ -45,7 +52,7 @@
 
             <v-col sm="6" cols="12">
               <v-text-field
-                v-model="price"
+                v-model.number="price"
                 :error-messages="priceErrors"
                 label="Цена"
                 suffix="руб"
@@ -76,14 +83,16 @@ import { storeToRefs } from "pinia";
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
 
-import { addProduct } from "@/services/ProductService";
+import ProductService from "@/services/ProductService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 import { useRouter } from "vue-router";
 
 import type { UserProductFields } from "@/types/Forms";
 
+
 const props = defineProps<{
   isActive: boolean;
+  
 }>();
 
 const emit = defineEmits<{
@@ -104,13 +113,17 @@ const { value: price, errorMessage: priceErrors } = useField("price");
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
 
-const { productsCategories, categoriesErrorMessage } = storeToRefs(userProductsStore);
+const { productsCategories, categoriesErrorMessage, isCategoriesLoading } =
+  storeToRefs(userProductsStore);
 
 const router = useRouter();
 
 const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
-    const { data } = await addProduct(values);
+    const { data } = await ProductService.addProduct(values);
+    
+    console.log(values);
+
     userProductsStore.addUserProduct({ ...values, ...data });
     alertStore.showMessage("success", `Товар ${values.name} был успешно добавлен!`);
   } catch (error) {
@@ -118,10 +131,9 @@ const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
       if (error.response?.status === 401) {
         router.push({
           name: "login-page",
-          query: {
-            isExpiredToken: "true"
-          }
+          query: { isExpiredToken: "true", redirectedFrom: "products-page" }
         });
+        return;
       }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при добавлении товара !");

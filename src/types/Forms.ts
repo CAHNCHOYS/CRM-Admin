@@ -32,10 +32,17 @@ export type UserProductFields = {
   price: number;
 };
 
-export type UserClientFields = {
+export type UserCustomerFields = {
   firstName: string;
   secondName: string;
   thirdName: string;
   phone: string;
-  premium:  0 | 1;
+  premium:  "Да" | "Нет";
 };
+
+export type UserOrderFields = {
+  customerId: number;
+  productId: number;
+  productCount: number;
+  date: string;
+}

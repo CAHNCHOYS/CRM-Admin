@@ -1,4 +1,4 @@
-import type { IUser, IUserClient, IUserNote, IUserProduct } from "./interfaces";
+import type { IUser, IUserCustomer, IUserNote, IUserOrder, IUserProduct } from "./interfaces";
 
 
 export type ApiError = {
@@ -16,30 +16,25 @@ export type LoginResponse = {
     user: IUser;
 
 };
-
 export type GetUserResponse = {
   user: IUser;
 }
-export type UpdateUserResponse = {
-  readonly isInfoUpdated: true;
-};
-
-
 
 //Товары--------------------------------------------
 export type GetProductsResponse = {
     products: IUserProduct[];
 }
 
-
 export type GetProductCategoriseResponse = {
     categories: {name: string, id: number}[];
 }
-//При обновлении или добавлении товара
-export type NewProductResponse = {
+
+export type AddProductResponse = {
   id: number;
   category: string;
 }
+
+
 //--------------------------------------------------
 
 //Заметки ---------------------------------------
@@ -57,13 +52,29 @@ export type AddNoteResponse = {
 //---------------------------------------------
 
 //Клиенты -----------------------
-export type GetClientsResponse = {
-  clients: IUserClient[];
+export type GetCustomersResponse = {
+  customers: IUserCustomer[];
 }
 
-export type AddClientResponse = {
-  clientId: number;
+export type AddCustomersResponse = {
+  customerId: number;
 }
+
+//-------------------------------
+//Заказы
+
+export type GetOrdersResponse = {
+  orders: IUserOrder[];
+}
+
+export type NewOrderResponse = {
+  id: number;
+  customerFullName: string;
+  productName: string;
+}
+
+//---------------
+
 
 
 //Generic ----------------
