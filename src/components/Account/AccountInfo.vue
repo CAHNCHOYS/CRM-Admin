@@ -11,7 +11,7 @@
               class="mr-sm-3 mb-sm-0 mb-4 border mx-auto"
               :image="
                 previewAvatarImage
-                || `http://localhost:3000/UserAvatars/${userAuthStore.currentUser!.avatar}`
+                || `https://crm-backend-mocha.vercel.app/UserAvatars/${userAuthStore.currentUser!.avatar}`
               "
             />
             <v-file-input
@@ -54,7 +54,6 @@
 </template>
 
 <script setup lang="ts">
-//СДелатьь алерт вверх  и шапку таблиц как generic
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -74,6 +73,8 @@ const emit = defineEmits<{
 
 const userAuthStore = useUserAuthStore();
 
+//---------------- Валидация формы -------------------------------------------------------------
+
 //Начальные значения формы
 const initialFormValues = computed(() => ({
   name: userAuthStore.currentUser?.name || "user logged out",
@@ -81,7 +82,6 @@ const initialFormValues = computed(() => ({
   country: userAuthStore.currentUser?.country || "user logged out",
   avatar: []
 }));
-//---------------- Валидация формы -------------------------------------------------------------
 const { updateInfoShchema } = useFormSchemas();
 const { handleSubmit, isSubmitting } = useForm<UpdateInfoFields>({
   validationSchema: updateInfoShchema,
@@ -109,7 +109,6 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
     const { data } = await AuthService.getUser();
 
     userAuthStore.setUser(data.user);
-  
 
     emit("showMessage", "success", "Данные были обновлены!");
   } catch (error) {

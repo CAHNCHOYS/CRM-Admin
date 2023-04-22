@@ -2,7 +2,7 @@
   <v-layout>
     <TheSidebarMenu @close-menu="isSidebarOpened = false" :is-opened="isSidebarOpened" />
 
-    <v-app-bar color="light-blue-darken-1" :height="65" :elevation="2">
+    <v-app-bar color="light-blue-darken-1" :height="smAndDown ? 55 : 65" :elevation="2" style="position: fixed">
       <v-app-bar-nav-icon @click="isSidebarOpened = !isSidebarOpened" />
       <v-spacer></v-spacer>
       <v-btn class="d-inline-flex align-center"
@@ -12,8 +12,8 @@
           class="text-white pr-2 d-inline-flex"
           >GitHub</a
         >
-        <v-icon size="large" icon="mdi-github"></v-icon
-      ></v-btn>
+        <v-icon size="large" icon="mdi-github" />
+      </v-btn>
     </v-app-bar>
 
     <v-main class="main">
@@ -27,8 +27,11 @@
 <script setup lang="ts">
 import TheSidebarMenu from "@/components/TheSidebarMenu.vue";
 import { ref } from "vue";
+import { useDisplay } from "vuetify/lib/framework.mjs";
 
 const isSidebarOpened = ref(true);
+
+const { smAndDown } = useDisplay();
 </script>
 
 <style scoped>

@@ -21,6 +21,7 @@ export const useOrdersSearch = (
 
   const searchedOrders = ref<IUserOrder[]>([]);
 
+  //Поля поиска
   const startDate = ref("2023-01-01");
   const endDate = ref("2024-01-01");
   const customerName = ref("");
@@ -83,7 +84,8 @@ export const useOrdersSearch = (
     async () => {
       if (!route.query.startDate && !route.query.endDate) return;
       searchOrders();
-    }
+    },
+    { immediate: true }
   );
 
   return {

@@ -19,13 +19,13 @@ export const useProductsSearch = (
     +(route.query.startPrice as string) || 1,
     +(route.query.endPrice as string) || 99999
   ]);
-
   const searchName = ref((route.query.productName as string) || "");
+
+  const searchedProducts = ref<IUserProduct[]>([]);
+
   const isSearchActive = ref(false);
   const isSearchLoading = ref(false);
   const isSearchFormActive = ref(false);
-
-  const searchedProducts = ref<IUserProduct[]>([]);
 
   const resetSearch = () => {
     searchName.value = "";

@@ -15,14 +15,16 @@ export const useCustomersSearch = (
 ) => {
   const alertStore = useAlertStore();
 
-  const isSearchFormActive = ref(false);
+
   const secondName = ref((route.query.secondName as string) || "");
   const premium = ref<0 | 1>((+(route.query.premium as string) as 0 | 1) || 0);
   const searchWithPremium = ref(false);
 
   const searchedCustomers = ref<IUserCustomer[]>([]);
+
   const isSearchActive = ref(false);
   const isSearchLoading = ref(false);
+  const isSearchFormActive = ref(false);
 
   const resetSearch = () => {
     secondName.value = "";
@@ -55,8 +57,6 @@ export const useCustomersSearch = (
         secondName: route.query.secondName as string,
         searchWithPremium: route.query.searchWithPremium as string
       });
-
-      console.log(data);
       searchedCustomers.value = data.customers;
       isSearchActive.value = true;
     } catch (error) {

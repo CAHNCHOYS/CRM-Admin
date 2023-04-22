@@ -1,13 +1,13 @@
 <template>
   <div>
-    <h2 class="text-sm-h2 text-h3 mb-6">Статистика</h2>
+    <h2 class="title text-sm-h2 text-h3 mb-6">Статистика</h2>
 
     <v-row class="stats-header">
       <v-col sm="4" cols="12" class="left-header-col">
         <v-card color="green" height="100%" elevation="0">
           <v-card-text>
-            <v-row align="center">
-              <v-col md="auto" cols="12" class="d-md-block d-flex justify-center">
+            <v-row align="center" :no-gutters="smAndDown">
+              <v-col md="auto" cols="12" class="d-md-block d-flex justify-center mb-md-0 mb-1">
                 <v-btn icon="mdi-laptop" color="blue-grey" class="text-white" />
               </v-col>
               <v-col cols="auto" class="flex-grow-1 text-md-left text-center">
@@ -22,8 +22,8 @@
       <v-col sm="4" cols="6" class="right-header-col">
         <v-card color="deep-orange-lighten-2" height="100%" elevation="0">
           <v-card-text>
-            <v-row align="center">
-              <v-col md="auto" cols="12" class="d-md-block d-flex justify-center">
+            <v-row align="center" :no-gutters="smAndDown">
+              <v-col md="auto" cols="12" class="d-md-block d-flex justify-center mb-md-0 mb-1">
                 <v-btn icon="mdi-account" color="cyan" class="text-white" />
               </v-col>
               <v-col cols="auto" class="flex-grow-1 text-white text-md-left text-center">
@@ -38,8 +38,8 @@
       <v-col sm="4" cols="6" class="right-header-col">
         <v-card color="light-blue" height="100%" elevation="0">
           <v-card-text>
-            <v-row align="center">
-              <v-col md="auto" cols="12" class="d-md-block d-flex justify-center">
+            <v-row align="center" :no-gutters="smAndDown">
+              <v-col md="auto" cols="12" class="d-md-block d-flex justify-center mb-md-0 mb-1">
                 <v-btn icon="mdi-wallet" color="pink" class="text-white" />
               </v-col>
               <v-col cols="auto" class="flex-grow-1 text-white text-md-left text-center">
@@ -55,11 +55,7 @@
     <!----Charts------>
     <v-row align="stretch" class="charts-row">
       <v-col md="4" sm="6" cols="12">
-        <ProductsCount
-          :products="userProductsStore.userProducts"
-      
-        />
-       
+        <ProductsCount :products="userProductsStore.userProducts" />
       </v-col>
       <v-col md="4" sm="6" cols="12">
         <ProductsPrices :products="userProductsStore.userProducts"
@@ -102,7 +98,10 @@ import CategoryProductsCount from "@/components/Charts/CategoryProductsCount.vue
 import OrdersByDateVue from "@/components/Charts/OrdersByDate.vue";
 import ProductsInOrders from "@/components/Charts/ProductsInOrders.vue";
 
+import { useDisplay } from "vuetify/lib/framework.mjs";
 import gsap from "@/plugins/gsap";
+
+const { smAndDown } = useDisplay();
 
 const userProductsStore = useUserProductsStore();
 const userCustomersStore = useUserCustomersStore();
@@ -149,7 +148,7 @@ onMounted(async () => {
     delay: 0.85,
     scrollTrigger: {
       trigger: ".charts-row",
-      start: "top 50%",
+      start: "top 70%",
       end: "+=1000"
     }
   });

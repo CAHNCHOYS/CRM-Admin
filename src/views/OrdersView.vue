@@ -191,9 +191,9 @@ const router = useRouter();
 const {
   isSearchFormActive,
   isSearchLoading,
+  isSearchActive,
   startDate,
   endDate,
-  isSearchActive,
   searchedOrders,
   customerName,
   productName,

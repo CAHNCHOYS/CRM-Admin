@@ -119,8 +119,8 @@ const menuItems = ref<MenuItem[]>([
   {
     title: "О приложении",
     icon: "mdi-information",
-    link: "info-page",
-  },
+    link: "info-page"
+  }
   // {
   //   title: "Анимации",
   //   icon: "mdi-animation",
@@ -167,9 +167,8 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .active-link {
-  background-color: rgba($color: #9C27B0, $alpha: 1) !important;
+  background-color: rgba($color: #9c27b0, $alpha: 1) !important;
   color: white !important;
   transition: all 0s ease 0s !important;
-
 }
 </style>

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory, createWebHashHistory, type RouteLocationNormalized } from "vue-router";
 import InfoView from "../views/InfoView.vue";
 import { useUserAuthStore } from "@/stores/userAuth";
 

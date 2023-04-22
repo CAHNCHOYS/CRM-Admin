@@ -2,10 +2,6 @@
   <div>
     <div class="text-h5 mb-4">Удаление аккаунта</div>
 
-    <v-snackbar v-model="isDeletionError" location="bottom right" color="error">
-      <p class="text-h6">{{ deleteErrorMessage }}</p>
-    </v-snackbar>
-
     <v-form @submit.prevent="deletionSubmit">
       <v-alert :border="'end'" variant="tonal" color="red-darken-2">
         <v-alert-title class="text-h6 mb-1">Вы уверены что хотите удалить аккаунт?</v-alert-title>
@@ -50,9 +46,7 @@ const userAuthStore = useUserAuthStore();
 const router = useRouter();
 
 const accountDeletionConfirm = ref(false);
-
 const isDeletionError = ref(false);
-const deleteErrorMessage = ref("");
 
 const deletionSubmit = async () => {
   if (!accountDeletionConfirm.value) return;
