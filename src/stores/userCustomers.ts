@@ -42,9 +42,7 @@ export const useUserCustomersStore = defineStore("userClients", () => {
     customers.value.push(newCustomer);
   }
 
-  function clearUserCustomers() {
-    customers.value = [];
-  }
+
 
   return {
     customers,
@@ -53,6 +51,5 @@ export const useUserCustomersStore = defineStore("userClients", () => {
     deleteCustomer,
     addCustomer,
     updateCustomer,
-    clearUserCustomers
   };
 });

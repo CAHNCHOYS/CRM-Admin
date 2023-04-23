@@ -38,7 +38,6 @@ const obj: {
 const getCurrentLayout = computed(() => {
   return obj[route.meta.layout || "main"];
 });
-
 </script>
 
 <style lang="scss">
@@ -59,7 +58,8 @@ body {
 
 .slide-enter-active,
 .slide-leave-active {
-  transition: all 0.55s ease 0s;
+  transition: all 0.35s ease 0s;
+  
 }
 
 .slide-enter-from,

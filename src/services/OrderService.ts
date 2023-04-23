@@ -13,7 +13,6 @@ type SearchPayload = {
 };
 
 
-
 class OrderService {
   async getOrders(userId: number): Promise<AxiosResponse<GetOrdersResponse>> {
     return await axios.get(`/Orders/${userId}`);

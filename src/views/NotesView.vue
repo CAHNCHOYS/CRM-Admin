@@ -91,27 +91,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import gsap from "gsap";
 import Note from "@/components/Note.vue";
+
+import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
-import { useNotesActions } from "@/composables/useNotesActions";
 
-import type { NoteType } from "@/types/interfaces";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
+import NoteService from "@/services/NotesService";
 
-const alertStore = useAlertStore();
-
-const {
-  notes,
-  filterNotesByType,
-  isActionLoading,
-  isNotesFetching,
-  fetchNotesError,
-
-  addNoteAction,
-  updateNoteAction,
-  deleteNoteAction
-} = useNotesActions();
+import type { IUserNote, NoteType } from "@/types/interfaces";
 
 type NotesColumn = {
   title: NoteType;
@@ -124,7 +114,7 @@ const columns = ref<NotesColumn[]>([
   { title: "Сделано", isFormActive: false, addText: "" }
 ]);
 
-//Drag actions ----------------------------------------------------------------
+//Drag & Drop ----------------------------------------------------------------
 const handleDragStart = (e: DragEvent, id: number) => {
   (e.target as HTMLElement).classList.add("dragging");
   e.dataTransfer!.setData("id", id.toString());
@@ -143,6 +133,85 @@ const handleDrop = async (e: DragEvent, noteType: NoteType) => {
   }
 };
 //------------------------------------------------------------------
+
+//Действия с заметками ---------------------------------------------
+const alertStore = useAlertStore();
+const userAuthStore = useUserAuthStore();
+
+const notes = ref<IUserNote[]>([]);
+
+const isActionLoading = ref(false);
+const isNotesFetching = ref(false);
+const fetchNotesError = ref<string | null>(null);
+
+const filterNotesByType = computed(() => {
+  return function (noteType: NoteType) {
+    return notes.value.filter((note) => note.type === noteType);
+  };
+});
+
+onMounted(async () => {
+  isNotesFetching.value = true;
+
+  try {
+    const { data } = await NoteService.getNotes(userAuthStore.currentUser!.id);
+    notes.value = data.notes;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      fetchNotesError.value = handleAxiosError(error);
+    } else fetchNotesError.value = "Ошибка при загрузке заметок!";
+  }
+  isNotesFetching.value = false;
+});
+
+const updateNoteAction = async (note: IUserNote) => {
+  isActionLoading.value = true;
+  try {
+    await NoteService.updateNote(note);
+  } catch (error) {
+    if (isAxiosError(error)) {
+      alertStore.showMessage("error", handleAxiosError(error));
+    } else alertStore.showMessage("error", "Ошибка при добавлении заметки!");
+  }
+
+  isActionLoading.value = false;
+};
+
+const addNoteAction = async (noteTitle: string, noteType: NoteType) => {
+  if (noteTitle.length < 1) return;
+  isActionLoading.value = true;
+
+  try {
+    const { data } = await NoteService.addNote({
+      title: noteTitle,
+      type: noteType,
+      userId: userAuthStore.currentUser!.id
+    });
+    notes.value.push({ id: data.noteId, title: noteTitle, type: noteType });
+  } catch (error) {
+    if (isAxiosError(error)) {
+      alertStore.showMessage("error", handleAxiosError(error));
+    } else alertStore.showMessage("error", "Ошибка при добавлении заметки!");
+  }
+
+  isActionLoading.value = false;
+};
+
+const deleteNoteAction = async (id: number) => {
+  isActionLoading.value = true;
+  try {
+    await NoteService.deleteNote(id);
+
+    notes.value = notes.value.filter((note) => note.id != id);
+  } catch (error) {
+    if (isAxiosError(error)) {
+      alertStore.showMessage("error", handleAxiosError(error));
+    } else alertStore.showMessage("error", "Ошибка при добавлении заметки!");
+  }
+  isActionLoading.value = false;
+};
+
+//------------------------------------------------------------------------------
 
 //Анимации
 const noteEnter = (el: any, done: GSAPCallback) => {

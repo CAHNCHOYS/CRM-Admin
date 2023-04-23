@@ -8,7 +8,6 @@ export const useDialogActions = <T>() => {
   const itemToEdit = ref<Ref<T> | null>(null);
 
   const openDialog = (item: T, dialogType: "edit" | "delete"): void => {
-    console.log(item);
     itemToEdit.value = item;
     if (dialogType === "edit") {
       isEditDialogActive.value = true;

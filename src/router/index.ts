@@ -1,4 +1,9 @@
-import { createRouter, createWebHistory, createWebHashHistory, type RouteLocationNormalized } from "vue-router";
+import {
+  createRouter,
+  createWebHistory,
+  createWebHashHistory,
+  type RouteLocationNormalized
+} from "vue-router";
 import InfoView from "../views/InfoView.vue";
 import { useUserAuthStore } from "@/stores/userAuth";
 
@@ -108,7 +113,15 @@ const router = createRouter({
         layout: "login"
       }
     }
-  ]
+  ],
+  scrollBehavior: (to, from, savedPosition) => {
+    return (
+      savedPosition ||
+      new Promise((res) => {
+        setTimeout(() => res({ top: 0, left: 0, behavior: "smooth" }), 360);
+      })
+    );
+  }
 });
 
 router.beforeEach(async (to, from) => {

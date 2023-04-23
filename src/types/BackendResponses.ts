@@ -5,7 +5,7 @@ export type ApiError = {
   error: string;
 };
 
-
+//Авторизация ---------------------------------------------------
 export type RegisterResponse =  {
   readonly isSuccess: true; // Если регистрация успешна
 };
@@ -14,11 +14,12 @@ export type LoginResponse = {
   //Если авторизация удалась получаем токен и объекьт пользователя
     token: string;
     user: IUser;
-
 };
+
 export type GetUserResponse = {
   user: IUser;
 }
+//------------------------------------------------------------
 
 //Товары--------------------------------------------
 export type GetProductsResponse = {
@@ -42,9 +43,6 @@ export type GetNotesResponse = {
      notes: IUserNote[];    
 }
 
-export type UpdateNoteResponse = {
-  isUpdated: true;
-}
 
 export type AddNoteResponse = {
   noteId: number;
@@ -74,8 +72,6 @@ export type NewOrderResponse = {
 }
 
 //---------------
-
-
 
 //Generic ----------------
 export type DeleteResponse = {

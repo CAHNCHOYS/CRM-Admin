@@ -13,8 +13,7 @@
     <v-card elevation="3" color="white" class="pa-5 rounded-lg mx-sm-0 mx-n5">
       <v-card-title class="pa-0" v-if="!userOrdersStore.ordersErrorMessage">
         <TableActions
-          v-model:count="elemetsPerPage"
-          @update:count="elemetsPerPage = $event"
+          v-model:count="elementsPerPageCount"
           @toggle-add-dialog="isAddDialogActive = true"
           @toggle-search="isSearchFormActive = !isSearchFormActive"
           :is-badge-active="$route.query.startDate || $route.query.endDate ? true : false"
@@ -24,7 +23,7 @@
 
         <v-expand-transition>
           <v-row v-if="isSearchFormActive" class="mb-5">
-            <v-col cols="6">
+            <v-col sm="6" cols="12">
               <v-row>
                 <v-col cols="6">
                   <v-text-field
@@ -50,20 +49,25 @@
               <v-text-field v-model="productName" label="Товар" />
             </v-col>
 
-            <v-col cols="6">
+            <v-col md="6" cols="12">
               <v-row>
-                <v-col cols="auto">
-                  <v-btn @click="addSearchQuery" variant="flat" color="green-darken-3">
+                <v-col sm="auto" cols="6">
+                  <v-btn @click="addSearchQuery" variant="flat" color="green-darken-3" block>
                     Искать
                   </v-btn>
                 </v-col>
-                <v-col cols="auto">
-                  <v-btn @click="resetSearch" variant="flat" color="red-darken-4">
-                    Сбросить поиск
+                <v-col sm="auto" cols="6">
+                  <v-btn @click="resetSearch" variant="flat" color="red-darken-4" block>
+                    <span class="text-wrap"> Сбросить поиск</span>
                   </v-btn>
                 </v-col>
-                <v-col cols="auto">
-                  <v-btn variant="flat" color="blue-darken-4" @click="isSearchFormActive = false">
+                <v-col sm="auto" cols="12">
+                  <v-btn
+                    variant="flat"
+                    color="blue-darken-4"
+                    @click="isSearchFormActive = false"
+                    block
+                  >
                     Закрыть
                   </v-btn>
                 </v-col>
@@ -82,11 +86,11 @@
       <ElementsTable
         :items="paginatedElements"
         :fields="tableFields"
+        :current-sort-field="currentSortField"
+        @update-sort-field="(field)=> setSortField(field as keyof IUserOrder)"
         :is-inverse-sort="isInverseSort"
-        no-data-text="Заказы не найдены"
-        v-model:current-sort-field="currentSortField"
-        @update:current-sort-field="(field)=> setSortField(field as keyof IUserOrder)"
         @open-dialog="(order, type)=> openDialog(order as IUserOrder, type)"
+        no-data-text="Заказы не найдены"
         v-else-if="!isSearchLoading"
       />
 
@@ -126,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTablePagination } from "@/composables/useTablePagination";
 import { useDialogActions } from "@/composables/useDialogActions";
@@ -209,14 +213,20 @@ const getOrders = computed(() => {
 });
 //---------------------------------------------------------------------------
 
-const { currentPage, paginatedElements, isInverseSort, elemetsPerPage, totalPages, setSortField } =
-  useTablePagination<IUserOrder>({
-    tableElements: getOrders,
-    pageName: "orders-page",
-    sortField: currentSortField,
-    route,
-    router
-  });
+const {
+  currentPage,
+  paginatedElements,
+  isInverseSort,
+  elementsPerPageCount,
+  totalPages,
+  setSortField
+} = useTablePagination<IUserOrder>({
+  tableElements: getOrders,
+  pageName: "orders-page",
+  sortField: currentSortField,
+  route,
+  router
+});
 </script>
 
 <style scoped></style>

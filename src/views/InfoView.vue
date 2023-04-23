@@ -3,23 +3,28 @@
     <h2 class="text-sm-h2 text-h3 mb-5">О приложении</h2>
     <v-card color="white" elevation="5" class="pa-5 mx-sm-0 mx-n5" rounded="lg">
       <v-card-title class="pa-0 mb-6 text-h4">Админ панель</v-card-title>
-      <v-card-subtitle class="pa-0 text-wrap text-h6 mb-4 text-black font-weight-medium" style="line-height: 1.5;">
-        Пет проект. Предоставляет возможность добавлять, изменять,
-        редактировать товары, заказы, клиентов. Данные хранятся в базе данных и все сохраняется после перезагрзке
-        страницы. 
+      <v-card-subtitle
+        class="pa-0 text-wrap text-h6 mb-4 text-black font-weight-medium"
+        style="line-height: 1.5"
+      >
+     
+        Пет проект. Предоставляет возможность добавлять, изменять, редактировать товары, заказы,
+        клиентов. Реализован поиск добавленных данных, личный кабинет пользователя. Созданы графики с использованием ChartJs и VueChartJs. Данные
+        хранятся в базе данных и все сохраняется после перезагрузки страницы.
+
+       
       </v-card-subtitle>
 
       <v-card-text class="pa-0">
         <p class="mb-1 text-subtitle-1">Используемые технологии:</p>
 
-        <v-row align="center"  no-gutters>
+        <v-row align="center" no-gutters>
           <v-col cols="auto" class="text-primary pr-2"> Frontend: </v-col>
           <v-col cols="auto">
             <v-chip-group
               selected-class="text-primary"
               class="chips-front-end overflow-hidden"
               v-model="currentChipFront"
-             
             >
               <v-chip
                 v-for="chip in chipsFrontEnd"
@@ -68,8 +73,8 @@ type Chip = {
   icon?: string;
 };
 
-const currentChipBack = ref("VueJs");
-const currentChipFront = ref("NodeJs");
+const currentChipBack = ref("NodeJs");
+const currentChipFront = ref("VueJs");
 
 const chipsFrontEnd = ref<Chip[]>([
   {

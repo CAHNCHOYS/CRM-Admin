@@ -1,7 +1,6 @@
-
 import { isAxiosError } from "axios";
 import type { ApiError } from "@/types/BackendResponses";
-import type { AxiosError} from "axios";
+import type { AxiosError } from "axios";
 
 export const handleAxiosError = (error: AxiosError<ApiError>) => {
   if (error.response) {
@@ -13,4 +12,4 @@ export const handleAxiosError = (error: AxiosError<ApiError>) => {
   }
 };
 
-export {isAxiosError};
+export { isAxiosError };

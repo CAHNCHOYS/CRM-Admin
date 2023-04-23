@@ -12,11 +12,10 @@
 
     <v-card color="white" elevation="3" class="pa-5 mb-6 rounded-lg mx-sm-0 mx-n5">
       <TableActions
-        v-model:count="elemetsPerPage"
-        @update:count="elemetsPerPage = $event"
+        v-model:count="elementsPerPageCount"
         @toggle-add-dialog="isAddDialogActive = true"
         @toggle-search="isSearchFormActive = !isSearchFormActive"
-        :is-badge-active="$route.query.secondName ? true : false"
+        :is-badge-active="$route.query.secondName !== undefined"
       >
         Все клиенты
       </TableActions>
@@ -24,11 +23,11 @@
       <!--------- Форма поиска ----------->
       <v-expand-transition>
         <v-row v-if="isSearchFormActive" class="mb-5" align="center">
-          <v-col cols="8">
+          <v-col sm="8" cols="12">
             <v-text-field label="Имя клиента" v-model="secondName" @click:clear="secondName = ''" />
           </v-col>
 
-          <v-col cols="auto">
+          <v-col sm="auto" cols="6">
             <v-checkbox
               v-model="searchWithPremium"
               color="indigo-darken-4"
@@ -36,7 +35,7 @@
             />
           </v-col>
           <v-scale-transition :leave-absolute="true">
-            <v-col cols="auto" v-if="searchWithPremium">
+            <v-col sm="auto" cols="6" v-if="searchWithPremium">
               <v-switch
                 v-model="premium"
                 :true-value="1"
@@ -48,34 +47,37 @@
           </v-scale-transition>
           <v-col cols="12">
             <v-row>
-              <v-col cols="auto">
+              <v-col sm="auto" cols="6">
                 <v-btn
                   variant="flat"
                   :disabled="isSearchLoading"
                   color="green-darken-3"
                   @click="addSearchQuery"
+                  block
                 >
                   Искать
                 </v-btn>
               </v-col>
-              <v-col cols="auto">
+              <v-col sm="auto" cols="6">
                 <v-btn
                   variant="flat"
                   :disabled="isSearchLoading"
                   color="error"
                   @click="resetSearch"
+                  block
                 >
-                  Сбросить поиск
+                  <span class="text-wrap"> Сбросить поиск</span>
                 </v-btn></v-col
               >
-              <v-col cols="auto">
+              <v-col sm="auto" cols="12">
                 <v-btn
                   variant="flat"
                   :disabled="isSearchLoading"
                   color="blue-darken-4"
                   @click="isSearchFormActive = false"
+                  block
                 >
-                  Закрыть поиск
+                  <span class="text-wrap"> Закрыть поиск</span>
                 </v-btn></v-col
               >
             </v-row>
@@ -91,12 +93,12 @@
       <!--------- Таблица с клиентами ----------->
       <ElementsTable
         :items="paginatedCustomers"
-        :fields="customersFields"
-        no-data-text="Клиенты не найдены"
-        v-model:current-sort-field="currentSortField"
-        @update:current-sort-field="(field)=> setSortField(field as keyof IUserCustomer)"
+        :fields="tableFields"
+        :current-sort-field="currentSortField"
+        @update-sort-field="(field)=> setSortField(field as keyof IUserCustomer)"
         :is-inverse-sort="isInverseSort"
         @open-dialog="(customer, type)=> openDialog(customer as IUserCustomer, type)"
+        no-data-text="Клиенты не найдены"
         v-else-if="!isSearchLoading"
       />
 
@@ -160,7 +162,7 @@ const userCustomersStore = useUserCustomersStore();
 const alertStore = useAlertStore();
 const userAuthStore = useUserAuthStore();
 
-const customersFields = ref<
+const tableFields = ref<
   {
     fieldText: string;
     fieldName: keyof IUserCustomer;
@@ -191,7 +193,7 @@ const currentSortField = ref<keyof IUserCustomer>("firstName");
 
 const { customers, customersErrorMessage } = storeToRefs(userCustomersStore);
 
-//Открыти модального окна-----------------------------------------------
+//Открытие диалогов-----------------------------------------------
 
 const {
   isAddDialogActive,
@@ -214,6 +216,7 @@ const {
   isSearchActive,
   secondName,
   searchedCustomers,
+
   addSearchQuery,
   resetSearch,
   searchUserCustomers
@@ -231,13 +234,13 @@ const {
   currentPage,
   paginatedElements: paginatedCustomers,
   isInverseSort,
-  elemetsPerPage,
+  elementsPerPageCount,
 
   totalPages,
   setSortField
 } = useTablePagination<IUserCustomer>({
   tableElements: getCustomers,
-  pageName: "clients-page",
+  pageName: "customers-page",
   sortField: currentSortField,
   route,
   router

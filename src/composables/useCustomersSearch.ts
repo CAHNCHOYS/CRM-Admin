@@ -32,12 +32,12 @@ export const useCustomersSearch = (
     premium.value = 0;
     isSearchActive.value = false;
     searchedCustomers.value = [];
-    router.push({ name: "clients-page", query: {} });
+    router.push({ name: "customers-page", query: {} });
   };
 
   const addSearchQuery = () => {
     router.push({
-      name: "clients-page",
+      name: "customers-page",
       query: {
         ...route.query,
         secondName: secondName.value,
@@ -76,6 +76,7 @@ export const useCustomersSearch = (
     },
     { immediate: true }
   );    
+
 
   return {
     premium,

@@ -134,21 +134,21 @@ onMounted(async () => {
   gsap.from(".stats-header > *", {
     x: "-100%",
     stagger: 0.25,
-    duration: 0.35,
+    duration: 0.25,
     opacity: 0,
     ease: "power2.out"
   });
 
   gsap.from(".charts-row > *", {
     scale: 0,
-    stagger: 0.25,
-    duration: 0.5,
+    stagger: 0.35,
+    duration: 0.35,
     opacity: 0,
     ease: "power3.out",
     delay: 0.85,
     scrollTrigger: {
       trigger: ".charts-row",
-      start: "top 70%",
+      start: "top 80%",
       end: "+=1000"
     }
   });
@@ -156,19 +156,19 @@ onMounted(async () => {
   gsap.to(productsCount.value, {
     count: userProductsStore.userProducts.length,
     duration: 2,
-    delay: 0.3
+    delay: 0.25
   });
 
   gsap.to(clientsCount.value, {
     count: userCustomersStore.customers.length,
     duration: 2,
-    delay: 0.3
+    delay: 0.5
   });
 
   gsap.to(ordersCount.value, {
     count: userOrdersStore.orders.length,
     duration: 2,
-    delay: 0.3
+    delay: 0.75
   });
 });
 </script>

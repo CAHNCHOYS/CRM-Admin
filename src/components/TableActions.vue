@@ -1,7 +1,7 @@
 <template>
   <v-row class="mb-8" align="center" no-gutters>
     <v-col class="flex-grow-1">
-      <div class="text-sm-h4 text-h6"><slot></slot></div>
+      <div class="text-sm-h4 text-h6 pr-2"><slot></slot></div>
     </v-col>
     <v-col cols="6" sm="2" class="order-sm-2 order-3 mx-2">
       <v-select
