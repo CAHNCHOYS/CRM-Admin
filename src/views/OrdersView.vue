@@ -4,6 +4,7 @@
       v-model="alertStore.isMessageShown"
       :max-width="500"
       :color="alertStore.messageType"
+      position="fixed"
     >
       <p class="text-h6">{{ alertStore.messageText }}</p>
     </v-snackbar>
@@ -108,8 +109,6 @@
       />
     </v-card>
 
-    <OrdersAddDialog :is-opened="isAddDialogActive" @close-dialog="isAddDialogActive = false" />
-
     <OrdersEditDialog
       :is-search-active="isSearchActive"
       @update-search-orders="searchOrders"
@@ -126,6 +125,8 @@
       @close-dialog="isDeleteDialogActive = false"
       v-if="orderToEdit"
     />
+
+    <OrdersAddDialog :is-opened="isAddDialogActive" @close-dialog="isAddDialogActive = false" />
   </div>
 </template>
 

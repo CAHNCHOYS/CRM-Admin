@@ -3,7 +3,7 @@
     <v-snackbar
       v-model="alertStore.isMessageShown"
       :color="alertStore.messageType"
-      location="bottom right"
+      position="fixed"
     >
       <p class="text-h6">{{ alertStore.messageText }}</p>
     </v-snackbar>

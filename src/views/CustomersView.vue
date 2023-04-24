@@ -4,6 +4,7 @@
       v-model="alertStore.isMessageShown"
       :max-width="500"
       :color="alertStore.messageType"
+      position="fixed"
     >
       <p class="text-h6">{{ alertStore.messageText }}</p>
     </v-snackbar>

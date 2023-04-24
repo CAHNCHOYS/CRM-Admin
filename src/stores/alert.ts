@@ -14,15 +14,10 @@ export const useAlertStore = defineStore("alert", () => {
 
     messageType.value = type;
     messageText.value = text;
-
-    setTimeout(() => (isMessageShown.value = false), 3800);
+    setTimeout(() => {
+      isMessageShown.value = false;
+    }, 3800);
   }
-
-  // function clearMessag(){
-  //   isMessageShown.value = false;
-  //   messageText.value = "";
-
-  // }
 
   return {
     isMessageShown,

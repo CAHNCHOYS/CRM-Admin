@@ -47,6 +47,8 @@ export default {
   },
   VSnackbar:{
    location: "bottom right",
+   width: "auto",
+   maxWidth: 450,
   },
   
  
