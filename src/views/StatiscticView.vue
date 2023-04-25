@@ -155,19 +155,19 @@ onMounted(async () => {
 
   gsap.to(productsCount.value, {
     count: userProductsStore.userProducts.length,
-    duration: 2,
+    duration: 2.5,
     delay: 0.25
   });
 
   gsap.to(clientsCount.value, {
     count: userCustomersStore.customers.length,
-    duration: 2,
+    duration: 2.5,
     delay: 0.5
   });
 
   gsap.to(ordersCount.value, {
     count: userOrdersStore.orders.length,
-    duration: 2,
+    duration: 2.5,
     delay: 0.75
   });
 });

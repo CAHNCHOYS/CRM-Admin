@@ -2,7 +2,7 @@
   <v-dialog
     transition="dialog-bottom-transition"
     max-width="500"
-    @update:model-value="$emit('closeModal')"
+    @update:model-value="$emit('closeDialog')"
     :model-value="isActive"
   >
     <v-card class="pa-5" color="white" elevation="4">
@@ -63,7 +63,7 @@
               <v-btn color="green-darken-4" variant="flat" :loading="isSubmitting" type="submit">
                 Сохранить
               </v-btn>
-              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')">
+              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeDialog')">
                 Отмена
               </v-btn>
             </v-col>
@@ -98,7 +98,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "closeModal"): void;
+  (e: "closeDialog"): void;
   (e: "updateSearchProducts"): Promise<void>;
 }>();
 
@@ -160,7 +160,7 @@ const updateProductSubmit = handleSubmit(async (values: UserProductFields) => {
     } else alertStore.showMessage("error", "Ошибка при обновлении товара!");
   } finally {
     resetForm();
-    emit("closeModal");
+    emit("closeDialog");
   }
 });
 </script>

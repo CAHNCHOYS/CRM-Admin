@@ -2,7 +2,7 @@
   <v-dialog
     transition="dialog-bottom-transition"
     max-width="500"
-    @update:model-value="$emit('closeModal')"
+    @update:model-value="$emit('closeDialog')"
     scrollable
     :model-value="isActive"
   >
@@ -64,7 +64,7 @@
               <v-btn color="green-darken-4" variant="flat" :loading="isSubmitting" type="submit">
                 Добавить
               </v-btn>
-              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeModal')">
+              <v-btn color="blue-darken-4" variant="flat" @click="$emit('closeDialog')">
                 Отмена
               </v-btn>
             </v-col>
@@ -96,7 +96,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "closeModal"): void;
+  (e: "closeDialog"): void;
 }>();
 
 //-----------------------------------------------------------
@@ -139,7 +139,7 @@ const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
     } else alertStore.showMessage("error", "Ошибка при добавлении товара !");
   } finally {
     resetForm();
-    emit("closeModal");
+    emit("closeDialog");
   }
 });
 </script>

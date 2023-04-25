@@ -109,7 +109,7 @@ import axiosInstance from "@/services/axios";
 import pageBackground from "@/assets/Images/LoginRegister/bg.png";
 import type { LoginFields } from "@/types/Forms";
 
-//Form validation -----------------------------------------------------------
+//Валидация формы -----------------------------------------------------------
 const { loginSchema } = useFormSchemas();
 
 const { handleSubmit, isSubmitting, resetForm } = useForm<LoginFields>({

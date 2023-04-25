@@ -2,9 +2,8 @@
   <div>
     <v-snackbar
       v-model="alertStore.isMessageShown"
-      :max-width="500"
       :color="alertStore.messageType"
-      position="fixed"
+      location-strategy="connected"
     >
       <p class="text-h6">{{ alertStore.messageText }}</p>
     </v-snackbar>
@@ -22,6 +21,7 @@
           Все заказы
         </TableActions>
 
+        <!----- Форма поиска ------->
         <v-expand-transition>
           <v-row v-if="isSearchFormActive" class="mb-5">
             <v-col sm="6" cols="12">
@@ -111,18 +111,18 @@
 
     <OrdersEditDialog
       :is-search-active="isSearchActive"
-      @update-search-orders="searchOrders"
-      :order="orderToEdit"
       :is-opened="isEditDialogActive"
       @close-dialog="isEditDialogActive = false"
+      @update-search-orders="searchOrders"
+      :order="orderToEdit"
       v-if="orderToEdit"
     />
     <OrdersDeleteDialog
       :is-search-active="isSearchActive"
       @update-search-orders="searchOrders"
+      @close-dialog="isDeleteDialogActive = false"
       :is-opened="isDeleteDialogActive"
       :order="orderToEdit"
-      @close-dialog="isDeleteDialogActive = false"
       v-if="orderToEdit"
     />
 

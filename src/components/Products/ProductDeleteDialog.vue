@@ -16,7 +16,7 @@
         </p>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn @click="$emit('closeModal')" height="40" color="blue-darken-4" variant="flat">
+        <v-btn @click="$emit('closeDialog')" height="40" color="blue-darken-4" variant="flat">
           <span class="text-white">Нет</span>
         </v-btn>
         <v-btn
@@ -50,7 +50,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "closeModal"): void;
+  (e: "closeDialog"): void;
   (e: "updateSearchProducts"): Promise<void>;
 }>();
 
@@ -83,7 +83,7 @@ const deletUserProduct = async () => {
     } else alertStore.showMessage("error", "Ошибка при удалении товара!");
   } finally {
     isDeleting.value = false;
-    emit("closeModal");
+    emit("closeDialog");
   }
 };
 </script>

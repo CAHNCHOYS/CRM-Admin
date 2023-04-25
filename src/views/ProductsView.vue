@@ -3,7 +3,7 @@
     <v-snackbar
       v-model="alertStore.isMessageShown"
       :color="alertStore.messageType"
-      position="fixed"
+      location-strategy="connected"
     >
       <p class="text-h6">{{ alertStore.messageText }}</p>
     </v-snackbar>
@@ -94,7 +94,6 @@
         @update-sort-field="(field)=> setSortField(field as keyof IUserProduct)"
         :is-inverse-sort="isInverseSort"
         no-data-text="Товары не найдены"
-    
         @open-dialog="(product, type)=> openDialog(product as IUserProduct, type)"
         v-else-if="!isSearchLoading"
       />
@@ -114,24 +113,24 @@
     </v-card>
 
     <ProductEditDialog
-      v-if="productToEdit"
-      :product="productToEdit"
-      @close-modal="isEditDialogActive = false"
       :is-active="isEditDialogActive"
+      @close-dialog="isEditDialogActive = false"
+      :product="productToEdit"
       :is-search-active="isSearchActive"
       @update-search-products="searchUserProducts"
+      v-if="productToEdit"
     />
 
     <ProductDeleteDialog
-      v-if="productToEdit"
       :is-active="isDeleteDialogActive"
+      @close-dialog="isDeleteDialogActive = false"
       :product="productToEdit"
-      @close-modal="isDeleteDialogActive = false"
       :is-search-active="isSearchActive"
       @update-search-products="searchUserProducts"
+      v-if="productToEdit"
     />
 
-    <ProductAddDialog @close-modal="isAddDialogActive = false" :is-active="isAddDialogActive" />
+    <ProductAddDialog @close-dialog="isAddDialogActive = false" :is-active="isAddDialogActive" />
   </div>
 </template>
 
@@ -215,7 +214,7 @@ const {
   isSearchActive,
   isSearchLoading,
   isSearchFormActive,
-  
+
   resetSearch,
   addSearchQuery,
   searchUserProducts
