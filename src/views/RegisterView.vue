@@ -1,6 +1,6 @@
 <template>
   <div class="fullscreen h-100 d-flex justify-center align-center">
-    <!------- Уведомления после регистрации ------>
+    <!------- Уведомления после регистрации -------->
     <v-dialog-transition>
       <v-alert class="alert" :type="messageType" :max-width="400" v-model="isMessageShown">
         <v-alert-title class="text-h4 mb-2">

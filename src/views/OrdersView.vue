@@ -21,7 +21,7 @@
           Все заказы
         </TableActions>
 
-        <!----- Форма поиска ------->
+        <!------- Форма поиска -------->
         <v-expand-transition>
           <v-row v-if="isSearchFormActive" class="mb-5">
             <v-col sm="6" cols="12">

@@ -1,6 +1,6 @@
 <template>
   <div class="fullscreen h-100 d-flex justify-center align-center">
-    <!----- Уведомления после авторизации ----------->
+    <!--------- Уведомления после авторизации ----------->
 
     <v-dialog-transition>
       <v-alert

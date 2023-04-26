@@ -20,7 +20,7 @@
         Все клиенты
       </TableActions>
 
-      <!--------- Форма поиска ----------->
+      <!---------- Форма поиска ------------>
       <v-expand-transition>
         <v-row v-if="isSearchFormActive" class="mb-5" align="center">
           <v-col sm="8" cols="12">
@@ -90,7 +90,7 @@
         <p>{{ customersErrorMessage }}</p>
       </v-alert>
 
-      <!--------- Таблица с клиентами ----------->
+      <!---------- Таблица с клиентами ----------->
       <ElementsTable
         :items="paginatedCustomers"
         :fields="tableFields"
