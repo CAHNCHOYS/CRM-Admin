@@ -39,6 +39,7 @@ export const useUserCustomersStore = defineStore("userClients", () => {
   }
 
   function addCustomer(newCustomer: IUserCustomer) {
+    console.log(newCustomer);
     customers.value.push(newCustomer);
   }
 

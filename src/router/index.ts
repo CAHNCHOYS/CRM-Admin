@@ -33,6 +33,15 @@ const router = createRouter({
       path: "/login",
       name: "login-page",
       component: () => import("../views/LoginView.vue"),
+      beforeEnter() {
+        const userAuthStore = useUserAuthStore();
+
+        if (userAuthStore.isUserLoggedIn) {
+          return {
+            name: "info-page"
+          };
+        }
+      },
       meta: {
         layout: "login",
         requireAuth: false

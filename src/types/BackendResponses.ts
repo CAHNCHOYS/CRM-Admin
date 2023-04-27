@@ -31,10 +31,9 @@ export type GetProductCategoriseResponse = {
 }
 
 export type AddProductResponse = {
-  id: number;
-  category: string;
+  productId: number;
+ 
 }
-
 
 //--------------------------------------------------
 

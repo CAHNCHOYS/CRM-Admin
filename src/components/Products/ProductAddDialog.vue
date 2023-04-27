@@ -89,10 +89,8 @@ import { useRouter } from "vue-router";
 
 import type { UserProductFields } from "@/types/Forms";
 
-
 const props = defineProps<{
   isActive: boolean;
-  
 }>();
 
 const emit = defineEmits<{
@@ -121,10 +119,12 @@ const router = useRouter();
 const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
     const { data } = await ProductService.addProduct(values);
-    
-    console.log(values);
 
-    userProductsStore.addUserProduct({ ...values, ...data });
+    const category = productsCategories.value.find(
+      (category) => category.id === values.categoryId
+    )!.name;
+
+    userProductsStore.addUserProduct({ ...values, id: data.productId, category });
     alertStore.showMessage("success", `Товар ${values.name} был успешно добавлен!`);
   } catch (error) {
     if (isAxiosError(error)) {

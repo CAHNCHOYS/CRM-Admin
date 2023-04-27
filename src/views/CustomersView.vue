@@ -90,7 +90,7 @@
         <p>{{ customersErrorMessage }}</p>
       </v-alert>
 
-      <!---------- Таблица с клиентами ----------->
+      <!----------- Таблица с клиентами ------------->
       <ElementsTable
         :items="paginatedCustomers"
         :fields="tableFields"
