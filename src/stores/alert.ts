@@ -16,7 +16,7 @@ export const useAlertStore = defineStore("alert", () => {
     messageText.value = text;
     setTimeout(() => {
       isMessageShown.value = false;
-    }, 5000);
+    }, 3800);
   }
 
   return {

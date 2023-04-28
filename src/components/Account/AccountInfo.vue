@@ -55,9 +55,10 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
 
 import { useFormSchemas } from "@/composables/useFormSchemas";
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
+
 import { useField, useForm } from "vee-validate";
 
 import { useUserAuthStore } from "@/stores/userAuth";
@@ -93,7 +94,7 @@ const { value: country, errorMessage: countryErrors } = useField<string>("countr
 const { value: avatar, errorMessage: avatarErrorMessages } = useField<File[]>("avatar");
 //--------------------------------------------------------------------------------------------
 
-const router = useRouter();
+const { handleLogout } = useLogoutHandler("account-page");
 
 const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   try {
@@ -114,18 +115,15 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        userAuthStore.logOutUser();
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "account-page" }
-        });
+        await handleLogout();
+        return;
       }
       emit("showMessage", "error", handleAxiosError(error));
     } else emit("showMessage", "error", "Ошибка при изменении данных!");
   }
 });
 
-//Предпросмотр аватара  пользователя---
+//Предпросмотр аватара  пользователя---------------------
 const previewAvatarImage = ref("");
 
 function setImagePreview(e: Event): void {
@@ -136,7 +134,7 @@ function setImagePreview(e: Event): void {
 function clearPreviewImage(): void {
   previewAvatarImage.value = "";
 }
-//-------------------------------------
+//--------------------------------------------------------
 </script>
 
 <style lang="scss" scoped></style>

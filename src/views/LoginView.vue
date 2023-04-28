@@ -132,8 +132,7 @@ const loginSubmit = handleSubmit(async (values: LoginFields) => {
     const { data } = await AuthService.login(values);
     userAuthStore.setToken(data.accessToken);
     userAuthStore.setUser(data.user);
-    
-
+  
     await userAuthStore.fetchData();
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
 

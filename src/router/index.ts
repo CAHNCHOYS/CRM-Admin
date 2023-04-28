@@ -34,13 +34,13 @@ const router = createRouter({
       name: "login-page",
       component: () => import("../views/LoginView.vue"),
       beforeEnter() {
-        // const userAuthStore = useUserAuthStore();
+        const userAuthStore = useUserAuthStore();
 
-        // if (userAuthStore.isUserLoggedIn) {
-        //   return {
-        //     name: "info-page"
-        //   };
-        // }
+        if (userAuthStore.isUserLoggedIn) {
+          return {
+            name: "info-page"
+          };
+        }
       },
       meta: {
         layout: "login",
@@ -138,7 +138,6 @@ router.beforeEach(async (to, from) => {
 
   //Если зашли первый раз
   if (!from.name) {
-    console.log("Yes");
     await userAuthStore.getUserData();
   }
 

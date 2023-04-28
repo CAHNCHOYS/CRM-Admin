@@ -24,7 +24,6 @@ export const useUserOrdersStore = defineStore("userOrders", () => {
   }
 
   function addOrder(order: IUserOrder) {
-    console.log(order);
     orders.value.push(order);
   }
 
@@ -33,12 +32,9 @@ export const useUserOrdersStore = defineStore("userOrders", () => {
   }
 
   function updateOrder(newOrder: IUserOrder) {
-    console.log(newOrder);
     const indexToUpdate = orders.value.findIndex((order) => order.id === newOrder.id);
     orders.value[indexToUpdate] = newOrder;
   }
-
- 
 
   return {
     orders,

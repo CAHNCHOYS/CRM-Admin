@@ -35,8 +35,8 @@ import { useRouter } from "vue-router";
 import { useUserAuthStore } from "@/stores/userAuth";
 import AuthService from "@/services/AuthService";
 
-import { isAxiosError } from "axios";
-import { handleAxiosError } from "@/services/axioxErrorHandle";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 
 const emit = defineEmits<{
   (e: "showMessage", type: "error" | "success", message: string): void;
@@ -46,7 +46,8 @@ const userAuthStore = useUserAuthStore();
 const router = useRouter();
 
 const accountDeletionConfirm = ref(false);
-const isDeletionError = ref(false);
+
+const { handleLogout } = useLogoutHandler("account-page");
 
 const deletionSubmit = async () => {
   if (!accountDeletionConfirm.value) return;
@@ -55,14 +56,16 @@ const deletionSubmit = async () => {
 
   try {
     await AuthService.deleteAccount(userAuthStore.currentUser!.id);
-    userAuthStore.logOutUser();
+    await userAuthStore.logOutUser();
     router.push({ name: "login-page" });
   } catch (error) {
-    isDeletionError.value = true;
     if (isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        await handleLogout();
+        return;
+      }
       emit("showMessage", "error", handleAxiosError(error));
     } else emit("showMessage", "error", "Ошибка при удалении профиля!");
-    setTimeout(() => (isDeletionError.value = false), 3500);
   }
 };
 </script>

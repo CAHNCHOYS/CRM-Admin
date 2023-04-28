@@ -53,17 +53,15 @@ export const useUserAuthStore = defineStore("userAuth", () => {
 
   async function getUserData(): Promise<void> {
     isUserDataFetching.value = true;
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const { data } = await AuthService.getUser();
-        setUser(data.user);
+    try {
+      const { data } = await AuthService.getUser();
+      setUser(data.user);
 
-        await fetchData();
-      } catch (error) {
-        removeToken();
-      }
+      await fetchData();
+    } catch (error) {
+      removeToken();
     }
+
     isUserDataFetching.value = false;
   }
 

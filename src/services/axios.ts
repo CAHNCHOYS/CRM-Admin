@@ -13,7 +13,7 @@ declare module "axios" {
 }
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://crm-backend-mocha.vercel.app/api",
   headers: {
     "Content-Type": "application/json"
   },

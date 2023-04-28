@@ -3,7 +3,6 @@ import axios from "./axios";
 import type {
   LoginFields,
   RegisterFields,
-  UpdateInfoFields,
   UpdatePasswordFields
 } from "@/types/Forms";
 import type {

@@ -67,9 +67,11 @@
 import { onMounted, ref } from "vue";
 import { useDisplay } from "vuetify/lib/framework.mjs";
 import { useUserAuthStore } from "@/stores/userAuth";
+import { useAlertStore } from "@/stores/alert";
 import { useRouter, useRoute } from "vue-router";
 
 import gsap from "gsap";
+
 
 const props = defineProps<{
   isOpened: boolean;
@@ -124,6 +126,7 @@ const menuItems = ref<MenuItem[]>([
 ]);
 
 const userAuthStore = useUserAuthStore();
+const alertStore = useAlertStore();
 
 const router = useRouter();
 const route = useRoute();
@@ -142,7 +145,10 @@ const logOut = async (): Promise<void> => {
 const navigateTo = (link: string): void => {
   if (link === (route.name as string)) {
     router.push({ name: link, query: { ...route.query } });
-  } else router.push({ name: link });
+  } else {
+    alertStore.isMessageShown = false;
+    router.push({ name: link });
+  };
 };
 
 //Анимация gsap

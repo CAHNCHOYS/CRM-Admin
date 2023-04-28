@@ -46,10 +46,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
 import { useUserAuthStore } from "@/stores/userAuth";
 
 import { useFormSchemas } from "@/composables/useFormSchemas";
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 import { useForm, useField } from "vee-validate";
 
 import AuthService from "@/services/AuthService";
@@ -79,7 +79,7 @@ const isOldPasswordSeen = ref(false);
 
 const userAuthStore = useUserAuthStore();
 
-const router = useRouter();
+const { handleLogout } = useLogoutHandler("account-page");
 
 const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) => {
   try {
@@ -92,11 +92,7 @@ const updatePasswordSubmit = handleSubmit(async (values: UpdatePasswordFields) =
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        userAuthStore.logOutUser();
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "account-page" }
-        });
+        await handleLogout();
         return;
       }
       emit("showMessage", "error", handleAxiosError(error));
