@@ -11,36 +11,44 @@ import type {
   GetUserResponse,
   LoginResponse,
   RegisterResponse,
+  UpdateAccessTokenResponse,
   UpdateResponse
 } from "@/types/BackendResponses";
 import type { AxiosResponse } from "axios";
 
-
 class AuthService {
   async login(loginPayload: LoginFields): Promise<AxiosResponse<LoginResponse>> {
-    return await axios.post("/Login", loginPayload);
+    return await axios.post("/Auth/login", loginPayload);
   }
 
   async getUser(): Promise<AxiosResponse<GetUserResponse>> {
-    return await axios.get("/FetchUser");
+    return await axios.get("/Auth/FetchUser");
+  }
+
+  async logoutUser() {
+    return await axios.post("/Auth/logout");
+  }
+
+  async updateAccessToken(): Promise<AxiosResponse<UpdateAccessTokenResponse>> {
+    return await axios.patch("/Auth/refresh");
   }
 
   async register(registerPayload: RegisterFields): Promise<AxiosResponse<RegisterResponse>> {
-    return await axios.post("/Registration", registerPayload);
+    return await axios.post("/Auth/register", registerPayload);
   }
 
   async deleteAccount(userId: number): Promise<AxiosResponse<DeleteResponse>> {
-    return await axios.delete(`/DeleteAccount/${userId}`);
+    return await axios.delete(`/Auth/delete/${userId}`);
   }
 
   async updatePassword(
     updatePayload: UpdatePasswordFields
   ): Promise<AxiosResponse<UpdateResponse>> {
-    return await axios.patch("/UpdateUserPassword", updatePayload);
+    return await axios.patch("/Auth/UpdateUserPassword", updatePayload);
   }
 
   async updateInfo(formData: FormData): Promise<AxiosResponse<UpdateResponse>> {
-    return await axios.patch("/UpdateUserInfo", formData, {
+    return await axios.patch("/Auth/UpdateUserInfo", formData, {
       headers: {
         "Content-Type": "multipart/form-data"
       }

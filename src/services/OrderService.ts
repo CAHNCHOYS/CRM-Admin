@@ -26,7 +26,7 @@ class OrderService {
     customer
   }: SearchPayload): Promise<AxiosResponse<GetOrdersResponse>> {
     return await axios.get(
-      `/SearchOrders/${userId}?startDate=${startDate}&endDate=${endDate}&product=${product}&customer=${customer}`
+      `/Orders/search/${userId}?startDate=${startDate}&endDate=${endDate}&product=${product}&customer=${customer}`
     );
   }
 

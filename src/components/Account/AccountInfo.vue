@@ -114,6 +114,7 @@ const updateInfoSubmit = handleSubmit(async (values: UpdateInfoFields) => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
+        userAuthStore.logOutUser();
         router.push({
           name: "login-page",
           query: { isExpiredToken: "true", redirectedFrom: "account-page" }

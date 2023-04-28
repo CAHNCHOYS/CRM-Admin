@@ -7,12 +7,10 @@
         class="pa-0 text-wrap text-h6 mb-4 text-black font-weight-medium"
         style="line-height: 1.5"
       >
-     
         Пет проект. Предоставляет возможность добавлять, изменять, редактировать товары, заказы,
-        клиентов. Реализован поиск добавленных данных, личный кабинет пользователя. Созданы графики с использованием ChartJs и VueChartJs. Данные
-        хранятся в базе данных и все сохраняется после перезагрузки страницы.
-
-       
+        клиентов. Реализован поиск добавленных данных, личный кабинет пользователя. Созданы графики
+        с использованием ChartJs и VueChartJs. Данные хранятся в базе данных и все сохраняется после
+        перезагрузки страницы.
       </v-card-subtitle>
 
       <v-card-text class="pa-0">
@@ -66,6 +64,7 @@
 
 <script setup lang="ts">
 import gsap from "gsap";
+import axios from "@/services/axios";
 import { onMounted, ref } from "vue";
 
 type Chip = {

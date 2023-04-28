@@ -121,11 +121,6 @@ const menuItems = ref<MenuItem[]>([
     icon: "mdi-information",
     link: "info-page"
   }
-  // {
-  //   title: "Анимации",
-  //   icon: "mdi-animation",
-  //   link: "gsap-animations"
-  // }
 ]);
 
 const userAuthStore = useUserAuthStore();
@@ -133,10 +128,14 @@ const userAuthStore = useUserAuthStore();
 const router = useRouter();
 const route = useRoute();
 
-const logOut = (): void => {
+const logOut = async (): Promise<void> => {
   if (window.confirm("Вы уверены что хотите выйти с аккаунта ?")) {
-    userAuthStore.logOutUser();
-    router.push({ name: "login-page" });
+    try {
+      await userAuthStore.logOutUser();
+      router.push({ name: "login-page" });
+    } catch (error) {
+      console.log(error);
+    }
   }
 };
 

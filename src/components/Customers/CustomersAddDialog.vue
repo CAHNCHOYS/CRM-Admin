@@ -63,6 +63,7 @@
 
 <script setup lang="ts">
 import { useField, useForm } from "vee-validate";
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 
 import CustomerService from "@/services/CustomersService";
@@ -70,7 +71,6 @@ import { useUserCustomersStore } from "@/stores/userCustomers";
 import { useAlertStore } from "@/stores/alert";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
-import { useRouter } from "vue-router";
 
 import type { UserCustomerFields } from "@/types/Forms";
 
@@ -97,8 +97,7 @@ premium.value = "Нет";
 
 const alertStore = useAlertStore();
 const userCustomersStore = useUserCustomersStore();
-
-const router = useRouter();
+const { handleLogout } = useLogoutHandler("customers-page");
 
 const addClientSubmit = handleSubmit(async (values: UserCustomerFields) => {
   try {
@@ -114,10 +113,7 @@ const addClientSubmit = handleSubmit(async (values: UserCustomerFields) => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "customers-page" }
-        });
+        await handleLogout();
         return;
       }
       alertStore.showMessage("error", handleAxiosError(error));

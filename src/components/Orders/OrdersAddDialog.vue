@@ -55,7 +55,6 @@
                 v-model.number="productCount"
                 label="Количество товара"
                 :error-messages="productCountErrors"
-
               />
             </v-col>
             <v-col cols="12">
@@ -94,7 +93,9 @@
 </template>
 
 <script setup lang="ts">
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 import { useFormSchemas } from "@/composables/useFormSchemas";
+
 import { useField, useForm } from "vee-validate";
 import { storeToRefs } from "pinia";
 import { useUserCustomersStore } from "@/stores/userCustomers";
@@ -102,7 +103,6 @@ import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
 import { useUserOrdersStore } from "@/stores/userOrders";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
-import { useRouter } from "vue-router";
 import OrderService from "@/services/OrderService";
 
 import type { UserOrderFields } from "@/types/Forms";
@@ -113,7 +113,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "closeDialog"): void;
-  
 }>();
 
 const userProductsStore = useUserProductsStore();
@@ -136,7 +135,7 @@ const { value: productCount, errorMessage: productCountErrors } = useField<numbe
 const { value: date, errorMessage: dateErrors } = useField<string>("date");
 //----------------------------------------------------------
 
-const router = useRouter();
+const { handleLogout } = useLogoutHandler("orders-page");
 
 const handleAddOrder = handleSubmit(async (values: UserOrderFields) => {
   try {
@@ -151,10 +150,7 @@ const handleAddOrder = handleSubmit(async (values: UserOrderFields) => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "orders-page" }
-        });
+        await handleLogout();
         return;
       }
       alertStore.showMessage("error", handleAxiosError(error));

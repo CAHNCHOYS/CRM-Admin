@@ -34,8 +34,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useAlertStore } from "@/stores/alert";
-import { useRouter } from "vue-router";
 import { useUserOrdersStore } from "@/stores/userOrders";
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 import OrderService from "@/services/OrderService";
@@ -58,7 +58,7 @@ const isDeleting = ref(false);
 const alertStore = useAlertStore();
 const userOrdersStore = useUserOrdersStore();
 
-const router = useRouter();
+const { handleLogout } = useLogoutHandler("orders-page");
 
 const deleteOrderSubmit = async () => {
   try {
@@ -66,17 +66,13 @@ const deleteOrderSubmit = async () => {
     await OrderService.deleteOrder(props.order.id);
 
     userOrdersStore.deleteOrder(props.order.id);
-    if(props.isSearchActive) emit("updateSearchOrders")
+    if (props.isSearchActive) emit("updateSearchOrders");
     alertStore.showMessage("success", "Заказ был успешно удален!");
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "orders-page" }
-        });
-        return;
-      } 
+        await handleLogout();
+      }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при удалении заказа");
   } finally {

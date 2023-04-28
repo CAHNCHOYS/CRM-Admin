@@ -33,12 +33,14 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from "vue-router";
+
 import { ref } from "vue";
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
-import ProductService from "@/services/ProductService";
 
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
+
+import ProductService from "@/services/ProductService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import type { IUserProduct } from "@/types/interfaces";
@@ -58,8 +60,7 @@ const isDeleting = ref(false);
 
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
-
-const router = useRouter();
+const { handleLogout } = useLogoutHandler("products-page");
 
 const deletUserProduct = async () => {
   try {
@@ -73,10 +74,7 @@ const deletUserProduct = async () => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "products-page" }
-        });
+        await handleLogout();
         return;
       }
       alertStore.showMessage("error", handleAxiosError(error));

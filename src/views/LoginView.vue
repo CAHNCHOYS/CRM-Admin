@@ -1,7 +1,5 @@
 <template>
   <div class="fullscreen h-100 d-flex justify-center align-center">
-    <!--------- Уведомления после авторизации ----------->
-
     <v-dialog-transition>
       <v-alert
         class="alert"
@@ -19,7 +17,7 @@
     </v-dialog-transition>
 
     <v-card class="form-card flex-grow-1 pb-8 rounded-lg" :max-width="486" :elevation="0">
-      <div class="form-title text-center text-h4 py-4">Авторизация</div>
+      <v-card-title class="form-title text-center text-h4 pa-0 py-4">Авторизация</v-card-title>
 
       <v-card-actions class="pt-4 pb-1 px-lg-10 px-md-8 px-4">
         <v-form @submit.prevent="loginSubmit" class="w-100">
@@ -132,11 +130,12 @@ const router = useRouter();
 const loginSubmit = handleSubmit(async (values: LoginFields) => {
   try {
     const { data } = await AuthService.login(values);
-    userAuthStore.setToken(data.token);
+    userAuthStore.setToken(data.accessToken);
     userAuthStore.setUser(data.user);
+    
 
     await userAuthStore.fetchData();
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
 
     alertStore.showMessage("success", "Авторизация успешна, вскоре вы будете переведены на сайт");
     setTimeout(() => {
@@ -145,6 +144,7 @@ const loginSubmit = handleSubmit(async (values: LoginFields) => {
       } else router.push("/");
     }, 3500);
   } catch (error) {
+    console.log(error);
     if (isAxiosError(error)) {
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при авторизации, попробуйте позже");

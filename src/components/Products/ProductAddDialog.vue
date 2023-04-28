@@ -76,16 +76,17 @@
 </template>
 
 <script setup lang="ts">
-import { useForm, useField } from "vee-validate";
-import { useFormSchemas } from "@/composables/useFormSchemas";
 import { storeToRefs } from "pinia";
+import { useForm, useField } from "vee-validate";
+
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
+import { useFormSchemas } from "@/composables/useFormSchemas";
 
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
 
 import ProductService from "@/services/ProductService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
-import { useRouter } from "vue-router";
 
 import type { UserProductFields } from "@/types/Forms";
 
@@ -97,7 +98,7 @@ const emit = defineEmits<{
   (e: "closeDialog"): void;
 }>();
 
-//-----------------------------------------------------------
+//----Валидация формы-------------------------------------------------------
 const { userProductSchema } = useFormSchemas();
 const { handleSubmit, isSubmitting, resetForm } = useForm<UserProductFields>({
   validationSchema: userProductSchema
@@ -106,15 +107,14 @@ const { value: name, errorMessage: nameErrors } = useField("name");
 const { value: categoryId, errorMessage: categoryIdErrors } = useField("categoryId");
 const { value: count, errorMessage: countErrors } = useField("count");
 const { value: price, errorMessage: priceErrors } = useField("price");
-//-----------------------------------------------------------
+//----------------------------------------------------------------------------
 
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
+const { handleLogout } = useLogoutHandler("products-page");
 
 const { productsCategories, categoriesErrorMessage, isCategoriesLoading } =
   storeToRefs(userProductsStore);
-
-const router = useRouter();
 
 const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
@@ -129,10 +129,7 @@ const addProductSubmit = handleSubmit(async (values: UserProductFields) => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "products-page" }
-        });
+        await handleLogout();
         return;
       }
       alertStore.showMessage("error", handleAxiosError(error));

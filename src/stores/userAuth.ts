@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 import { useUserProductsStore } from "./userProducts";
-import {useUserCustomersStore } from "./userCustomers";
+import { useUserCustomersStore } from "./userCustomers";
 import { useUserOrdersStore } from "./userOrders";
 
 import AuthService from "@/services/AuthService";
@@ -30,14 +30,18 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     isUserLoggedIn.value = true;
   }
 
-  function logOutUser(): void {
-    removeToken();
-    currentUser.value = null;
-    isUserLoggedIn.value = false;
+  async function logOutUser(): Promise<void> {
+    try {
+      await AuthService.logoutUser();
+      removeToken();
+      currentUser.value = null;
+      isUserLoggedIn.value = false;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async function fetchData(): Promise<void> {
- 
     const { getAllUserCustomers } = useUserCustomersStore();
     const { getAllUserProducts } = useUserProductsStore();
     const { getAllUserOrders } = useUserOrdersStore();
@@ -45,7 +49,6 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     await getAllUserCustomers(currentUser.value!.id);
     await getAllUserProducts(currentUser.value!.id);
     await getAllUserOrders(currentUser.value!.id);
-
   }
 
   async function getUserData(): Promise<void> {
@@ -56,8 +59,7 @@ export const useUserAuthStore = defineStore("userAuth", () => {
         const { data } = await AuthService.getUser();
         setUser(data.user);
 
-        await  fetchData();
-
+        await fetchData();
       } catch (error) {
         removeToken();
       }

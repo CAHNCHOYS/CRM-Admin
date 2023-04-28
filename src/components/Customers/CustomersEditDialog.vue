@@ -61,11 +61,12 @@
 <script setup lang="ts">
 import { computed } from "@vue/reactivity";
 import { useField, useForm } from "vee-validate";
+
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 
 import { useUserCustomersStore } from "@/stores/userCustomers";
 import { useAlertStore } from "@/stores/alert";
-import { useRouter } from "vue-router";
 
 import CustomerService from "@/services/CustomersService";
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
@@ -107,11 +108,9 @@ const { value: premium } = useField<"Да" | "Нет">("premium");
 
 const alertStore = useAlertStore();
 const userCustomersStore = useUserCustomersStore();
-
-const router = useRouter();
+const { handleLogout } = useLogoutHandler("customers-page");
 
 const updateClientSubmit = handleSubmit(async (values: UserCustomerFields) => {
-  console.log(values);
   try {
     await CustomerService.updateCustomer(values, props.customer.id);
 
@@ -127,10 +126,7 @@ const updateClientSubmit = handleSubmit(async (values: UserCustomerFields) => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "customers-page" }
-        });
+        await handleLogout();
         return;
       }
       alertStore.showMessage("error", handleAxiosError(error));

@@ -7,7 +7,8 @@
   >
     <v-card color="white" class="pa-4" :max-width="450">
       <v-card-title class="text-h5 mb-4 pa-0 font-weight-bold"
-        >Подтвердите удаление клиента</v-card-title>
+        >Подтвердите удаление клиента</v-card-title
+      >
 
       <v-card-text class="text-h6 mb-4 pa-0">
         Вы уверены что хотиет удалить клиента
@@ -30,9 +31,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
 import { useAlertStore } from "@/stores/alert";
 import { useUserCustomersStore } from "@/stores/userCustomers";
+
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 import CustomerService from "@/services/CustomersService";
@@ -52,9 +54,8 @@ const emit = defineEmits<{
 
 const alertStore = useAlertStore();
 const userCustomersStore = useUserCustomersStore();
+const { handleLogout } = useLogoutHandler("customers-page");
 
-
-const router = useRouter();
 const isDeleting = ref(false);
 
 const deleteSubmit = async () => {
@@ -68,17 +69,14 @@ const deleteSubmit = async () => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "customers-page" }
-        });
+        await handleLogout();
         return;
       }
       alertStore.showMessage("error", handleAxiosError(error));
     } else alertStore.showMessage("error", "Ошибка при удалении клиента!");
   } finally {
-    emit("closeDialog");
     isDeleting.value = false;
+    emit("closeDialog");
   }
 };
 </script>

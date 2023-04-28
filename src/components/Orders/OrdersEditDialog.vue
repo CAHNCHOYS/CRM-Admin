@@ -69,7 +69,7 @@
                     block
                     :loading="isSubmitting"
                   >
-                    Добавить
+                    Сохранить
                   </v-btn></v-col
                 >
 
@@ -95,8 +95,9 @@ import { useUserCustomersStore } from "@/stores/userCustomers";
 import { useUserProductsStore } from "@/stores/userProducts";
 import { useAlertStore } from "@/stores/alert";
 import { useForm, useField } from "vee-validate";
+
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 import { useFormSchemas } from "@/composables/useFormSchemas";
-import { useRouter } from "vue-router";
 
 import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 import OrderService from "@/services/OrderService";
@@ -128,7 +129,6 @@ const initialFormValues = computed<UserOrderFields>(() => ({
   customerId: props.order.customerId,
   date: formatDate.value
 }));
-
 const { userOrderSchema } = useFormSchemas();
 
 const { isSubmitting, resetForm, handleSubmit } = useForm<UserOrderFields>({
@@ -147,10 +147,11 @@ const userProductsStore = useUserProductsStore();
 const userOrdersStore = useUserOrdersStore();
 const alertStore = useAlertStore();
 
-const router = useRouter();
 
 const { customers, customersErrorMessage } = storeToRefs(userCustomersStore);
 const { userProducts, productsErrorMessage } = storeToRefs(userProductsStore);
+
+const { handleLogout } = useLogoutHandler("orders-page");
 
 const handleOrderUpdate = handleSubmit(async (values: UserOrderFields) => {
   try {
@@ -165,10 +166,7 @@ const handleOrderUpdate = handleSubmit(async (values: UserOrderFields) => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "orders-page" }
-        });
+        await handleLogout();
         return;
       }
       alertStore.showMessage("error", handleAxiosError(error));

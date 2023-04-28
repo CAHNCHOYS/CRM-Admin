@@ -80,6 +80,7 @@ import { computed } from "vue";
 import { storeToRefs } from "pinia";
 
 import { useForm, useField } from "vee-validate";
+import { useLogoutHandler } from "@/composables/useLogoutHandler";
 import { useFormSchemas } from "@/composables/useFormSchemas";
 
 import { useUserProductsStore } from "@/stores/userProducts";
@@ -124,11 +125,10 @@ const { value: categoryId, errorMessage: categoryIdErrors } = useField("category
 
 const userProductsStore = useUserProductsStore();
 const alertStore = useAlertStore();
+const { handleLogout } = useLogoutHandler("products-page");
 
 const { productsCategories, categoriesErrorMessage, isCategoriesLoading } =
   storeToRefs(userProductsStore);
-
-const router = useRouter();
 
 const updateProductSubmit = handleSubmit(async (values: UserProductFields) => {
   try {
@@ -150,10 +150,7 @@ const updateProductSubmit = handleSubmit(async (values: UserProductFields) => {
   } catch (error) {
     if (isAxiosError(error)) {
       if (error.response?.status === 401) {
-        router.push({
-          name: "login-page",
-          query: { isExpiredToken: "true", redirectedFrom: "products-page" }
-        });
+        await handleLogout();
         return;
       }
       alertStore.showMessage("error", handleAxiosError(error));

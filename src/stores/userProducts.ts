@@ -36,6 +36,7 @@ export const useUserProductsStore = defineStore("userProducts", () => {
       const { data } = await ProductService.getProductCategories();
       productsCategories.value = data.categories;
     } catch (error) {
+      console.log(error);
       if (isAxiosError(error)) {
         categoriesErrorMessage.value = handleAxiosError(error);
       } else categoriesErrorMessage.value = "Ошибка при загрузке категорий";

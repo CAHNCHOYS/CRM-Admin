@@ -9,16 +9,16 @@ export type ApiError = {
 export type RegisterResponse =  {
   readonly isSuccess: true; // Если регистрация успешна
 };
-
-export type LoginResponse = {
-  //Если авторизация удалась получаем токен и объекьт пользователя
-    token: string;
-    user: IUser;
-};
+export type UpdateAccessTokenResponse = {
+  accessToken: string
+}
 
 export type GetUserResponse = {
   user: IUser;
 }
+
+export type LoginResponse = GetUserResponse & UpdateAccessTokenResponse;
+
 //------------------------------------------------------------
 
 //Товары--------------------------------------------

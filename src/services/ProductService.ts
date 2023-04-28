@@ -25,7 +25,7 @@ class ProductService {
   }
 
   async getProductCategories(): Promise<AxiosResponse<GetProductCategoriseResponse>> {
-    return await axios.get("/ProductCategories");
+    return await axios.get("/Products/categories/all");
   }
 
   async deleteProduct(productId: number): Promise<AxiosResponse<DeleteResponse>> {
@@ -50,7 +50,7 @@ class ProductService {
     userId
   }: SearchPayload): Promise<AxiosResponse<GetProductsResponse>> {
     return await axios.get(
-      `/SearchProducts/${userId}?name=${productName}&startPrice=${startPrice}&endPrice=${endPrice}`
+      `/Products/search/${userId}?name=${productName}&startPrice=${startPrice}&endPrice=${endPrice}`
     );
   }
 }

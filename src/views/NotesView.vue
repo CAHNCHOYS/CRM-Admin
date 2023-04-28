@@ -10,7 +10,7 @@
       <v-progress-linear color="green" height="4" indeterminate />
     </div>
 
-    <v-row class="row" v-else>
+    <v-row class="row" v-else-if="!fetchNotesError">
       <v-col
         v-for="column in columns"
         :key="column.title"
