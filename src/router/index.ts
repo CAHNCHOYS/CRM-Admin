@@ -135,7 +135,6 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
   const userAuthStore = useUserAuthStore();
-
   //Если зашли первый раз
   if (!from.name) {
     await userAuthStore.getUserData();

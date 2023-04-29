@@ -1,7 +1,4 @@
-import axios, {
-  AxiosError,
-  type InternalAxiosRequestConfig,
-} from "axios";
+import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import type { AxiosInstance } from "axios";
 import { useUserAuthStore } from "@/stores/userAuth";
 import AuthService from "./AuthService";
@@ -13,7 +10,7 @@ declare module "axios" {
 }
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: "https://crm-backend-mocha.vercel.app/api",
+  baseURL: "http://localhost:3000/api",
   headers: {
     "Content-Type": "application/json"
   },
@@ -31,7 +28,10 @@ axiosInstance.interceptors.response.use(
   (response) => response,
 
   async (error: AxiosError) => {
+    console.log("error occuried", error);
+
     const originalRequest = error.config as InternalAxiosRequestConfig;
+    console.log("config", originalRequest);
     if (error.response?.status === 403 && !originalRequest._sent) {
       try {
         originalRequest._sent = true;
@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
         axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
         return axiosInstance(originalRequest);
       } catch (error) {
-        console.log(error);
+        await AuthService.logoutUser();
         return Promise.reject(error);
       }
     } else {
