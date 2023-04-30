@@ -132,7 +132,7 @@ const loginSubmit = handleSubmit(async (values: LoginFields) => {
     const { data } = await AuthService.login(values);
     userAuthStore.setToken(data.accessToken);
     userAuthStore.setUser(data.user);
-  
+
     await userAuthStore.fetchData();
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
 
@@ -161,7 +161,6 @@ watchEffect(() => {
   }
   if (route.query.isExpiredToken) {
     alertStore.showMessage("error", "Сеанс авторизации истек, войдите в аккаунт снова!");
-    userAuthStore.logOutUser();
   }
 });
 </script>

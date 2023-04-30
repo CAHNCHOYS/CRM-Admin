@@ -25,7 +25,7 @@ export const useUserAuthStore = defineStore("userAuth", () => {
     delete axiosInstance.defaults.headers.common["Authorization"];
   }
 
-  function setUser(user: IUser) {
+  function setUser(user: IUser): void {
     currentUser.value = user;
     isUserLoggedIn.value = true;
   }

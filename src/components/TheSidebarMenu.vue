@@ -58,6 +58,8 @@
           <span class="font-weight-medium">Выйти с аккаунта</span>
           <v-icon end icon="mdi-exit-to-app" size="x-large" />
         </v-btn>
+
+        <p class="text-subtitle mt-2 text-white" v-if="logoutError" >{{ logoutError }}</p>
       </div>
     </template>
   </v-navigation-drawer>
@@ -69,9 +71,9 @@ import { useDisplay } from "vuetify/lib/framework.mjs";
 import { useUserAuthStore } from "@/stores/userAuth";
 import { useAlertStore } from "@/stores/alert";
 import { useRouter, useRoute } from "vue-router";
+import { handleAxiosError, isAxiosError } from "@/services/axioxErrorHandle";
 
 import gsap from "gsap";
-
 
 const props = defineProps<{
   isOpened: boolean;
@@ -131,13 +133,17 @@ const alertStore = useAlertStore();
 const router = useRouter();
 const route = useRoute();
 
+const logoutError = ref<string | null>(null);
+
 const logOut = async (): Promise<void> => {
   if (window.confirm("Вы уверены что хотите выйти с аккаунта ?")) {
     try {
       await userAuthStore.logOutUser();
       router.push({ name: "login-page" });
     } catch (error) {
-      console.log(error);
+      if (isAxiosError(error)) {
+        logoutError.value = handleAxiosError(error);
+      } else logoutError.value = "Ошибка при выходе с аккаунта";
     }
   }
 };
@@ -148,7 +154,7 @@ const navigateTo = (link: string): void => {
   } else {
     alertStore.isMessageShown = false;
     router.push({ name: link });
-  };
+  }
 };
 
 //Анимация gsap

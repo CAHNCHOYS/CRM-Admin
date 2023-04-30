@@ -10,7 +10,7 @@ import type {
   GetUserResponse,
   LoginResponse,
   RegisterResponse,
-  UpdateAccessTokenResponse,
+  GetAccessTokenResponse,
   UpdateResponse
 } from "@/types/BackendResponses";
 import type { AxiosResponse } from "axios";
@@ -24,11 +24,11 @@ class AuthService {
     return await axios.get("/Auth/FetchUser");
   }
 
-  async logoutUser() {
+  async logoutUser(): Promise<AxiosResponse<string>> {
     return await axios.post("/Auth/logout");
   }
 
-  async updateAccessToken(): Promise<AxiosResponse<UpdateAccessTokenResponse>> {
+  async updateAccessToken(): Promise<AxiosResponse<GetAccessTokenResponse>> {
     return await axios.patch("/Auth/refresh");
   }
 

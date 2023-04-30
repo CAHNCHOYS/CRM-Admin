@@ -12,7 +12,6 @@ export const useLogoutHandler = (pageName: string) => {
     try {
       isLogoutLoading.value = true;
       await userAuthStore.logOutUser();
-      console.log(router);
       router.push({
         name: "login-page",
         query: { isExpiredToken: "true", redirectedFrom: pageName }
